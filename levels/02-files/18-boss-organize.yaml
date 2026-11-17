@@ -27,4 +27,4 @@ solution: |
   mv *.jpg *.png images/
   mv *.pdf *.txt docs/
   mv *.mp3 music/
-reveal: "整理完下載區，你發現一個沒人下載過的 backup.zip，裡面是 warden-installer。是誰把它裝上站的？"
+reveal: "整理完下載區，你發現一個沒人下載過的 backup.zip，裡面是 warden-installer。Warden 不是原廠配備，是有人把它裝上站的。安裝者那一欄，被人抹成了空白。"

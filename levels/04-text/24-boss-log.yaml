@@ -47,4 +47,4 @@ solution: |
   err=$(awk '$9 ~ /^5/' access.log | wc -l)
   hr=$(awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | awk 'NR==1{print $2}')
   answer "$ip $err $hr"
-reveal: "流量尖峰集中在 14 點。那正是 Vega 失蹤的時間。"
+reveal: "流量尖峰集中在 14 點，正是 Vega 失蹤的那一刻。更怪的是，尖峰的來源不是外部入侵，是站內自己：有什麼東西在 14:00 一口氣塞滿了磁碟。"

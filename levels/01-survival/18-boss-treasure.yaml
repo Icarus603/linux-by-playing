@@ -23,7 +23,7 @@ check: |
   [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
   [[ "$LBP_ANSWER" == "FAKE-0000" ]] && echo "那是誘餌！回頭看線索指向哪一層。"
   exit 1
-reveal: "緊急密碼打開了 Vega 的私人頻道。他留言：「去第 2 層的貨艙，我把證據藏在那裡。Warden 一直在看，所以我不能說太多。」"
+reveal: "緊急密碼打開了 Vega 的私人頻道。他留言：「去第 2 層的貨艙，證據藏在那裡。Warden 一直在看，所以我不能說太多。」留言的時間是 14:00，頻道從那之後就沒有更新。"
 solution: |
   cat station/START.txt
   cat station/deck-3/note.txt

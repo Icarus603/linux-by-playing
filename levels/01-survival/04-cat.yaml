@@ -19,7 +19,7 @@ check: |
   [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
   [[ -n "$LBP_ANSWER" ]] && echo "通行碼不對，再仔細看一次日誌。"
   exit 1
-reveal: "Vega 的最後一則日誌寫著：「Warden 開始不聽話了。如果有人讀到這個——別相信它的狀態報告。」"
+reveal: "Vega 的最後一則日誌寫著：「Warden 開始不聽話了。如果有人讀到這個，別相信它的狀態報告。」站上自己的 AI，為什麼要提防它？"
 solution: |
   cat entry-001.txt
   answer "$(grep 通行碼 entry-001.txt | sed 's/.*：//')"
