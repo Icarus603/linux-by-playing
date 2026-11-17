@@ -33,10 +33,11 @@ export const Rule = React.memo(function Rule({
   mode,
 }: {
   width: number
-  mode: 'idle' | 'busy' | 'run'
+  mode: 'idle' | 'busy' | 'run' | 'chat'
 }): React.ReactNode {
   const line = '─'.repeat(Math.max(0, width))
   if (mode === 'run') return <Text color={C.accent}>{line}</Text>
+  if (mode === 'chat') return <Text color={C.sky}>{line}</Text>
   if (mode === 'busy') return <Text color={C.track}>{line}</Text>
   return <Text color={C.rule}>{line}</Text>
 })

@@ -110,7 +110,7 @@ export function App({ ctl }: { ctl: Controller }): React.ReactNode {
             <Text color={C.accent}>✓ {ctl.flashText}</Text>
           ) : (
             <Text color={C.dim} wrap="truncate-end">
-              ↑↓ 歷史 · Tab 補全 · 拖曳選取自動複製 · /levels 選關 · /help 指令 · /quit 離開
+              ↑↓ 歷史 · Tab 補全 · ! 和 Pip 聊天 · /levels 選關 · /help 指令 · /quit 離開
             </Text>
           )}
         </Box>

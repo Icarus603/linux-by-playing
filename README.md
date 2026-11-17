@@ -24,7 +24,7 @@ git clone https://github.com/Icarus603/linux-by-playing.git && cd linux-by-playi
 
 ## 問 Pip（自然語言問答）
 
-直接在輸入框用中文問問題（或 `/ask ...`），Pip 會用內建的離線知識庫（手寫專業條目、man page、tldr-pages、核心文件，共約 3.5 萬個知識塊）檢索，再交給本機的 Qwen3.5-4B 簡短回答；離題問題也會以「Linux 專家」的身分回應。完全離線。資料來源與授權見 [THIRD_PARTY.md](THIRD_PARTY.md)，模型選擇見 [docs/MODELS.md](docs/MODELS.md)。
+在輸入框行首輸入 `!` 進入**聊天模式**（輸入框會變藍色），之後的每一句都是自然語言對話，Pip 會記得最近幾輪的上下文；`Esc` 或在空白時按退格回到指令模式。一般模式只執行 shell 指令與 `/` 指令，不會混在一起。也可以用 `/ask ...` 單次提問，Pip 會用內建的離線知識庫（手寫專業條目、man page、tldr-pages、核心文件，共約 3.5 萬個知識塊）檢索，再交給本機的 Qwen3.5-4B 簡短回答；離題問題也會以「Linux 專家」的身分回應。完全離線。資料來源與授權見 [THIRD_PARTY.md](THIRD_PARTY.md)，模型選擇見 [docs/MODELS.md](docs/MODELS.md)。
 
 ## 介面
 

@@ -240,9 +240,9 @@ export class Controller {
       const [c, ...r] = line.split(/\s+/)
       return this.slash(c!, r.join(' '))
     }
-    // 自然語言問題 → 交給 Pip（RAG + 本機小模型）；指令一律交給 bash
+    // 一般模式一律是 shell 指令；自然語言要先輸入 ! 進入聊天模式。看起來像在聊天時，Pip 提醒一下
     if (!multi && isNaturalLanguage(line)) {
-      this.ask(line)
+      this.speak([{ text: '看起來你是想跟我聊天？先輸入 ! 進入聊天模式（輸入框會變藍色），再用自然語言問我；Esc 回到指令模式。', pose: 'think', tone: 'info' }])
       return
     }
 

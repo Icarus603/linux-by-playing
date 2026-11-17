@@ -18,6 +18,8 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
   const [cands, setCands] = useState<string[]>([])
   const [sel, setSel] = useState(0)
   const [dismissed, setDismissed] = useState('')
+  // 聊天模式：行首輸入 ! 進入，輸入框變藍色，送出的內容用自然語言交給 Pip；Esc 或在空白時按退格離開
+  const [chat, setChat] = useState(false)
   const hist = useRef({ i: -1, draft: '' })
   const running = ctl.running !== null
   const { columns } = useTerminalSize()
@@ -97,6 +99,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
         case 'c':
           if (running) ctl.interrupt()
           else if (chars.length) setText('')
+          else if (chat) setChat(false)
           else ctl.nudgeQuit()
           return
         case 'd':
@@ -135,12 +138,14 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
       if (!text.trim() && !running && ctl.advanceSpeech()) return
       hist.current = { i: -1, draft: '' }
       setText('')
-      ctl.submit(text)
+      if (chat && text.trim() && !text.trim().startsWith('/')) ctl.ask(text.trim())
+      else ctl.submit(text)
       return
     }
 
     // ---- 編輯 ----
     if (key.backspace) {
+      if (chat && chars.length === 0) return setChat(false)
       if (cur > 0) set([...chars.slice(0, cur - 1), ...chars.slice(cur)], cur - 1)
       return
     }
@@ -185,10 +190,18 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
       return
     }
 
-    if (key.escape) return setCands([])
+    if (key.escape) {
+      if (chat && chars.length === 0) return setChat(false)
+      return setCands([])
+    }
 
     // ---- 一般字元與貼上 ----
     if (input && !key.meta) {
+      if (!running && chars.length === 0 && !chat && input.startsWith('!')) {
+        setChat(true)
+        input = input.slice(1)
+        if (!input) return
+      }
       let clean = input.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '').replace(/\r\n|\r/g, '\n')
       if (!clean) return
       let cs = chars
@@ -212,7 +225,8 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
   const before = chars.slice(0, cur).join('')
   const at = chars[cur] ?? ' '
   const after = chars.slice(cur + 1).join('')
-  const mode = running ? 'run' : ctl.busy ? 'busy' : 'idle'
+  const mode = running ? 'run' : chat ? 'chat' : ctl.busy ? 'busy' : 'idle'
+  const ink = chat ? C.ice : C.ivory
   return (
     <Box flexDirection="column" flexShrink={0}>
       {picking && (() => {
@@ -284,6 +298,8 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
         <Text>
           {running ? (
             <Text color={C.accent}>{'› '}</Text>
+          ) : chat ? (
+            <Text color={C.sky}>{'Pip › '}</Text>
           ) : (
             <>
               <Text color={C.ivory}>player</Text>
@@ -294,10 +310,10 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
               <Text color={C.beigeDim}>{'$ '}</Text>
             </>
           )}
-          <Text color={C.ivory}>{before}</Text>
-          <Text color={C.ivory} inverse>{at === '\n' ? ' ' : at}</Text>
-          <Text color={C.ivory}>{(at === '\n' ? '\n' : '') + after}</Text>
-          {chars.length === 0 && !running && !ctl.busy && <Text color={C.beigeDim}> 輸入指令… help 查看說明</Text>}
+          <Text color={ink}>{before}</Text>
+          <Text color={ink} inverse>{at === '\n' ? ' ' : at}</Text>
+          <Text color={ink}>{(at === '\n' ? '\n' : '') + after}</Text>
+          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.sky}>用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
           {chars.length === 0 && running && <Text color={C.dim}> 輸入會送給執行中的程式 · Ctrl-C 中斷 · Ctrl-D 結束輸入</Text>}
         </Text>
       </Box>
