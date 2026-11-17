@@ -7,14 +7,14 @@
 
 ## 安裝
 
-需要 Docker（macOS 建議 OrbStack）。支援 amd64 與 arm64。
+需要 git 與 Docker（macOS 建議 OrbStack）。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Icarus603/linux-by-playing/main/install.sh | bash
-lbp-play            # 開始；lbp-play update 更新；lbp-play reset 重置進度
+playnux            # 開始；playnux update 更新；playnux reset 重置進度
 ```
 
-映像約 3GB（內含本機 4B 模型），預設限制 5GB 記憶體（`LBP_MEM` 可調）。遊戲在容器內執行，預設不連外網，進度存在 `~/.linux-by-playing`。
+第一次執行會在本機建置映像（編譯 llama.cpp、下載約 2.6GB 的 4B 模型，約十幾分鐘），之後秒開。只要精簡版（不含模型）：`docker build --build-arg WITH_LLM=0 -t lbp:dev ~/.local/share/playnux`。預設限制 5GB 記憶體（`LBP_MEM` 可調）。遊戲在容器內執行，預設不連外網，進度存在 `~/.linux-by-playing`。
 
 ## 問 Pip（自然語言問答）
 

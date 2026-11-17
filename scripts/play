@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # 啟動遊戲。用法: scripts/play [build|verify|shell]
 set -euo pipefail
-HERE="$(cd "$(dirname "$0")" && pwd -P)"
+SRC="$0"; while [ -L "$SRC" ]; do d="$(cd "$(dirname "$SRC")" && pwd -P)"; SRC="$(readlink "$SRC")"; case "$SRC" in /*) ;; *) SRC="$d/$SRC" ;; esac; done
+HERE="$(cd "$(dirname "$SRC")" && pwd -P)"
 REG=ghcr.io/icarus603/linux-by-playing:latest
 # 在原始碼目錄裡執行就用本機建置的映像；用 install.sh 安裝的版本則使用 GHCR 上發布的映像
 if [ -f "$HERE/../Dockerfile" ]; then cd "$HERE/.."; IMAGE="${LBP_IMAGE:-lbp:dev}"; else IMAGE="${LBP_IMAGE:-$REG}"; fi
@@ -18,7 +19,8 @@ RUN_ARGS=(--rm --hostname kernel-7
   -v "$SAVE:/save")
 
 case "${1:-play}" in
-  build|update) build ;;
+  build) build ;;
+  update) if [ -d .git ]; then git pull --ff-only; fi; build ;;
   verify) docker image inspect "$IMAGE" >/dev/null 2>&1 || build
           docker run --init "${RUN_ARGS[@]}" -e LBP_SAVE=/tmp/verify-save --entrypoint lbp "$IMAGE" verify "${2:-}" ;;
   shell)  docker run -it "${RUN_ARGS[@]}" --entrypoint bash "$IMAGE" ;;

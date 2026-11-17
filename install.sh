@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-# 安裝「Linux 冒險：Kernel-7」：需要 Docker（建議 OrbStack / Docker Desktop）。
+# 安裝「Linux 冒險：Kernel-7」，之後輸入 playnux 就能開玩。需要 git 與 Docker（macOS 建議 OrbStack）。
 #   curl -fsSL https://raw.githubusercontent.com/Icarus603/linux-by-playing/main/install.sh | bash
 set -euo pipefail
-REPO=Icarus603/linux-by-playing
-DEST="${LBP_BIN_DIR:-$HOME/.local/bin}"
+REPO=https://github.com/Icarus603/linux-by-playing.git
+DIR="${LBP_HOME:-$HOME/.local/share/playnux}"
+BIN="${LBP_BIN_DIR:-$HOME/.local/bin}"
+command -v git >/dev/null 2>&1 || { echo "找不到 git。" >&2; exit 1; }
 command -v docker >/dev/null 2>&1 || { echo "找不到 docker。請先安裝 Docker（macOS 建議 OrbStack：https://orbstack.dev）。" >&2; exit 1; }
-docker info >/dev/null 2>&1 || { echo "docker 沒有在執行，請先啟動 Docker。" >&2; exit 1; }
-mkdir -p "$DEST"
-curl -fsSL "https://raw.githubusercontent.com/$REPO/main/scripts/play" -o "$DEST/lbp-play"
-chmod +x "$DEST/lbp-play"
-echo "下載遊戲映像（約 3GB，含本機小模型）…"
-docker pull "ghcr.io/icarus603/linux-by-playing:latest"
-echo
-echo "安裝完成：$DEST/lbp-play"
-case ":$PATH:" in *":$DEST:"*) ;; *) echo "提示：把 $DEST 加進 PATH 後即可直接輸入 lbp-play。" ;; esac
-echo "開始遊玩：lbp-play    更新：lbp-play update    重置進度：lbp-play reset"
+if [ -d "$DIR/.git" ]; then git -C "$DIR" pull --ff-only; else git clone --depth 1 "$REPO" "$DIR"; fi
+mkdir -p "$BIN"
+ln -sf "$DIR/scripts/play" "$BIN/playnux"
+echo "安裝完成：$BIN/playnux"
+case ":$PATH:" in *":$BIN:"*) ;; *) echo "提示：請把 $BIN 加進 PATH。" ;; esac
+echo "輸入 playnux 開始（第一次會自動建置映像，約十幾分鐘）；playnux update 更新；playnux reset 重置進度。"
