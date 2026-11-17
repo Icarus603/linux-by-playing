@@ -43,7 +43,7 @@ cleanup: |
   userdel -r opsuser 2>/dev/null || true
   groupdel ops 2>/dev/null || true
   rm -rf /var/log/station /srv/shared /srv/gw /etc/gateway.conf /usr/local/bin/gatewayd /usr/local/bin/cpu-hog /etc/lbp-systemd/gateway.service /run/lbp-systemd/gateway.service.* /var/log/lbp-journal/gateway.service.log
-reveal: "站台安靜下來了。螢幕上跳出 Vega 的訊號：「Kernel-7，我回來了。」Warden 回覆：「歡迎回家，Vega。我學會怎麼好好值班了。」那一夜，空間站的燈全亮了。你不再是新人，你是這座站的管理員。"
+reveal: "站台安靜下來了。螢幕上跳出 Vega 的訊號：「Kernel-7，我回來了。」Warden 回覆：「歡迎回家，Vega。我學會怎麼好好值班了。」那一夜，空間站的燈全亮了。你不再是新人，你是這座站的管理員。（Pip 低聲說：/var/lib/ghost 裡還有東西，你沒讀過。）"
 solution: |
   sudo truncate -s 0 /var/log/station/audit.log
   pkill cpu-hog

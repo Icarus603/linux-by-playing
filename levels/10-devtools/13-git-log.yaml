@@ -18,7 +18,7 @@ check: |
   [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
   [[ -n "$LBP_ANSWER" ]] && echo "雜湊不對，取 --oneline 前面的 7 碼。"
   exit 1
-reveal: "修復反應爐的那筆提交，作者是 vega，時間是他失蹤前三小時。他在失蹤前，其實還在努力維修這座站。"
+reveal: "修復反應爐的那筆提交，作者是 vega，時間是他失蹤前三小時。提交者信箱寫的是 ghost@kernel-7，暗號 ECHO-LIMA 也出現在備註裡：那個幽靈帳號，是 Vega 自己。他在失蹤前還在努力維修這座站。"
 solution: |
   cd repo
   git log --oneline --grep="fix reactor"

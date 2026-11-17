@@ -1,6 +1,6 @@
 # Linux 冒險：Kernel-7
 
-在真實的 Linux 終端機裡，邊玩邊學 Linux command line，從入門到精通（11 個階段、229 關）。
+在真實的 Linux 終端機裡，邊玩邊學 Linux command line，從入門到精通（11 個階段、230 關）。
 
 你是剛接手 Kernel-7 號空間站的新任管理員。前任管理員 Vega 失蹤了，站上有個不聽話的守護程序 Warden。領航企鵝 **Pip** 會陪你一路解開謎團。每過幾關，Pip 會替你解讀一則「日誌碎片」。
 
@@ -88,7 +88,7 @@ src/engine/   關卡載入、判定、存檔、徽章、驗證
 src/shell/    PTY 常駐 bash、輸出緩衝
 src/hud/      Ink 介面、Pip、slash 指令（只透過 ink.ts 引用 UI 層）
 docker/       玩家 bashrc、入口腳本、模擬 systemctl/journalctl
-levels/       229 關（11 個階段）
+levels/       230 關（11 個階段）
 docs/CURRICULUM.md   課程地圖與指令覆蓋清單
 vendor/ink    訂製版 Ink，見 NOTICE.md
 ```

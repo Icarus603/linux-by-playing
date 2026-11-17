@@ -1,4 +1,5 @@
 import { loadCatalog } from '../engine/levels'
+import { loadState } from '../engine/state'
 import { type Hit, search, searchFused } from './kb'
 import { type ChatMsg, chatStream, ensureServer, llmConfigured } from './llm'
 
@@ -170,10 +171,24 @@ function remember(q: string, a: string): void {
 const lastUserQ = (): string => (history.length >= 2 ? history[history.length - 2]!.content.replace(/^問題：/, '') : '')
 
 /** 完整流程：先理解這句話（寒暄 / 問 Pip / 追問 / 技術問題）→ 技術問題才檢索 → 一律交給模型「對話」式回答。 */
+const STORY_RE = /warden|vega|ghost|aurora|echo-lima|kernel-7|空間站|太空站|劇情|故事|失蹤|守護程序|幽靈|真相|兇手|誰關了/i
+
+/** 劇情問題（Warden 是誰、Vega 去哪了…）：只能依玩家「已經揭露」的碎片回答，不能劇透。 */
+function storyNote(q: string): string | null {
+  if (!STORY_RE.test(q)) return null
+  let lore: { id: string; text: string }[] = []
+  try {
+    lore = loadState().lore
+  } catch {}
+  const known = lore.length ? lore.map((l, i) => `${i + 1}. ${l.text}`).join('\n') : '（目前還沒有任何線索）'
+  return `【劇情進度：玩家目前查到的線索】\n${known}\n（只能依這些線索回答。沒提到的事，就說「這個我們還沒查到」，並鼓勵繼續破關；不要編造、不要劇透。）`
+}
+
 export async function ask(q: string, sink: Sink, signal: AbortSignal): Promise<void> {
   sink.begin('讓我想想…')
   // 寒暄與問 Pip 自己不檢索（「你是誰」會誤中 whoami）；很短的追問（「那 -r 呢」）把上一題接上去一起檢索
-  const social = chitchat(q) !== null
+  const story = storyNote(q)
+  const social = chitchat(q) !== null || story !== null
   const searchQ = !social && [...q].length <= 8 && lastUserQ() ? `${lastUserQ()} ${q}` : q
   let hits = social ? [] : search(searchQ, 5)
   // 第一輪沒有把握（常見於用「現象」而非指令名稱描述的問題）：請模型補上英文關鍵字再檢索一次
@@ -196,7 +211,7 @@ export async function ask(q: string, sink: Sink, signal: AbortSignal): Promise<v
     ...prefixMessages(),
     ...history,
     // 資料只是「可能相關」的參考：由模型依對話判斷要不要用
-    { role: 'user', content: confident ? `【可能相關的參考資料（不相關就忽略）】\n${context(hits)}\n\n問題：${q}` : `問題：${q}` },
+    { role: 'user', content: story ? `${story}\n\n問題：${q}` : confident ? `【可能相關的參考資料（不相關就忽略）】\n${context(hits)}\n\n問題：${q}` : `問題：${q}` },
   ]
   let acc = ''
   try {

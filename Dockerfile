@@ -84,6 +84,7 @@ COPY docker/entrypoint.sh /game/entrypoint.sh
 COPY docker/lbp-systemctl /usr/local/bin/systemctl
 COPY docker/lbp-journalctl /usr/local/bin/journalctl
 COPY levels /game/levels
+COPY world/ghost /var/lib/ghost
 COPY knowledge /game/knowledge
 COPY eval /game/eval
 # 匯入 man page、tldr 範例與核心文件，作為 RAG 的長尾知識
