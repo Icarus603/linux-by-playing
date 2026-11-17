@@ -47,6 +47,8 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
     const c = matches[i]!
     const full = '/' + c.name
     if (run && !c.needsArg) {
+      // 輸入框空白時按 Enter：跳到 Pip 的下一則訊息
+      if (!text.trim() && !running && ctl.advanceSpeech()) return
       hist.current = { i: -1, draft: '' }
       setText('')
       ctl.submit(full)
