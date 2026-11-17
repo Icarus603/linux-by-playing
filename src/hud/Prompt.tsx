@@ -317,7 +317,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
           <Text color={ink}>{before}</Text>
           <Text color={ink} inverse>{at === '\n' ? ' ' : at}</Text>
           <Text color={ink}>{(at === '\n' ? '\n' : '') + after}</Text>
-          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.chatHint}>用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
+          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.chatHint}> 用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
           {chars.length === 0 && running && <Text color={C.dim}> 輸入會送給執行中的程式 · Ctrl-C 中斷 · Ctrl-D 結束輸入</Text>}
         </Text>
       </Box>
