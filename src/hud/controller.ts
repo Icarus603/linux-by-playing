@@ -6,7 +6,7 @@ import { loadCatalog, stageOf } from '../engine/levels'
 import { SAVE_DIR, loadState, rankOf } from '../engine/state'
 import type { GameEvent, State } from '../engine/types'
 import { setClipboard } from './ink'
-import { ask as askPip, warmup as warmupLlm } from '../ask/answer'
+import { type Activity, ask as askPip, warmup as warmupLlm } from '../ask/answer'
 import { isNaturalLanguage } from '../ask/route'
 import { OutBuf } from '../shell/outbuf'
 import { PtyShell, type PromptInfo } from '../shell/ptyshell'
@@ -452,9 +452,19 @@ export class Controller {
         },
       },
       ac.signal,
+      this.recentActivity(),
     ).catch((e) => {
       if (!ac.signal.aborted) this.showAnswer(`查資料時出了點問題：${String(e).slice(0, 60)}`, 'worry', 'plain', false)
     })
+  }
+
+  /** 最近執行過的指令與輸出（供 Pip 回答時當上下文）。 */
+  private recentActivity(): Activity[] {
+    const out: Activity[] = []
+    for (const e of this.store.entries) {
+      if (e.kind === 'cmd' && (e.done || e === this.running)) out.push({ cwd: e.cwd, cmd: e.cmd, out: e.lines, rc: e.rc })
+    }
+    return out.slice(-12)
   }
 
   lastCmd(): CmdEntry | undefined {

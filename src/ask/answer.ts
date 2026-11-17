@@ -1,7 +1,8 @@
 import { loadCatalog } from '../engine/levels'
 import { loadState } from '../engine/state'
+import type { Level } from '../engine/types'
 import { type Hit, search, searchFused } from './kb'
-import { type ChatMsg, chatStream, ensureServer, llmConfigured } from './llm'
+import { type ChatMsg, chatStream, ctxTokens, ensureServer, llmConfigured } from './llm'
 
 // 把檢索到的資料交給模型（或在沒有模型時直接用知識庫作答），並嚴格限制回答的長度與風格，
 // 讓 Pip 的對話框不會被撐爆。
@@ -22,7 +23,8 @@ const SYSTEM = `你是 Pip，住在 Linux 太空站的企鵝助教，是精通 L
 2. 有時訊息會附上【可能相關的參考資料】，那是自動檢索的，可能不相關。只有確實符合使用者意圖時才採用，不相關就完全忽略，絕對不要因為有資料就硬套。
 3. 技術問題沒把握就坦白說不確定，不要編造，並建議用 /explain 指令名稱 或 man 指令名稱。
 4. 如果問題和 Linux、電腦、命令列無關，要先坦白說這不是你的專長、你是 Linux 專家，再簡短回應，並把話題帶回 Linux。
-5. 回答要讓人真的看懂：簡單的問題 2–3 句就好；技術問題要說明「是什麼、為什麼、怎麼做」，附上一兩個可直接複製的指令範例與常見陷阱，通常 4–8 句、約 150–350 字。用自然的段落，不要 Markdown 標題或表格，指令直接寫出來。`
+5. 回答要讓人真的看懂：簡單的問題 2–3 句就好；技術問題要說明「是什麼、為什麼、怎麼做」，附上一兩個可直接複製的指令範例與常見陷阱，通常 4–8 句、約 150–350 字。用自然的段落，不要 Markdown 標題或表格，指令直接寫出來。
+6. 訊息可能附上【目前的遊戲情境】：那是玩家正在玩的關卡與終端機最近的操作。玩家說「這題」「這關」「剛才」「上面」「為什麼錯」就是指它，不用叫玩家再貼一次。可以解釋題目、輸出與錯誤、引導解題思路；預設不要直接貼出完整答案，玩家明確要答案時才給。`
 
 const SHOTS: [string, string][] = [
   ['【可能相關的參考資料（不相關就忽略）】\n[1] 問：怎麼離開 vim？\n答：按 Esc 回到一般模式，輸入 :wq 存檔離開，或 :q! 放棄修改離開。\n\n問題：vim 怎麼退出', '先按 Esc 回到一般模式，然後輸入 :wq 存檔離開；想放棄修改就輸入 :q! 喔。'],
@@ -163,10 +165,68 @@ export async function expandQuery(q: string, signal: AbortSignal): Promise<strin
 
 /** 最近幾輪對話（只存使用者原話與 Pip 的回答，不含參考資料），讓模型理解上下文與追問。 */
 const history: ChatMsg[] = []
-const MAX_TURNS = 6
+const MAX_TURNS = 30
 function remember(q: string, a: string): void {
   history.push({ role: 'user', content: `問題：${q}` }, { role: 'assistant', content: a })
   while (history.length > MAX_TURNS * 2) history.splice(0, 2)
+}
+
+// ───────────── 上下文預算 ─────────────
+// 上下文大小由 llm.ts 依記憶體決定（預設最多 32768 token）。中文約 1 字 ≈ 1 token，所以字數預算取 6 成並留給回答。
+const budget = (): number => Math.max(2400, Math.floor(ctxTokens() * 0.6))
+/** 對話歷史超出預算時，從最舊的一輪開始丟。 */
+function fitHistory(reserve: number): ChatMsg[] {
+  const room = budget() - reserve
+  const h = [...history]
+  const size = (): number => h.reduce((n, m) => n + m.content.length, 0)
+  while (h.length > 2 && size() > room) h.splice(0, 2)
+  return h
+}
+
+export type Activity = { cwd: string; cmd: string; out: string[]; rc: number | null }
+const ANSI = /\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07]*\x07/g
+const REF_RE = /這題|這關|這個|這道|這步|上面|剛才|剛剛|前面|上一|為什麼|為何|怎麼(做|辦|解|過|會)|不對|不行|錯|失敗|卡|提示|答案|任務|目標|題目|輸出|結果|報錯|error|看不懂|什麼意思|是什麼意思|該怎麼|怎麼辦/i
+
+function clipOut(lines: string[], maxLines: number, maxChars: number): string {
+  const L = lines.map((l) => l.replace(ANSI, '').replace(/\s+$/, '')).filter((l, i, a) => l || (a[i - 1] ?? '') !== '')
+  const body = L.length > maxLines ? [...L.slice(0, Math.ceil(maxLines * 0.6)), `…（省略 ${L.length - maxLines} 行）…`, ...L.slice(-Math.floor(maxLines * 0.4))] : L
+  const s = body.map((l) => (l.length > 160 ? l.slice(0, 160) + '…' : l)).join('\n')
+  return s.length > maxChars ? s.slice(0, maxChars) + '…' : s
+}
+
+/** 目前關卡（永遠附上一小段）＋ 需要時附上詳細內容與最近的終端機操作。 */
+function gameContext(q: string, recent: Activity[]): { text: string; referential: boolean; teaches: string } {
+  let lvl: Level | undefined
+  let st: ReturnType<typeof loadState> | undefined
+  try {
+    st = loadState()
+    lvl = st.current ? loadCatalog().byId.get(st.current) : undefined
+  } catch {}
+  const referential = REF_RE.test(q) || [...q].length <= 10
+  const parts: string[] = []
+  if (lvl && st) {
+    parts.push(`目前關卡：${lvl.id}「${lvl.title}」\n任務：${lvl.goal}${lvl.teaches.length ? `\n本關教的指令：${lvl.teaches.join('、')}` : ''}`)
+    if (referential) {
+      if (lvl.story) parts.push(`關卡背景：${clip(lvl.story, 300)}`)
+      const shown = lvl.hints.slice(0, st.hintsShown)
+      if (shown.length) parts.push(`玩家已看過的提示：${shown.join(' / ')}`)
+      if (st.feedback) parts.push(`系統對玩家上次嘗試的回饋：${st.feedback}`)
+    }
+  }
+  if (referential && recent.length) {
+    let room = Math.min(4000, Math.floor(budget() * 0.25))
+    const blocks: string[] = []
+    for (const a of [...recent].reverse().slice(0, 8)) {
+      const out = clipOut(a.out, 14, 600)
+      const b = `$ ${clip(a.cmd, 200)}${a.rc !== null && a.rc !== 0 ? `   （結束碼 ${a.rc}）` : ''}${out ? `\n${out}` : ''}`
+      if (b.length > room && blocks.length) break
+      room -= b.length
+      blocks.unshift(b)
+    }
+    parts.push(`最近的終端機操作（舊 → 新，目錄 ${recent[recent.length - 1]!.cwd}）：\n${blocks.join('\n\n')}`)
+  }
+  const text = parts.length ? `【目前的遊戲情境】\n${parts.join('\n')}\n` : ''
+  return { text, referential, teaches: lvl?.teaches.join(' ') ?? '' }
 }
 const lastUserQ = (): string => (history.length >= 2 ? history[history.length - 2]!.content.replace(/^問題：/, '') : '')
 
@@ -184,12 +244,14 @@ function storyNote(q: string): string | null {
   return `【劇情進度：玩家目前查到的線索】\n${known}\n（只能依這些線索回答。沒提到的事，就說「這個我們還沒查到」，並鼓勵繼續破關；不要編造、不要劇透。）`
 }
 
-export async function ask(q: string, sink: Sink, signal: AbortSignal): Promise<void> {
+export async function ask(q: string, sink: Sink, signal: AbortSignal, recent: Activity[] = []): Promise<void> {
   sink.begin('讓我想想…')
   // 寒暄與問 Pip 自己不檢索（「你是誰」會誤中 whoami）；很短的追問（「那 -r 呢」）把上一題接上去一起檢索
   const story = storyNote(q)
   const social = chitchat(q) !== null || story !== null
-  const searchQ = !social && [...q].length <= 8 && lastUserQ() ? `${lastUserQ()} ${q}` : q
+  const game = social ? { text: '', referential: false, teaches: '' } : gameContext(q, recent)
+  // 短追問接上一題；指涉「這題」的問題把本關教的指令加進檢索，找得到對應的說明
+  const searchQ = !social && [...q].length <= 8 && lastUserQ() ? `${lastUserQ()} ${q}` : game.referential && game.teaches ? `${q} ${game.teaches}` : q
   let hits = social ? [] : search(searchQ, 5)
   // 第一輪沒有把握（常見於用「現象」而非指令名稱描述的問題）：請模型補上英文關鍵字再檢索一次
   const strong = hits[0] && hits[0].score >= 60 && hits[0].cov >= 0.6
@@ -207,12 +269,12 @@ export async function ask(q: string, sink: Sink, signal: AbortSignal): Promise<v
   const ready = await ensureServer()
   if (!ready || signal.aborted) return sink.done(offline, 'kb')
 
-  const messages: ChatMsg[] = [
-    ...prefixMessages(),
-    ...history,
-    // 資料只是「可能相關」的參考：由模型依對話判斷要不要用
-    { role: 'user', content: story ? `${story}\n\n問題：${q}` : confident ? `【可能相關的參考資料（不相關就忽略）】\n${context(hits)}\n\n問題：${q}` : `問題：${q}` },
-  ]
+  // 資料只是「可能相關」的參考：由模型依對話判斷要不要用
+  const extra = story ? `${story}\n\n` : confident ? `【可能相關的參考資料（不相關就忽略）】\n${context(hits)}\n\n` : ''
+  const userMsg: ChatMsg = { role: 'user', content: `${game.text ? game.text + '\n' : ''}${extra}問題：${q}` }
+  const prefix = prefixMessages()
+  const reserve = prefix.reduce((n, m) => n + m.content.length, 0) + userMsg.content.length
+  const messages: ChatMsg[] = [...prefix, ...fitHistory(reserve), userMsg]
   let acc = ''
   try {
     for await (const piece of chatStream(messages, signal)) {
