@@ -1,0 +1,18 @@
+id: "7-02"
+title: tar 加上壓縮
+kind: practice
+story: "打包之後通常會壓縮。-z 用 gzip 壓縮，副檔名慣例是 .tar.gz 或 .tgz。要記住的口訣：c 建立、z 壓縮、f 檔名。"
+goal: "把 data 目錄打包並用 gzip 壓縮，存成 backup.tar.gz。"
+teaches: [tar, gzip]
+xp: 20
+hints:
+  - "tar -czf backup.tar.gz data"
+setup: |
+  cd /home/player
+  mkdir -p data
+  echo records > data/db.txt
+check: |
+  cd /home/player
+  [[ -f backup.tar.gz ]] && file backup.tar.gz | grep -qi gzip && tar -tzf backup.tar.gz | grep -q 'data/db.txt'
+solution: |
+  tar -czf backup.tar.gz data

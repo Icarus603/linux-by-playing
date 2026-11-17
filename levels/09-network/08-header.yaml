@@ -1,0 +1,44 @@
+id: "9-08"
+title: 加上自訂標頭
+kind: practice
+story: "API 常要求身分憑證，通常放在 HTTP 標頭。curl -H '名稱: 值' 加上標頭。這個保險庫 API 只有帶對 X-Key 標頭的人才讀得到內容。"
+goal: "金鑰在 ~/key.txt。向 http://127.0.0.1:8081/vault 發出請求並帶上 X-Key 標頭，answer 提交回應內容。"
+teaches: [curl]
+xp: 40
+hints:
+  - "先 curl -i 看看不帶金鑰時的回應（401）。"
+  - "curl -s -H \"X-Key: $(cat key.txt)\" http://127.0.0.1:8081/vault"
+setup: |
+  mkdir -p /srv/api /usr/local/lib/lbp
+  chown player:player /srv/api
+  k="K$((RANDOM % 9000 + 1000))"; s="VAULT-$((RANDOM % 9000 + 1000))"
+  echo "$k" > /srv/api/key; echo "$s" > /srv/api/secret; chmod 644 /srv/api/key /srv/api/secret
+  echo "$k" > /home/player/key.txt
+  mkdir -p /var/lib/lbp && echo "$s" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  cat > /usr/local/lib/lbp/api.py <<'PY'
+  import http.server
+  class H(http.server.BaseHTTPRequestHandler):
+      def do_GET(self):
+          if self.path == "/vault":
+              key = open("/srv/api/key").read().strip()
+              if self.headers.get("X-Key") == key:
+                  self.send_response(200); self.end_headers(); self.wfile.write(open("/srv/api/secret").read().encode())
+              else:
+                  self.send_response(401); self.end_headers(); self.wfile.write(b"unauthorized\n")
+          else:
+              self.send_response(404); self.end_headers()
+      def log_message(self, *a): pass
+  http.server.HTTPServer(("127.0.0.1", 8081), H).serve_forever()
+  PY
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/api.py >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "內容不對。沒帶對標頭會得到 unauthorized。"
+  exit 1
+cleanup: |
+  pkill -f '[a]pi.py' 2>/dev/null || true
+  rm -rf /srv/api /usr/local/lib/lbp/api.py
+solution: |
+  curl -s -H "X-Key: $(cat key.txt)" http://127.0.0.1:8081/vault
+  answer "$(curl -s -H "X-Key: $(cat key.txt)" http://127.0.0.1:8081/vault)"

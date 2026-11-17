@@ -1,0 +1,20 @@
+id: "9-16"
+title: ssh-keygen：產生金鑰
+kind: practice
+story: "SSH 用金鑰代替密碼：私鑰留在你手上、公鑰放到伺服器。ssh-keygen -t ed25519 產生一對（現代推薦的演算法）。-N '' 不設通關密語、-f 指定檔案。私鑰權限必須是 600。"
+goal: "在 ~/.ssh/ 產生一對 ed25519 金鑰（檔名 id_ed25519），不設通關密語。"
+teaches: [ssh-keygen]
+xp: 35
+hints:
+  - "ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519"
+setup: |
+  rm -rf /home/player/.ssh
+check: |
+  f=/home/player/.ssh/id_ed25519
+  [[ -f $f && -f $f.pub ]] || { echo "還沒有金鑰檔。"; exit 1; }
+  ssh-keygen -l -f $f.pub 2>/dev/null | grep -q ED25519 || { echo "要用 ed25519 演算法。"; exit 1; }
+  [[ "$(stat -c %a $f)" == "600" ]]
+cleanup: |
+  rm -rf /home/player/.ssh
+solution: |
+  ssh-keygen -q -t ed25519 -N '' -f ~/.ssh/id_ed25519

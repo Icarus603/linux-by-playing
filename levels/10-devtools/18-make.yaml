@@ -1,0 +1,18 @@
+id: "10-18"
+title: make：自動化建置
+kind: learn
+story: "make 讀取 Makefile，依「目標: 依賴」的規則決定要執行什麼。它會比對檔案時間，只重做有變動的部分。Makefile 裡的指令行必須以 Tab 字元縮排（不是空格）。"
+goal: "目錄裡已有一個 Makefile，裡面有 build 與 clean 兩個目標。執行 make build 產生 app.out。"
+teaches: [make]
+xp: 30
+hints:
+  - "cat Makefile 看看有哪些目標。"
+  - "make build"
+setup: |
+  cd /home/player
+  rm -f app.out Makefile
+  printf 'build:\n\techo BUILT > app.out\n\nclean:\n\trm -f app.out\n' > Makefile
+check: |
+  [[ "$(cat /home/player/app.out 2>/dev/null)" == "BUILT" ]]
+solution: |
+  make build

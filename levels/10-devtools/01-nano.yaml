@@ -1,0 +1,16 @@
+id: "10-01"
+title: nano：簡單好上手的編輯器
+kind: learn
+story: "新篇章。Vega 把站台設定都放進了版本庫，要讀懂、修改它們，先得會用編輯器。nano 最適合新手：底部列出所有快速鍵（^ 代表 Ctrl）。Ctrl-O 存檔、Ctrl-X 離開、Ctrl-W 搜尋。"
+goal: "用 nano 開啟 config.txt，把 port=80 改成 port=8080，存檔離開。"
+teaches: [nano]
+xp: 25
+hints:
+  - "nano config.txt"
+  - "改完按 Ctrl-O、Enter 存檔，再按 Ctrl-X 離開。"
+setup: |
+  printf 'host=kernel7\nport=80\nmode=safe\n' > /home/player/config.txt
+check: |
+  [[ "$(cat /home/player/config.txt)" == $'host=kernel7\nport=8080\nmode=safe' ]]
+solution: |
+  sed -i 's/^port=80$/port=8080/' config.txt

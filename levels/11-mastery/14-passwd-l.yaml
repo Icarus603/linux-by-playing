@@ -1,0 +1,19 @@
+id: "11-14"
+title: 鎖定帳號
+kind: practice
+story: "發現可疑帳號時，先鎖住它而不是急著刪除（保留證據）。passwd -l 帳號 鎖定密碼、passwd -S 帳號 查看狀態（L 是鎖定、P 是有密碼可用）。"
+goal: "使用者 mallory 的行為可疑。把他的帳號鎖定（不要刪除）。"
+teaches: [passwd]
+xp: 40
+hints:
+  - "sudo passwd -S mallory 看目前狀態。"
+  - "sudo passwd -l mallory"
+setup: |
+  id mallory >/dev/null 2>&1 || useradd -m -s /bin/bash mallory
+  echo 'mallory:Secret123' | chpasswd
+check: |
+  [[ "$(passwd -S mallory 2>/dev/null | awk '{print $2}')" == "L" ]] && id mallory >/dev/null 2>&1
+cleanup: |
+  userdel -r mallory 2>/dev/null || true
+solution: |
+  sudo passwd -l mallory

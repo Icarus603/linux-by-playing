@@ -1,0 +1,23 @@
+id: "11-17"
+title: SSH 加固
+kind: practice
+story: "對外開放的 SSH 是攻擊者的第一個目標。基本加固：禁止 root 直接登入（PermitRootLogin no）、禁用密碼只用金鑰（PasswordAuthentication no）、關掉用不到的功能如 X11Forwarding。sshd -t -f 檔案 能檢查設定檔語法。"
+goal: "sshd_config.draft 是一份不安全的草稿。產生加固版本 sshd_config.hard：PermitRootLogin no、PasswordAuthentication no、X11Forwarding no，其餘設定保留，並通過 sshd -t -f 的語法檢查。"
+teaches: [sed, ssh]
+xp: 70
+hints:
+  - "sed 可以逐行取代：sed 's/^PermitRootLogin.*/PermitRootLogin no/'"
+  - "三個設定都要改，可以串多個 -e 或用分號。"
+  - "sshd -t -f sshd_config.hard 驗證。"
+setup: |
+  mkdir -p /run/sshd; ssh-keygen -A >/dev/null 2>&1
+  printf 'Port 22\nPermitRootLogin yes\nPasswordAuthentication yes\nX11Forwarding yes\nUsePAM no\n' > /home/player/sshd_config.draft
+  rm -f /home/player/sshd_config.hard
+check: |
+  f=/home/player/sshd_config.hard
+  [[ -f $f ]] || { echo "還沒有 sshd_config.hard。"; exit 1; }
+  grep -qx 'PermitRootLogin no' $f && grep -qx 'PasswordAuthentication no' $f && grep -qx 'X11Forwarding no' $f || { echo "三個安全設定都要正確。"; exit 1; }
+  grep -qx 'Port 22' $f || { echo "其餘設定要保留（Port 22）。"; exit 1; }
+  sshd -t -f $f 2>/dev/null || { echo "sshd -t 檢查沒過。"; exit 1; }
+solution: |
+  sed -e 's/^PermitRootLogin.*/PermitRootLogin no/' -e 's/^PasswordAuthentication.*/PasswordAuthentication no/' -e 's/^X11Forwarding.*/X11Forwarding no/' sshd_config.draft > sshd_config.hard

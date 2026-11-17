@@ -1,0 +1,22 @@
+id: "7-14"
+title: cron：排程
+kind: practice
+story: "cron 讓系統定時執行工作。格式是五個欄位加指令：分 時 日 月 星期。例如 30 3 * * * 是每天凌晨 3:30。crontab -l 看目前排程，crontab 檔案 則安裝一份排程。"
+goal: "安裝一筆排程：每天凌晨 3:30 執行 /home/player/backup.sh。"
+teaches: [crontab, cron]
+xp: 30
+hints:
+  - "排程的寫法：30 3 * * * /home/player/backup.sh"
+  - "echo '30 3 * * * /home/player/backup.sh' | crontab -"
+  - "用 crontab -l 確認。"
+setup: |
+  crontab -r -u player 2>/dev/null || true
+  printf '#!/bin/bash\necho backup >> /home/player/backup.log\n' > /home/player/backup.sh
+  chmod 755 /home/player/backup.sh
+check: |
+  crontab -u player -l 2>/dev/null | grep -Eq '^30 3 [*] [*] [*] +/home/player/backup.sh'
+cleanup: |
+  crontab -r -u player 2>/dev/null || true
+reveal: "排程裡本來有一行每日備份，被人註解掉了。時間是 Vega 失蹤的那天。是誰關掉了備份？"
+solution: |
+  echo '30 3 * * * /home/player/backup.sh' | crontab -

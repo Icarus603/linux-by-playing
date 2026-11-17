@@ -1,0 +1,16 @@
+id: "10-07"
+title: 如何逃離 vim
+kind: practice
+story: "這是全世界最有名的問題之一：「我進了 vim 出不來」。冷靜，按 Esc 確保在一般模式，然後輸入冒號指令。如果改壞了、想完全放棄剛剛的修改呢？"
+goal: "寫出「放棄所有修改並強制離開 vim」的冒號指令（包含冒號），用 answer 提交，例如 answer :xyz"
+teaches: [vim]
+xp: 20
+hints:
+  - "q 是 quit，加上驚嘆號代表強制。"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == ":q!" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "再想想：quit 加上強制的驚嘆號。"
+  exit 1
+solution: |
+  answer ":q!"

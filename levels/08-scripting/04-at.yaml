@@ -1,0 +1,21 @@
+id: "8-04"
+title: $@ 與引號
+kind: practice
+story: "\"$@\" 會把每個參數原封不動地展開（含空白的參數也不會被切開），\"$*\" 則把全部合成一個字串。寫腳本時幾乎永遠要用 \"$@\"。"
+goal: "寫 args.sh：先印出參數個數，再每個參數各印一行。例如 ./args.sh a \"b c\" d 要印出 3、a、b c、d（各一行）。"
+teaches: [bash]
+xp: 30
+hints:
+  - "echo $#"
+  - "for a in \"$@\"; do echo \"$a\"; done"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/args.sh ]] || { echo "還沒有 args.sh。"; exit 1; }
+  [[ "$(P 'bash args.sh a "b c" d')" == $'3\na\nb c\nd' ]]
+solution: |
+  cat > args.sh <<'EOS'
+  #!/bin/bash
+  echo $#
+  for a in "$@"; do echo "$a"; done
+  EOS

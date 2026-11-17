@@ -1,0 +1,189 @@
+# 專業知識：Bash 進階與文字處理
+- q: bash 的參數展開有哪些常用技巧？
+  keys: 參數展開 ${var:-} ${var#} ${var%} ${var//} ${#var} 預設值 字串處理 bash expansion
+  a: |-
+    ${v:-預設} 空值給預設、${v#前綴} 去頭、${v%後綴} 去尾、${v/舊/新} 取代、${#v} 長度、${v:0:5} 子字串。
+  d: |-
+    `${v:?訊息}` 未設定就報錯結束；`${v:=值}` 賦值；`${v##*/}` 取檔名（basename）、`${v%/*}` 取目錄（dirname）、`${v%.txt}` 去副檔名；`${v^^}` 轉大寫、`${v,,}` 轉小寫；
+    `${arr[@]}` 全部元素、`${!arr[@]}` 全部索引、`${!prefix@}` 列出前綴相同的變數名。這些都是內建，不啟動子程序，比 sed/basename 快很多。
+- q: bash 陣列與關聯式陣列怎麼用？
+  keys: 陣列 array declare -A 關聯陣列 mapfile readarray 迴圈 索引 bash
+  a: |-
+    arr=(a b c)、"${arr[@]}" 展開全部、${#arr[@]} 長度；declare -A map 建立關聯陣列，map[key]=值。
+  d: |-
+    `arr+=(d)` 追加；`for x in "${arr[@]}"`（務必加雙引號）；`mapfile -t lines < file`（逐行讀進陣列）；
+    `declare -A c; c[$k]=$((c[$k]+1))` 計數；列舉 `for k in "${!c[@]}"`。關聯陣列需 bash 4+；macOS 內建 bash 3.2 不支援。
+- q: set -euo pipefail 有什麼要注意的陷阱？
+  keys: set -e -u pipefail 嚴格模式 腳本 錯誤處理 陷阱 trap ERR
+  a: |-
+    -e 失敗即中止、-u 未定義變數報錯、pipefail 讓管線任一段失敗就算失敗。但 -e 在 if、&&、|| 等情境中不會觸發，要小心。
+  d: |-
+    `cmd || true` 明確容忍失敗；`set +e` 暫時關閉。`local x=$(cmd)` 會吞掉 cmd 的失敗碼，要分兩行寫。`grep` 沒找到回傳 1 在 -e 下會中止腳本。
+    搭配 `trap 'echo "line $LINENO failed" >&2' ERR` 與 `trap cleanup EXIT`。-e 的行為有太多例外，關鍵路徑仍應顯式檢查 `$?`。
+- q: trap 怎麼用？能攔截哪些事件？
+  keys: trap EXIT ERR INT TERM 清理 訊號 暫存檔 cleanup 腳本
+  a: |-
+    trap 'cleanup' EXIT 讓腳本不論怎麼結束都會執行清理；也可攔截 INT、TERM、ERR。
+  d: |-
+    典型：`tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT`。`trap '' INT` 忽略；`trap - INT` 還原。
+    EXIT 在 SIGKILL 時不會觸發（無法攔截）。子 shell 不繼承 trap。ERR 搭配 `set -E` 才會在函式內也觸發。
+- q: 管線的輸出如何分開處理 stdout 與 stderr？檔案描述符重導向怎麼用？
+  keys: 重導向 2>&1 &> 檔案描述符 fd exec 3> stdout stderr tee 管線 錯誤輸出
+  a: |-
+    `cmd > out 2> err` 分開，`cmd > all 2>&1` 合併（順序重要），`cmd 2>&1 | tee log` 同時看與存。
+  d: |-
+    `&>file` 是 bash 的 stdout+stderr 縮寫；`cmd 2>/dev/null` 丟掉錯誤；只把 stderr 接管線：`cmd 2>&1 >/dev/null | grep err`。
+    自訂 fd：`exec 3> log.txt; echo hi >&3; exec 3>&-`。`>&2` 讓 echo 輸出到 stderr（腳本的錯誤訊息應如此）。順序：`2>&1 > file` 與 `> file 2>&1` 結果不同。
+- q: 處理替換 <() 與 here-string 有什麼用？
+  keys: process substitution <() >() here-string <<< here-doc diff comm 管線 子殼
+  a: |-
+    <(指令) 讓指令輸出當成檔案使用，例如 diff <(sort a) <(sort b)；<<< 字串 把字串餵給標準輸入。
+  d: |-
+    `while read -r l; do ...; done < <(cmd)` 讓迴圈在目前 shell 執行，變數才會保留（管線 `cmd | while` 會在子 shell，迴圈內設定的變數離開後消失）。
+    `tee >(gzip > a.gz) >(sha256sum > a.sum) < in > /dev/null` 一次輸出到多處。here-doc `<<'EOF'` 加引號則不展開變數。
+- q: 子 shell、source、exec、( ) 與 { } 有什麼差別？
+  keys: 子殼 subshell source . exec ( ) { } 環境 變數 作用域 工作目錄
+  a: |-
+    ( ) 與管線的各段在子 shell 執行，變數與 cd 不會影響外面；{ } 與 source 在目前 shell 執行；exec 取代目前行程。
+  d: |-
+    `(cd dir && make)` 不會改變外面的工作目錄。`source script` 或 `. script` 會把變數、函式留在目前 shell。
+    `exec cmd` 不會返回，常用在包裝腳本的最後一行或重導向整個腳本的輸出 `exec > log 2>&1`。`$BASHPID` 與 `$$` 的差別：子 shell 內 `$$` 仍是父 shell 的 PID。
+- q: 怎麼安全處理含空白或特殊字元的檔名？
+  keys: 空白 檔名 find -print0 xargs -0 引號 IFS read -r 特殊字元 換行 安全
+  a: |-
+    變數一律加雙引號；find 搭配 -print0 與 xargs -0 或 -exec {} +；讀行用 IFS= read -r。
+  d: |-
+    `find . -type f -name '*.log' -print0 | xargs -0 gzip`、`while IFS= read -r -d '' f; do ...; done < <(find . -print0)`。
+    永遠以 `--` 結束選項以防檔名以 - 開頭：`rm -- "$f"`。`for f in *.txt` 沒有符合時會得到字面字串 *.txt，可用 `shopt -s nullglob`。
+    不要 `for f in $(ls)`。
+- q: xargs 與 GNU parallel 怎麼平行處理？
+  keys: xargs -P -n -I parallel 平行 並行 批次 加速 多核心
+  a: |-
+    xargs -P 8 -n 1 指令 同時跑 8 個；GNU parallel 功能更強（進度、遠端、記錄、重試）。
+  d: |-
+    `find . -name '*.png' -print0 | xargs -0 -P "$(nproc)" -n 4 convert-cmd`；`-I{}` 把輸入放到指定位置（會強制 -n 1）。
+    parallel：`parallel -j8 gzip ::: *.log`、`--eta`、`--joblog j.txt`、`--retries 3`、`--sshloginfile hosts`。注意平行寫同一檔案會交錯輸出，用 `--group` 或各自寫檔。
+- q: find 的進階技巧？
+  keys: find -exec + -prune -newer -mmin -size -perm -regex -delete 搜尋 排除目錄 進階 find files larger than bigger than size 大於 大檔案 找大檔案 older than newer than 超過
+  a: |-
+    -exec cmd {} + 一次傳多個檔案（比 \; 快）；-prune 排除目錄；-newer 比較時間；-delete 直接刪（放在條件最後）。
+  d: |-
+    排除目錄：`find . -path ./node_modules -prune -o -type f -name '*.js' -print`。`-mmin -30`、`-size +100M`、`-perm -u+x`、`-user`、`-regex '.*\.\(jpg\|png\)'`、`-maxdepth 2`、`-printf '%p %s\n'`。
+    運算子優先順序：`-o` 低於隱含的 `-a`，複雜條件要用 `\( \)` 括起來。刪除前先把 -delete 換成 -print 預覽。
+- q: grep 的進階用法（-P、-o、-z、-f）？
+  keys: grep -P -o -E -z -f -w -x -c -l --include 正規表示式 pcre 進階 搜尋
+  a: |-
+    -E 延伸正規式、-P 使用 PCRE（支援 \d、lookahead）、-o 只輸出符合部分、-f 檔案 用檔案內的多個樣式、--include 限制檔案類型。
+  d: |-
+    `grep -rnE 'error|fatal' --include='*.log' /var/log`、`grep -oP '(?<=user=)\w+'`（lookbehind 取值）、`grep -Fxf a b`（兩檔共同行，固定字串整行比對）、
+    `grep -vFxf a b`（只在 b 的行）、`-z` 以 NUL 分隔記錄（可跨行比對）、`-c` 計數、`-A/-B/-C` 前後文、`--color=auto`。
+    大型程式碼庫可用 ripgrep（rg）更快並尊重 .gitignore。
+- q: sed 的進階用法（保持空間、範圍、多行）？
+  keys: sed 保持空間 hold space 範圍 位址 多行 N P D -n -i -E 進階 取代
+  a: |-
+    sed 以「位址 + 指令」運作：10,20d 刪行、/start/,/end/p 區段、s/a/b/2 取代第二個、-E 延伸正規式、-i.bak 修改並留備份。
+  d: |-
+    `sed -n '5,10p'`、`sed '/^#/d;/^$/d'`、`sed -E 's/([0-9]+)-([0-9]+)/\2-\1/'`、`sed '1!G;h;$!d'`（反轉行序，用保持空間）、`sed ':a;N;$!ba;s/\n/,/g'`（多行合併成一行）、
+    `sed -i.bak 's/old/new/g' file`。含斜線時換分隔符：`s|/usr/bin|/opt/bin|`。macOS 的 BSD sed 的 `-i` 需要後綴參數，腳本可攜性要注意。
+- q: awk 程式的結構與常用範例？
+  keys: awk BEGIN END 欄位 NR NF FS OFS 陣列 printf 統計 分組 內建變數
+  a: |-
+    awk 是「樣式 { 動作 }」：BEGIN 在開始前、END 在結束後；NR 行號、NF 欄位數、$1..$NF 欄位、-F 設分隔符。
+  d: |-
+    `awk -F: '$3>=1000 {print $1}' /etc/passwd`、`awk '{s+=$3} END{print s, s/NR}'`、`awk '!seen[$0]++'`（保序去重）、
+    `awk '{c[$1]++} END{for(k in c) print c[k], k}' | sort -nr`、`awk 'NR==FNR{a[$1]=$2; next} $1 in a {print $0, a[$1]}' f1 f2`（兩檔 join）、
+    `awk -v OFS=, '{$1=$1}1'`（重新組合欄位）、`printf "%-10s %5.2f\n"`。多字元分隔符與 CSV 含引號欄位用 gawk 的 FPAT 或專用工具（csvkit、miller）。
+- q: jq 怎麼處理 JSON？
+  keys: jq json select map group_by to_entries 過濾 解析 -r api 資料
+  a: |-
+    jq '.欄位' 取值，.[] 展開陣列，select(條件) 篩選，map() 轉換，-r 輸出不帶引號的原始字串。
+  d: |-
+    `jq -r '.items[] | select(.status=="ok") | .name'`、`jq '[.[] | .size] | add'`、`jq 'group_by(.type) | map({type: .[0].type, n: length})'`、
+    `jq -n --arg x "$v" '{key:$x}'`（安全地建構 JSON，避免字串拼接）、`jq -c`（一行一筆）、`jq -S`（鍵排序，方便 diff）、`jq 'to_entries[]'`、`jq '.a // "預設"'`。
+    處理 YAML 用 yq，CSV 用 miller 或 csvkit。
+- q: sort 與 uniq 的進階用法？
+  keys: sort -k -t -n -h -u -s -V uniq -c -d -u 排序 去重 多欄位 穩定排序
+  a: |-
+    sort -t, -k2,2nr 依第 2 欄數值反向；-h 人類可讀大小（K、M）；-V 版本號排序；-u 去重；uniq 需要相鄰才去重，所以通常先 sort。
+  d: |-
+    `sort -k1,1 -k2,2n`（先第 1 欄再第 2 欄數值）、`sort -s`（穩定）、`sort -t: -k3 -n /etc/passwd`、`du -sh * | sort -h`。
+    `uniq -c` 計數、`uniq -d` 只列重複、`uniq -u` 只列唯一；`sort | uniq -c | sort -nr` 排行榜。大檔排序用 `-S 2G -T /tmp` 控制記憶體與暫存位置，設 `LC_ALL=C` 大幅提速。
+- q: cut、paste、join、column、tr 各適合什麼情境？
+  keys: cut paste join column tr 欄位 合併 表格 字元轉換 文字工具
+  a: |-
+    cut 取欄位、paste 橫向合併、join 依共同欄位合併（需排序）、column -t 對齊成表格、tr 字元替換或刪除。
+  d: |-
+    `cut -d, -f1,3`、`cut -c1-10`、`paste -d, a b`、`join -t, -1 2 -2 1 f1 f2`、`column -t -s,`、`tr -d '\r'`（去除 CRLF）、`tr -s ' '`（壓縮連續空白）、`tr 'a-z' 'A-Z'`。
+    cut 不支援引號包住的 CSV 逗號，也不能重排欄位順序；複雜情況改用 awk。
+- q: diff 與 patch 的進階用法？
+  keys: diff -u -r patch -p1 --dry-run 差異 補丁 比對 目錄 sdiff vimdiff
+  a: |-
+    diff -u 產生統一格式；diff -r 比較整個目錄；patch -p1 < 補丁 套用，先用 --dry-run 預覽。
+  d: |-
+    `diff -ruN old/ new/ > change.patch`、`cd 專案 && patch -p1 --dry-run < change.patch && patch -p1 < change.patch`、`patch -R`（還原）。
+    `-p1` 是去掉路徑第一層。git 專案用 `git diff > x.patch` 與 `git apply`。`diff <(cmd1) <(cmd2)` 比較兩個指令輸出；視覺化用 `vimdiff` 或 `meld`。
+- q: 正規表示式 BRE、ERE、PCRE 有什麼不同？
+  keys: 正規表示式 regex bre ere pcre grep -E -P 差異 跳脫 量詞
+  a: |-
+    BRE 是 grep/sed 預設（+ ? | ( ) 需要反斜線）；ERE（grep -E、sed -E、awk）直接可用；PCRE（grep -P、perl）支援 \d、非貪婪、lookaround。
+  d: |-
+    常見：`.` 任意字元、`*` 零或多、`+` 一或多（ERE）、`?` 零或一、`{n,m}` 次數、`^$` 行首尾、`[[:alpha:]]` POSIX 字元類別、`\b` 單字邊界（GNU）。
+    PCRE 專屬：`\d \w \s`、`(?:...)`、`.*?`、`(?=...)` 前瞻、`(?<=...)` 後顧。shell 萬用字元（glob）與正規式是兩回事：glob 的 `*` 等於正規式的 `.*`。
+- q: 怎麼處理 Windows 換行與編碼問題？
+  keys: crlf dos2unix iconv file 編碼 big5 utf-8 亂碼 換行 bom 轉碼
+  a: |-
+    去除 CR 用 tr -d '\r' 或 dos2unix；用 file 判斷編碼，iconv -f 舊編碼 -t UTF-8 轉碼；注意 UTF-8 BOM。
+  d: |-
+    `file -i 檔案`、`iconv -f BIG5 -t UTF-8 in.txt > out.txt`、`iconv -f UTF-8 -t ASCII//TRANSLIT`、`sed -i '1s/^\xEF\xBB\xBF//' f`（去 BOM）。
+    腳本出現 `^M` 或 `bad interpreter: /bin/bash^M` 就是 CRLF 造成。偵測：`grep -c $'\r' file`。
+- q: 怎麼寫一個正確的 shell 腳本骨架？
+  keys: 腳本 骨架 template shebang usage getopts set -euo 最佳實務 shellcheck 函式
+  a: |-
+    shebang、set -euo pipefail、用 trap 清理、參數檢查與 usage、變數加引號、函式內用 local，最後用 shellcheck 檢查。
+  d: |-
+    #!/usr/bin/env bash → `set -euo pipefail` → `IFS=$'\n\t'`（視情況）→ `usage() {...}` → `getopts` 解析 → `main "$@"`。
+    日誌函式輸出到 stderr；檢查必要指令 `command -v jq >/dev/null || { echo "need jq" >&2; exit 1; }`；用 `mktemp`；避免解析 `ls` 輸出。
+    複雜到需要資料結構或錯誤處理時，改用 Python。
+- q: 歷史展開與快捷鍵（!!、!$、Ctrl-R）怎麼用？
+  keys: history !! !$ ^r ctrl-r 歷史展開 快捷鍵 readline alt-. 重複指令
+  a: |-
+    !! 上一個指令、!$ 上一個指令的最後參數、Ctrl-R 反向搜尋歷史、Alt-. 插入上個指令的最後參數。
+  d: |-
+    `sudo !!`（忘了加 sudo）、`!ssh`（最近一個以 ssh 開頭的指令）、`^舊^新`（取代上一行文字後重跑）、`!:1` 第一個參數。
+    readline：Ctrl-A/E 行首/尾、Ctrl-W 刪前一詞、Ctrl-U 刪到行首、Ctrl-K 刪到行尾、Ctrl-L 清畫面、Ctrl-X Ctrl-E 用編輯器編輯目前這行。`HISTSIZE`、`HISTCONTROL=ignoredups:ignorespace`、`histappend`。
+- q: 大括號展開與萬用字元的差異？
+  keys: brace expansion {} 大括號 glob 萬用字元 extglob globstar 展開 順序
+  a: |-
+    {a,b,c} 與 {1..10} 由 shell 先展開成多個字串（不看檔案存不存在）；glob 的 * ? [] 則是去比對現有檔案。
+  d: |-
+    `mkdir -p proj/{src,docs,tests}`、`cp file{,.bak}`（備份）、`echo {a..e}`、`touch log-{01..12}.txt`。
+    `shopt -s globstar` 讓 `**` 遞迴；`shopt -s extglob` 後可用 `!(*.log)`、`+(a|b)`。展開順序：大括號 → 波浪號 → 變數與指令替換 → 單詞切分 → 路徑展開（glob）。
+- q: 怎麼量測與比較指令效能？
+  keys: time hyperfine perf stat benchmark 效能比較 基準測試 多次執行
+  a: |-
+    time 量一次、hyperfine 多次跑並做統計比較；注意第一次受快取影響，需要預熱。
+  d: |-
+    `hyperfine --warmup 3 'grep -r foo .' 'rg foo'`。`perf stat -r 10 cmd`。比較磁碟相關操作時用 `sync; echo 3 > /proc/sys/vm/drop_caches`（需 root）清快取以測冷啟動。
+    以 `LC_ALL=C` 與固定輸入避免干擾。報告時給中位數與變異。
+- q: 在腳本裡怎麼解析參數與子命令？
+  keys: getopts getopt case shift 參數解析 子命令 選項 長選項 usage
+  a: |-
+    短選項用 getopts；長選項可用 while + case + shift，或 GNU getopt。
+  d: |-
+    `while getopts ":hvf:" o; do case $o in h) usage;; v) V=1;; f) F=$OPTARG;; :) echo "-$OPTARG 需要參數" >&2; exit 2;; \?) usage;; esac; done; shift $((OPTIND-1))`。
+    長選項：`while [[ $# -gt 0 ]]; do case $1 in --file) F=$2; shift 2;; --verbose) V=1; shift;; --) shift; break;; *) break;; esac; done`。
+    保持結束碼約定：0 成功、1 一般錯誤、2 用法錯誤。
+- q: 怎麼在 bash 做除錯？
+  keys: bash 除錯 set -x PS4 bash -x debug trap DEBUG shellcheck 腳本偵錯
+  a: |-
+    bash -x 腳本 或 set -x 會印出每個執行的指令；PS4 可加上檔名與行號；先跑 shellcheck 抓常見錯誤。
+  d: |-
+    `PS4='+ ${BASH_SOURCE}:${LINENO}: ' bash -x script.sh`、`set -x; 問題區段; set +x`、`bash -n script.sh` 只檢查語法、`trap 'echo $LINENO: $BASH_COMMAND' DEBUG`。
+    shellcheck 的警告編號（SC2086 未加引號等）網站上有詳細說明。
+- q: 怎麼對檔案內容做快速統計與取樣？
+  keys: wc head tail shuf sample 統計 取樣 隨機 行數 大檔案 split
+  a: |-
+    wc -l 數行、shuf -n 100 隨機取樣、split -l 切檔、head/tail 看頭尾，sort | uniq -c 做頻率統計。
+  d: |-
+    `shuf -n 1000 big.csv > sample.csv`、`split -l 1000000 -d big.log part_`、`tail -n +2 f`（去掉第一行標題）、`head -c 1M`、`wc -lwc`、`cat f | pv > /dev/null`（pv 看進度與速度）。
+    超大檔案避免 `cat file | ...` 多一道複製，直接 `< file` 或把檔名給指令。

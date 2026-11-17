@@ -1,0 +1,21 @@
+id: "1-11"
+title: 只看結尾
+kind: learn
+story: "tail 是 head 的兄弟，只顯示結尾。看日誌時最常用，因為最新的事件都在最後。"
+goal: "transmission.log 的最後一行有校驗碼（checksum=）。只看結尾，把校驗碼用 answer 提交。"
+teaches: [tail]
+xp: 15
+hints:
+  - "tail -n 1 transmission.log"
+setup: |
+  cd /home/player
+  c=$(printf '%06X' $(( (RANDOM * 32768 + RANDOM) % 16777216 )))
+  { for i in $(seq 1 500); do echo "packet $i ok"; done; echo "EOF: checksum=$c"; } > transmission.log
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "校驗碼不對，要看最後一行。"
+  exit 1
+solution: |
+  tail -n 1 transmission.log
+  answer "$(tail -n 1 transmission.log | sed 's/.*=//')"

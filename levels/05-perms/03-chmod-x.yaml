@@ -1,0 +1,20 @@
+id: "5-03"
+title: chmod：讓腳本可執行
+kind: learn
+story: "新建的檔案預設不能執行。chmod 改權限：u 是擁有者、g 群組、o 其他人、a 全部；+ 加、- 減；r w x 是權限。"
+goal: "script.sh 沒有執行權限。用 chmod 讓擁有者（你）可以執行它。"
+teaches: [chmod]
+xp: 15
+hints:
+  - "chmod u+x script.sh"
+setup: |
+  cd /home/player
+  printf '#!/bin/bash\necho ready\n' > script.sh
+  chmod 644 script.sh
+check: |
+  [[ "$(stat -c %A /home/player/script.sh)" =~ ^.{3}x ]]
+solution: |
+  chmod u+x script.sh
+golf: 18
+golf_solution: |
+  chmod +x script.sh

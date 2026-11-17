@@ -1,0 +1,24 @@
+id: "6-02"
+title: 程序屬於誰
+kind: practice
+story: "ps aux 的第一欄是擁有者，也就是這個程序用誰的權限在跑。ledger-writer 是個背景服務，查查它是用哪個使用者在執行。"
+goal: "找出 ledger-writer 程序的擁有者，answer 提交使用者名稱。"
+teaches: [ps]
+xp: 20
+hints:
+  - "ps aux | grep ledger"
+  - "ps -o user= -p <PID> 只印擁有者。"
+setup: |
+  cp -f /usr/bin/sleep /usr/local/bin/ledger-writer
+  setsid setpriv --reuid=nobody --regid=nogroup --init-groups -- ledger-writer 100000 >/dev/null 2>&1 </dev/null &
+  sleep 0.3
+check: |
+  [[ "$LBP_ANSWER" == "nobody" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，看 ps aux 的第一欄。"
+  exit 1
+cleanup: |
+  pkill -x ledger-writer || true
+  rm -f /usr/local/bin/ledger-writer
+solution: |
+  ps aux | grep ledger
+  answer nobody

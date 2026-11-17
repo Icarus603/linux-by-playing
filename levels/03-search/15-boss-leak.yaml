@@ -1,0 +1,29 @@
+id: "3-15"
+title: "Boss：外洩的金鑰"
+kind: boss
+story: "緊急！有人把正式環境的金鑰 sk_live_ 開頭的字串提交到了專案裡。必須找到它、回報、並移除含金鑰的檔案。把 find 與 grep 全用上。"
+goal: "在 webapp 專案中找出 sk_live_ 開頭的金鑰（answer 提交完整金鑰），並刪除含有它的那個檔案。"
+teaches: [find, grep]
+xp: 60
+hints:
+  - "grep -r 'sk_live_' webapp"
+  - "-l 只列檔名；找到之後用 rm 刪掉那個檔案。"
+  - "別刪錯！有些檔案只是提到 sk_test_（測試金鑰），不用刪。"
+setup: |
+  cd /home/player
+  mkdir -p webapp/{src/api,src/ui,config,tests,docs}
+  for i in $(seq 1 30); do echo "line $i" > webapp/src/ui/comp$i.js; done
+  echo "const key = 'sk_test_000111'" > webapp/tests/mock.js
+  echo "use sk_live_ for production" > webapp/docs/README.md
+  echo "STRIPE=sk_live_9aZ4kQ77xT" > webapp/config/old-deploy.env
+  echo "ok" > webapp/src/api/index.js
+check: |
+  cd /home/player
+  [[ "$LBP_ANSWER" == "sk_live_9aZ4kQ77xT" ]] || { [[ -n "$LBP_ANSWER" ]] && echo "金鑰不對，要完整的那一串。"; exit 1; }
+  [[ ! -e webapp/config/old-deploy.env ]] || { echo "金鑰已回報，但含金鑰的檔案還沒刪除。"; exit 1; }
+  [[ -f webapp/tests/mock.js && -f webapp/docs/README.md ]]
+solution: |
+  grep -r 'sk_live_' webapp
+  answer sk_live_9aZ4kQ77xT
+  rm webapp/config/old-deploy.env
+reveal: "外洩的金鑰被你刪掉了，Warden 的對外連線中斷了整整一小時。你替站上爭取到了時間。"

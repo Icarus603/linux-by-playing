@@ -1,0 +1,24 @@
+id: "8-03"
+title: 腳本的參數
+kind: practice
+story: "傳給腳本的參數用 $1 $2 … 取得。好腳本會檢查參數夠不夠，不夠就印用法並以非 0 結束。"
+goal: "寫 greet.sh：./greet.sh Ada 印出 Hello, Ada!；沒有給參數時印出 Usage: greet.sh NAME 並以結束碼 1 結束。"
+teaches: [bash]
+xp: 30
+hints:
+  - "$# 是參數個數。if [ $# -lt 1 ]; then ... exit 1; fi"
+setup: ""
+check: |
+  PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }
+  [[ -f /home/player/greet.sh ]] || { echo "還沒有 greet.sh。"; exit 1; }
+  [[ "$(PR 'bash greet.sh Ada')" == $'Hello, Ada!\nRC=0' ]] || { echo "有參數時要印出 Hello, 名字!"; exit 1; }
+  [[ "$(PR 'bash greet.sh')" == $'Usage: greet.sh NAME\nRC=1' ]]
+solution: |
+  cat > greet.sh <<'EOS'
+  #!/bin/bash
+  if [ $# -lt 1 ]; then
+    echo "Usage: greet.sh NAME"
+    exit 1
+  fi
+  echo "Hello, $1!"
+  EOS

@@ -1,0 +1,17 @@
+id: "10-22"
+title: python3：隨身計算機
+kind: practice
+story: "python3 -c '程式碼' 直接執行一小段 Python，不用建檔案，是拿來快速計算、處理文字、解析 JSON 的好幫手。大整數運算也輕而易舉。"
+goal: "用 python3 -c 算出 2 的 64 次方，answer 提交結果。"
+teaches: [python3]
+xp: 25
+hints:
+  - "python3 -c 'print(2**64)'"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "18446744073709551616" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，** 是次方運算子。"
+  exit 1
+solution: |
+  python3 -c 'print(2**64)'
+  answer 18446744073709551616

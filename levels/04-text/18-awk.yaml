@@ -1,0 +1,21 @@
+id: "4-18"
+title: awk：按欄位計算
+kind: learn
+story: "awk 把每行切成欄位（$1 $2 $3…），可以做計算。awk '{s+=$3} END{print s}' 把第 3 欄加總，END 在讀完全部資料後執行。"
+goal: "sales.txt 每行是 品名 數量 金額。算出金額（第 3 欄）的總和，answer 提交。"
+teaches: [awk]
+xp: 30
+hints:
+  - "awk '{s+=$3} END{print s}' sales.txt"
+setup: |
+  cd /home/player
+  printf 'fuel 10 250\noxygen 5 120\nfood 20 90\nparts 2 140\n' > sales.txt
+check: |
+  cd /home/player
+  exp=$(awk '{s+=$3} END{print s}' sales.txt)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "總和不對，要把第 3 欄全部加起來。"
+  exit 1
+solution: |
+  awk '{s+=$3} END{print s}' sales.txt
+  answer 600

@@ -1,0 +1,24 @@
+id: "9-14"
+title: iptables：防火牆規則
+kind: practice
+story: "iptables 依「鏈」裡的規則逐條比對封包。INPUT 鏈管進來的封包。-A 追加規則、-p 協定、--dport 目的埠、-j 動作（ACCEPT / DROP / REJECT）。規則依序比對，先符合先生效。iptables -S 列出所有規則。"
+goal: "9300 與 9301 兩個埠都有服務在聽。只封鎖 9300（丟棄進來的 TCP 封包），9301 要保持可連。"
+teaches: [iptables]
+xp: 50
+hints:
+  - "sudo iptables -S 看目前規則。"
+  - "sudo iptables -A INPUT -p tcp --dport 9300 -j DROP"
+setup: |
+  iptables -F INPUT
+  for p in 9300 9301; do
+    setsid setpriv --reuid=player --regid=player --init-groups -- python3 -c 'import socket,time,sys; s=socket.socket(); s.setsockopt(1,2,1); s.bind(("127.0.0.1",int(sys.argv[1]))); s.listen(); time.sleep(10**6)' "$p" >/dev/null 2>&1 </dev/null &
+  done
+  sleep 0.7
+check: |
+  nc -z -w1 127.0.0.1 9301 || { echo "9301 不該被擋。"; exit 1; }
+  ! nc -z -w1 127.0.0.1 9300
+cleanup: |
+  iptables -F INPUT
+  pkill -f '[s]ocket.socket' 2>/dev/null || true
+solution: |
+  sudo iptables -A INPUT -p tcp --dport 9300 -j DROP

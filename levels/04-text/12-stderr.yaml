@@ -1,0 +1,15 @@
+id: "4-12"
+title: 錯誤輸出 2>
+kind: practice
+story: "程式有兩條輸出管道：標準輸出（1）與標準錯誤（2）。> 只接 1，用 2> 才能把錯誤另外存起來。"
+goal: "執行 find /root /etc -name '*.conf'：把正常結果存進 found.txt，把錯誤訊息存進 errors.txt。"
+teaches: ["2>", find]
+xp: 25
+hints:
+  - "find /root /etc -name '*.conf' > found.txt 2> errors.txt"
+setup: ""
+check: |
+  cd /home/player
+  [[ -s found.txt ]] && grep -q 'Permission denied' errors.txt && ! grep -q 'Permission denied' found.txt
+solution: |
+  find /root /etc -name '*.conf' > found.txt 2> errors.txt

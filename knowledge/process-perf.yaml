@@ -1,0 +1,227 @@
+# 專業知識：程序、排程、效能分析與診斷
+- q: load average 的三個數字是什麼意思？
+  keys: load average 負載 uptime 平均負載 1分鐘 5分鐘 15分鐘 負載高
+  a: |-
+    是 1、5、15 分鐘內「可執行加不可中斷睡眠」程序數的平均。要和 CPU 核心數比較：持續大於核心數代表過載。
+  d: |-
+    `uptime` 或 `/proc/loadavg`。四核心機器負載 4.0 約等於滿載。Linux 的負載包含等待磁碟 I/O（D 狀態）的程序，
+    所以負載高不一定是 CPU 忙。三個數字趨勢：1 分鐘高於 15 分鐘代表正在惡化，反之正在恢復。
+    用 `nproc` 取得核心數，用 `vmstat 1`（r 欄是可執行佇列、b 欄是被阻塞）判斷是 CPU 還是 I/O。
+- q: 負載很高但 CPU 使用率很低，是什麼原因？
+  keys: 負載高 cpu低 iowait d狀態 磁碟 nfs 卡住 不可中斷
+  a: |-
+    通常是大量程序卡在不可中斷睡眠（D 狀態），例如等磁碟或 NFS。看 vmstat 的 wa 與 b 欄，以及 ps 找 D 狀態程序。
+  d: |-
+    `ps -eo state,pid,wchan:32,cmd | awk '$1=="D"'` 看卡在哪個核心函式（wchan）。
+    常見：NFS 伺服器無回應、故障磁碟、備份或同步狀態、大量同步寫入。`iostat -x 1` 看磁碟，`cat /proc/PID/stack`（需 root）看核心堆疊。
+    D 狀態的程序無法被 kill -9，只能解決底層 I/O 問題。
+- q: 程序狀態 R S D Z T 是什麼？
+  keys: 程序狀態 ps stat R S D Z T 睡眠 殭屍 停止 state
+  a: |-
+    R 執行中、S 可中斷睡眠、D 不可中斷睡眠（等 I/O）、Z 殭屍、T 被停止（Ctrl-Z 或 SIGSTOP）。
+  d: |-
+    ps 的 STAT 欄後綴：`+` 前景程序群組、`s` 工作階段首領、`l` 多執行緒、`<` 高優先權、`N` 低優先權。
+    `ps -eo pid,stat,cmd`、`top` 的 S 欄同義。大量 D 狀態是 I/O 問題的信號，大量 Z 是父程序沒有 wait()。
+- q: 殭屍程序怎麼處理？
+  keys: zombie 殭屍 defunct Z 父程序 wait 清除 殺不掉
+  a: |-
+    殭屍已經結束，只剩程序表項目等父程序回收。殺不掉它；要通知或結束「父程序」，由 init 接手回收。
+  d: |-
+    `ps -eo pid,ppid,stat,cmd | awk '$3 ~ /Z/'` 找出父程序 PPID。對父程序送 `kill -CHLD PPID` 有時可促使它回收，無效再重啟父程序。
+    少量殭屍無害，只佔一個 PID；大量累積可能耗盡 PID（`kernel.pid_max`）。容器內沒有適當 init 常造成殭屍，需用 tini 或 `--init`。
+- q: OOM killer 是什麼？程序被殺怎麼查？
+  keys: oom killer 記憶體不足 oom-kill dmesg 被殺 oom_score_adj 記憶體耗盡
+  a: |-
+    記憶體耗盡時核心會挑一個程序殺掉。用 dmesg -T | grep -i "killed process" 找證據。
+  d: |-
+    `journalctl -k | grep -i oom`。挑選依據是 `/proc/PID/oom_score`，可用 `echo -1000 > /proc/PID/oom_score_adj` 保護（-1000 完全不被殺）。
+    systemd 服務可設 `OOMScoreAdjust=` 與 `MemoryMax=`。容器或 cgroup 超過限制是 cgroup 內的 OOM（dmesg 會寫 memory cgroup out of memory）。
+    預防：加記憶體或 swap、限制程序、修洩漏、調 `vm.overcommit_memory`。
+- q: RSS、VSZ、PSS 有什麼不同？
+  keys: rss vsz pss uss 記憶體 virt res shr 虛擬記憶體 常駐 共享記憶體 which process uses most memory top memory ps sort memory 哪個程序最吃記憶體
+  a: |-
+    VSZ 是虛擬位址空間大小，RSS 是實際在實體記憶體的頁面，PSS 把共享頁面按使用者數平均分攤，最能反映真實占用。
+  d: |-
+    `ps -o pid,vsz,rss,cmd -p PID`、`top` 的 VIRT/RES/SHR。精確分析：`cat /proc/PID/smaps_rollup` 或 `smem -tk`（USS/PSS）。
+    VIRT 很大通常正常（映射了函式庫、保留位址空間）。加總所有程序 RSS 會重複計算共享記憶體。
+- q: nice、ionice、chrt 怎麼調整優先權？
+  keys: nice renice ionice chrt 優先權 排程 cpu優先 io優先 即時排程 sched
+  a: |-
+    nice/renice 調 CPU 優先權（-20 到 19，越大越禮讓）；ionice 調 I/O 優先權；chrt 設即時排程策略。
+  d: |-
+    `nice -n 10 cmd`、`renice -n 5 -p PID`、`ionice -c3 -p PID`（idle 類別，只在磁碟閒置時才輪到）、`ionice -c2 -n7`。
+    `chrt -f 50 cmd`（SCHED_FIFO 即時，使用不當會鎖死系統）。降低備份對線上服務的影響：`nice -n 19 ionice -c3 rsync ...`。
+- q: 怎麼把程序綁定在特定 CPU 核心？
+  keys: taskset numactl cpu affinity 親和性 綁核 numa isolcpus cpuset
+  a: |-
+    taskset -c 0,1 指令 讓程序只在指定核心執行；NUMA 機器用 numactl 同時控制記憶體節點。
+  d: |-
+    `taskset -cp 0-3 PID` 修改執行中程序；`taskset -p PID` 查看。`numactl --cpunodebind=0 --membind=0 cmd`。
+    開機參數 `isolcpus=`、cgroup 的 cpuset 可保留核心給關鍵工作。綁核可減少快取失效，但可能讓負載不均。
+- q: strace 的進階用法？
+  keys: strace 系統呼叫 追蹤 -c -f -tt -e trace -p 除錯 卡住 syscall
+  a: |-
+    strace -f -tt -e trace=network -p PID 附加到執行中程序；-c 做系統呼叫統計；-T 顯示每個呼叫耗時。
+  d: |-
+    常用：`strace -f -o out.txt cmd`（跟蹤子程序並存檔）、`-e trace=openat,read`、`-e trace=%file`、`-e trace=%network`、`-s 200` 加長字串、`-y` 顯示 fd 對應路徑。
+    找「程式為什麼打不開某檔」：grep ENOENT / EACCES。程式卡住：看最後一個系統呼叫（read、futex、epoll_wait 代表在等什麼）。
+    strace 會明顯拖慢程序，正式環境短時間使用，或改用 perf trace / eBPF。
+- q: perf 能做什麼？怎麼找出 CPU 熱點？
+  keys: perf top perf record perf stat cpu熱點 profiling 效能分析 flamegraph
+  a: |-
+    perf top 即時看最耗 CPU 的函式；perf record -g 取樣後 perf report 分析呼叫堆疊。
+  d: |-
+    `perf stat cmd`（IPC、快取失誤、分支預測）、`perf record -F 99 -g -p PID -- sleep 30`、`perf report`。
+    火焰圖：`perf script | stackcollapse-perf.pl | flamegraph.pl > out.svg`（Brendan Gregg 工具）。
+    需要符號資訊，缺少時安裝 debug 套件或用 frame pointer；容器內可能需要 `--cap-add SYS_ADMIN` 與調整 `kernel.perf_event_paranoid`。
+- q: eBPF 與 bpftrace 是什麼？
+  keys: ebpf bpf bpftrace bcc execsnoop opensnoop 追蹤 動態追蹤 核心追蹤
+  a: |-
+    eBPF 讓你安全地在核心中執行小程式做追蹤與網路處理；bpftrace 是高階腳本語言，一行就能做動態追蹤。
+  d: |-
+    範例：`bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s %s\n", comm, str(args->filename)); }'`。
+    bcc-tools 有現成工具：execsnoop（新程序）、opensnoop（開檔）、biolatency（磁碟延遲）、tcplife、runqlat。
+    開銷低、可用於正式環境，需要較新核心與 root。
+- q: vmstat 每個欄位的意思？
+  keys: vmstat r b swpd si so bi bo in cs us sy id wa st 系統狀態
+  a: |-
+    r 可執行佇列、b 被阻塞、si/so 換入換出、bi/bo 區塊 I/O、us/sy/id/wa/st 是 CPU 使用者/核心/閒置/等 I/O/被偷走比例。
+  d: |-
+    `vmstat 1 5` 每秒一次。r 長期大於核心數是 CPU 不足；b 大是 I/O 阻塞；si/so 持續非零是記憶體不足；wa 高是磁碟慢；
+    cs（上下文切換）與 in（中斷）異常高要查是否有輪詢或鎖競爭；st 高在虛擬機代表宿主機超賣。
+- q: mpstat、pidstat、sar 各自用在哪？
+  keys: mpstat pidstat sar sysstat 每核心 每程序 歷史 效能 監控
+  a: |-
+    mpstat -P ALL 看每個核心；pidstat 看每個程序的 CPU/記憶體/I-O；sar 可記錄並回溯歷史數據。
+  d: |-
+    屬於 sysstat 套件。`mpstat -P ALL 1`（單核被打滿而整體不高是單執行緒瓶頸）、`pidstat -u -r -d 1`、`pidstat -t -p PID`（執行緒）。
+    `sar -u 1 3`、`sar -n DEV 1`（網路介面）、`sar -q`（負載）、`sar -r`（記憶體），啟用資料收集後可 `sar -f /var/log/sysstat/saDD` 看過去。
+- q: CPU 的 st（steal）是什麼？
+  keys: steal st 虛擬機 超賣 雲端 cpu被偷 vm
+  a: |-
+    steal 是虛擬機想用 CPU 卻被宿主機給別人用掉的時間。持續偏高代表宿主機過載或超賣。
+  d: |-
+    `top` 的 st、`vmstat` 的 st、`mpstat` 的 %steal。雲端環境偶發 5% 以下通常可接受；長期高於 10% 應換機型或換宿主機。
+    突發型執行個體（如 t 系列）CPU 額度用完也會表現為 steal 或被節流。
+- q: Linux 信號（signal）有哪些常用的？
+  keys: signal 信號 sigterm sigkill sighup sigint sigusr1 sigstop sigcont kill -l
+  a: |-
+    SIGTERM(15) 請它結束、SIGKILL(9) 強制殺（不可攔截）、SIGHUP(1) 常用來重新載入設定、SIGINT(2) 是 Ctrl-C、SIGSTOP/SIGCONT 暫停與繼續。
+  d: |-
+    `kill -l` 列出全部。SIGUSR1/2 給應用自訂（例如 nginx 重開日誌、dd 印進度）；SIGQUIT(3) 可產生 core dump；SIGPIPE 寫入已關閉的管線；SIGCHLD 子程序結束通知。
+    kill -9 之前先給 SIGTERM 讓程序清理。SIGKILL 與 SIGSTOP 不能被攔截或忽略。`kill -0 PID` 只檢查程序是否存在。
+- q: nohup、disown、setsid、tmux 差在哪？
+  keys: nohup disown setsid tmux screen 背景 登出 斷線 持續執行 sighup
+  a: |-
+    都是讓程序在登出後繼續跑：nohup 忽略 SIGHUP；disown 讓 shell 不再管理；setsid 建新工作階段；tmux 保留可回來互動的終端。
+  d: |-
+    `nohup cmd > out.log 2>&1 &`；已在跑的程序：Ctrl-Z、`bg`、`disown -h %1`。`setsid -f cmd` 完全脫離終端。
+    長時間互動工作用 tmux；正式服務用 systemd（`systemd-run --user --scope cmd` 或寫 unit），別靠 nohup 當服務管理。
+- q: cgroups v2 是什麼？怎麼限制資源？
+  keys: cgroup cgroups v2 memory.max cpu.max 資源限制 容器 /sys/fs/cgroup systemd-run 限制記憶體 限制程序記憶體 限制cpu 最多使用 記憶體上限 MemoryMax 限制程序
+  a: |-
+    cgroup 把程序分組並限制/統計 CPU、記憶體、I/O。最簡單用 systemd-run -p MemoryMax=500M -p CPUQuota=50% 指令。
+  d: |-
+    v2 是統一階層，掛在 `/sys/fs/cgroup`。檔案：`memory.max`、`memory.high`、`cpu.max`（"50000 100000" 代表 50%）、`io.max`、`pids.max`、`cgroup.procs`。
+    手動：`mkdir /sys/fs/cgroup/demo; echo 100M > .../memory.max; echo PID > .../cgroup.procs`。
+    查看：`systemd-cgls`、`systemd-cgtop`、`cat /proc/PID/cgroup`。容器執行階段（Docker、Kubernetes）都建立在 cgroup 與 namespace 之上。
+- q: 怎麼看程序的完整資訊（路徑、環境變數、工作目錄）？
+  keys: /proc cmdline environ cwd exe fd status maps 程序資訊 程序細節
+  a: |-
+    /proc/PID/ 底下：cmdline 啟動指令、environ 環境變數、cwd 工作目錄、exe 執行檔、fd 開啟的檔案、status 狀態。
+  d: |-
+    `tr '\0' ' ' < /proc/PID/cmdline`、`tr '\0' '\n' < /proc/PID/environ`（需同擁有者或 root）、`ls -l /proc/PID/cwd /proc/PID/exe`、`ls -l /proc/PID/fd`。
+    `/proc/PID/status` 有 VmRSS、Threads、Uid；`/proc/PID/limits` 資源限制；`/proc/PID/maps` 記憶體映射；`/proc/PID/io` 讀寫統計。
+    刪除了執行檔的程序，exe 會顯示 (deleted)，可從 /proc/PID/exe 復原檔案。
+- q: pstree 與 ps 的樹狀檢視怎麼用？
+  keys: pstree ps forest 程序樹 父子關係 ppid
+  a: |-
+    pstree -p 顯示樹狀與 PID；ps -ef --forest 也能看到父子關係。
+  d: |-
+    `pstree -ps PID` 顯示從 init 到該程序的祖先鏈。`ps -o pid,ppid,pgid,sid,tty,cmd` 看程序群組與工作階段。
+    父程序先死的孤兒會被 PID 1（或 subreaper）收養。
+- q: 怎麼調查記憶體洩漏？
+  keys: 記憶體洩漏 memory leak valgrind pmap smem rss 增長 heap
+  a: |-
+    持續記錄程序 RSS 是否單調成長（pidstat -r 或 ps），再用 pmap、valgrind 或語言專屬工具找出分配來源。
+  d: |-
+    `pidstat -r -p PID 5`、`pmap -x PID`（看哪段記憶體在長）、`cat /proc/PID/smaps_rollup`。C/C++：`valgrind --leak-check=full`、heaptrack、jemalloc profiling。
+    Java 用 jmap/ jcmd，Go 用 pprof，Python 用 tracemalloc。先區分「洩漏」與「快取正常成長」。系統層看 `slabtop` 判斷是否核心記憶體在增加。
+- q: core dump 怎麼產生與分析？
+  keys: core dump coredump gdb coredumpctl ulimit -c 當機 segfault 崩潰
+  a: |-
+    ulimit -c unlimited 允許產生 core；用 gdb 程式 core 看 bt 堆疊。systemd 系統可用 coredumpctl。
+  d: |-
+    核心檔位置由 `/proc/sys/kernel/core_pattern` 決定（可能導向 systemd-coredump）。`coredumpctl list`、`coredumpctl gdb PID`。
+    gdb 內：`bt`（堆疊）、`bt full`、`info threads`、`thread apply all bt`。編譯時加 `-g` 並保留符號才有意義。
+    服務要在 unit 設 `LimitCORE=infinity`。
+- q: sysctl 與核心參數調校怎麼做？
+  keys: sysctl /proc/sys vm.swappiness overcommit somaxconn 核心參數 調校 sysctl.conf
+  a: |-
+    sysctl -w 參數=值 臨時修改，永久寫進 /etc/sysctl.d/*.conf 再 sysctl --system 套用。
+  d: |-
+    `sysctl -a | grep 關鍵字` 搜尋。常見：`vm.swappiness`、`vm.overcommit_memory`、`vm.dirty_ratio`、`kernel.pid_max`、`fs.file-max`、
+    `net.core.somaxconn`、`net.ipv4.tcp_tw_reuse`、`net.ipv4.ip_local_port_range`、`net.ipv4.ip_forward`。調參前先量測，不要照抄網路上的「優化清單」。
+- q: Transparent Huge Pages 為什麼常被關掉？
+  keys: thp transparent huge pages 大頁 hugepages 資料庫 延遲 redis mongodb
+  a: |-
+    THP 自動合併大頁面可能造成延遲抖動與記憶體膨脹，Redis、MongoDB、資料庫常建議關閉或設為 madvise。
+  d: |-
+    查看：`cat /sys/kernel/mm/transparent_hugepage/enabled`。修改：`echo madvise > /sys/kernel/mm/transparent_hugepage/enabled`（永久用 systemd unit 或核心參數 transparent_hugepage=madvise）。
+    與顯式 HugePages（`vm.nr_hugepages`）不同，後者要預先保留，適合 Oracle、DPDK 等。
+- q: NUMA 是什麼？為什麼會影響效能？
+  keys: numa numactl numastat 記憶體節點 跨節點 多路 cpu 效能
+  a: |-
+    NUMA 多路機器上，CPU 存取本地記憶體比遠端快。跨節點存取增加延遲，可用 numactl 綁定。
+  d: |-
+    `numactl -H` 看拓樸、`numastat -p PID` 看程序在各節點的記憶體。資料庫等高吞吐服務常用 `numactl --interleave=all` 避免單節點被吃滿。
+    `lscpu` 也會顯示 NUMA 節點與核心對應。
+- q: 效能分析有沒有系統化的方法？
+  keys: use method 效能分析 方法論 利用率 飽和度 錯誤 brendan gregg 排查順序
+  a: |-
+    USE 方法：對每個資源（CPU、記憶體、磁碟、網路）依序檢查 Utilization 使用率、Saturation 飽和度、Errors 錯誤。
+  d: |-
+    CPU：`mpstat`（使用率）、`vmstat` 的 r（飽和）；記憶體：`free`、`vmstat` si/so、dmesg OOM；磁碟：`iostat -x`（%util、await）；網路：`sar -n DEV`、`ss -s`、`ip -s link`（errors/drops）。
+    先廣後深：`uptime`、`dmesg -T | tail`、`vmstat 1`、`mpstat -P ALL 1`、`pidstat 1`、`iostat -xz 1`、`free -m`、`sar -n DEV 1`、`top` ——Brendan Gregg 的「60 秒檢查清單」。
+- q: /usr/bin/time -v 和 shell 的 time 差在哪？
+  keys: time /usr/bin/time -v 計時 最大記憶體 maximum resident 量測 效能
+  a: |-
+    shell 內建 time 只給時間；/usr/bin/time -v 還提供最大常駐記憶體、換頁、上下文切換次數。
+  d: |-
+    `/usr/bin/time -v cmd 2> stats.txt` 看 Maximum resident set size、Major page faults、Voluntary context switches。
+    比較不同做法的效能請多跑幾次並注意快取預熱；更精確可用 `perf stat -r 10 cmd` 或 `hyperfine`。
+- q: 怎麼避免 cron 工作重複執行或互相重疊？
+  keys: flock 重複執行 cron 互斥 鎖 lock 重疊 timeout 單例
+  a: |-
+    用 flock 包起來：flock -n /var/lock/job.lock 指令，已有實例在跑就直接退出。
+  d: |-
+    `* * * * * flock -n /var/lock/job.lock /usr/local/bin/job.sh`。`-w 10` 最多等 10 秒。搭配 `timeout 300 cmd` 避免卡死拖住鎖。
+    systemd timer 預設不會讓同一個服務同時啟動多個實例，是更好的選擇。
+- q: ps 怎麼自訂輸出與排序？
+  keys: ps -eo --sort 自訂欄位 排序 記憶體排行 cpu排行 ps aux
+  a: |-
+    ps -eo pid,ppid,user,%cpu,%mem,etime,cmd --sort=-%mem | head 看記憶體排行。
+  d: |-
+    欄位：pid ppid user stat %cpu %mem rss vsz etime（執行時間）lstart（啟動時間）wchan nlwp（執行緒數）cmd args comm。
+    `ps -L -p PID` 列執行緒、`ps -o pid= -C nginx` 只輸出 PID（給腳本用）。BSD 風格 `ps aux` 與 UNIX 風格 `ps -ef` 輸出略有不同。
+- q: fork bomb 是什麼？怎麼預防？
+  keys: fork bomb 叉炸彈 :(){ pids.max ulimit -u 程序數 耗盡
+  a: |-
+    fork bomb 不斷複製自己耗盡程序數。預防靠 ulimit -u、/etc/security/limits.conf 的 nproc，或 cgroup 的 pids.max。
+  d: |-
+    systemd 服務可設 `TasksMax=`；容器 `docker run --pids-limit 512`。受害時系統會連 ssh 都登入不了，保留一個 root shell 或用 SysRq 救援。
+    不要在生產機測試；本遊戲會攔下這類指令。
+- q: 怎麼持續監控而不是看一次？
+  keys: watch 持續監控 重複執行 每秒 即時 dstat glances
+  a: |-
+    watch -n 1 指令 每秒重跑一次；-d 反白變化。需要歷史就用 sar 或監控系統。
+  d: |-
+    `watch -d -n 2 'ss -s'`、`watch -n 1 "ps -eo pid,%cpu,cmd --sort=-%cpu | head"`。引號要包住含管線的整串指令。
+    即時整合檢視：`htop`、`btop`、`glances`、`dstat -cdngy`（已被 dool 取代）。
+- q: gdb 的基本用法？
+  keys: gdb 除錯 breakpoint backtrace attach debugger 偵錯
+  a: |-
+    gdb 程式 載入後 break main、run、bt 看堆疊；gdb -p PID 可附加到執行中程序。
+  d: |-
+    常用：`break 函式`、`run 參數`、`next`/`step`/`continue`、`print 變數`、`bt`、`info locals`、`watch 變數`、`thread apply all bt`。
+    編譯用 `-g -O0` 較易除錯。附加正式程序會暫停它，必要時用 `gcore PID` 取得快照後離線分析。

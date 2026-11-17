@@ -1,0 +1,55 @@
+id: "11-23"
+title: "最終 Boss：整座壞掉的站"
+kind: boss
+story: "警報響徹 Kernel-7。Vega 的回程訊號即將抵達，但站上同時出了五種故障：磁碟被一個失控的日誌塞爆、CPU 被吃光、閘道服務起不來、共用目錄的權限錯亂、還有防火牆擋著閘道的埠。每一種你都學過怎麼處理。這是最後一戰。"
+goal: "全部修好：① /var/log/station/audit.log 暴長，把它清空（檔案要留著）。② 結束吃光 CPU 的 cpu-hog。③ 讓 gateway.service 成功執行。④ /srv/shared 要讓群組 ops 可寫，且新檔案自動屬於 ops（群組 ops、權限 2775）。⑤ 讓 curl http://127.0.0.1:9700/ 能取得 GATEWAY-OK。"
+teaches: [find, kill, systemctl, journalctl, chmod, iptables, sudo]
+xp: 300
+hints:
+  - "一個一個來。① find /var/log -size +100M 或 ls -lS 找最大的檔案；truncate -s 0 清空。"
+  - "② ps aux --sort=-%cpu 或 pkill cpu-hog。"
+  - "③ systemctl status gateway、journalctl -u gateway：設定檔路徑差一個字母。修單元檔後 start。"
+  - "④ sudo chgrp ops /srv/shared && sudo chmod 2775 /srv/shared"
+  - "⑤ 服務好了還連不上？sudo iptables -S，刪除擋 9700 的規則。"
+setup: |
+  mkdir -p /var/log/station /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal /srv/shared /usr/local/lib/lbp
+  truncate -s 300M /var/log/station/audit.log
+  cp -f /usr/bin/yes /usr/local/bin/cpu-hog
+  setsid setpriv --reuid=player --regid=player --init-groups -- bash -c 'exec cpu-hog > /dev/null' >/dev/null 2>&1 </dev/null &
+  getent group ops >/dev/null || groupadd ops
+  id opsuser >/dev/null 2>&1 || useradd -m -s /bin/bash -G ops opsuser
+  chown root:root /srv/shared; chmod 755 /srv/shared
+  echo "mode=gateway" > /etc/gateway.conf
+  printf '#!/bin/bash\n[ -f "$2" ] || { echo "gatewayd: cannot open config $2" >&2; exit 1; }\nmkdir -p /srv/gw; echo GATEWAY-OK > /srv/gw/index.html\nexec python3 -m http.server 9700 --bind 127.0.0.1 --directory /srv/gw\n' > /usr/local/bin/gatewayd
+  chmod 755 /usr/local/bin/gatewayd
+  printf '[Unit]\nDescription=Station Gateway\n[Service]\nExecStart=/usr/local/bin/gatewayd --config /etc/gateway.cfg\n' > /etc/lbp-systemd/gateway.service
+  systemctl stop gateway 2>/dev/null || true
+  rm -f /run/lbp-systemd/gateway.service.* /var/log/lbp-journal/gateway.service.log
+  systemctl start gateway 2>/dev/null || true
+  iptables -F INPUT; iptables -A INPUT -p tcp --dport 9700 -j DROP
+  sleep 0.5
+check: |
+  [[ -f /var/log/station/audit.log && $(stat -c %s /var/log/station/audit.log) -lt 1048576 ]] || { echo "① audit.log 還是太大（要清空但保留檔案）。"; exit 1; }
+  ! pgrep -x cpu-hog >/dev/null || { echo "② cpu-hog 還在吃 CPU。"; exit 1; }
+  systemctl is-active gateway >/dev/null 2>&1 || { echo "③ gateway.service 還沒有成功執行。"; exit 1; }
+  [[ "$(stat -c %G /srv/shared)" == ops && "$(stat -c %a /srv/shared)" == 2775 ]] || { echo "④ /srv/shared 要是群組 ops、權限 2775。"; exit 1; }
+  ! iptables -S INPUT | grep -q 'dport 9700' || { echo "⑤ 防火牆還擋著 9700。"; exit 1; }
+  [[ "$(curl -s --max-time 2 http://127.0.0.1:9700/ | tr -d '\n')" == "GATEWAY-OK" ]] || { echo "⑤ 閘道連不上。"; exit 1; }
+cleanup: |
+  systemctl stop gateway 2>/dev/null || true
+  pkill -x cpu-hog || true
+  pkill -f '[h]ttp.server 9700' || true
+  iptables -F INPUT
+  userdel -r opsuser 2>/dev/null || true
+  groupdel ops 2>/dev/null || true
+  rm -rf /var/log/station /srv/shared /srv/gw /etc/gateway.conf /usr/local/bin/gatewayd /usr/local/bin/cpu-hog /etc/lbp-systemd/gateway.service /run/lbp-systemd/gateway.service.* /var/log/lbp-journal/gateway.service.log
+reveal: "站台安靜下來了。螢幕上跳出 Vega 的訊號：「Kernel-7，我回來了。」Warden 回覆：「歡迎回家，Vega。我學會怎麼好好值班了。」那一夜，空間站的燈全亮了。你不再是新人，你是這座站的管理員。"
+solution: |
+  sudo truncate -s 0 /var/log/station/audit.log
+  pkill cpu-hog
+  sudo sed -i 's/gateway.cfg/gateway.conf/' /etc/lbp-systemd/gateway.service
+  sudo systemctl start gateway
+  sudo chgrp ops /srv/shared
+  sudo chmod 2775 /srv/shared
+  sudo iptables -D INPUT -p tcp --dport 9700 -j DROP
+  sleep 1

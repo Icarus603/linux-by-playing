@@ -1,0 +1,24 @@
+id: "8-17"
+title: 算術與 shift
+kind: practice
+story: "$(( )) 做整數運算。shift 把參數往左移一位（$2 變成 $1），搭配 while 可以逐個處理不定數量的參數。"
+goal: "寫 sum.sh 數字…：印出所有參數的總和。沒有參數就印 0。"
+teaches: [shift, bash]
+xp: 35
+hints:
+  - "total=0; while [ $# -gt 0 ]; do total=$((total + $1)); shift; done"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/sum.sh ]] || { echo "還沒有 sum.sh。"; exit 1; }
+  [[ "$(P 'bash sum.sh 1 2 3 4')" == 10 && "$(P 'bash sum.sh')" == 0 && "$(P 'bash sum.sh -5 15')" == 10 ]]
+solution: |
+  cat > sum.sh <<'EOS'
+  #!/bin/bash
+  total=0
+  while [ $# -gt 0 ]; do
+    total=$((total + $1))
+    shift
+  done
+  echo "$total"
+  EOS

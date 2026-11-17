@@ -1,0 +1,21 @@
+id: "3-02"
+title: 不分大小寫
+kind: practice
+story: "Linux 區分大小寫：README 和 readme 是不同檔案。-iname 讓你忽略大小寫搜尋。"
+goal: "在 docs 底下，找出所有名字是 readme（不分大小寫、不含副檔名）的檔案，answer 提交總數。"
+teaches: [find]
+xp: 15
+hints:
+  - "find docs -iname readme"
+  - "數量可以用 find ... | wc -l 算。"
+setup: |
+  cd /home/player
+  mkdir -p docs/{a,b,c,d}
+  touch docs/a/README docs/b/readme docs/c/ReadMe docs/d/README.md docs/d/readme.txt docs/a/notes
+check: |
+  [[ "$LBP_ANSWER" == "3" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對。注意：README.md 的名字不是單純的 readme。"
+  exit 1
+solution: |
+  find docs -iname readme | wc -l
+  answer 3

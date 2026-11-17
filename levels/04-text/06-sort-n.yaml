@@ -1,0 +1,20 @@
+id: "4-06"
+title: 數字排序
+kind: practice
+story: "sort 預設按字典序，所以 100 會排在 20 前面。-n 啟用數值排序，-r 反向（由大到小）。"
+goal: "scores.txt 每行一個分數。找出最高的前三個，存成 top3.txt（由大到小）。"
+teaches: [sort, head]
+xp: 20
+hints:
+  - "sort -nr scores.txt | head -3 > top3.txt"
+setup: |
+  cd /home/player
+  printf '85\n100\n20\n93\n7\n61\n100\n88\n' > scores.txt
+check: |
+  cd /home/player
+  diff <(sort -nr scores.txt | head -3) top3.txt >/dev/null
+solution: |
+  sort -nr scores.txt | head -3 > top3.txt
+golf: 36
+golf_solution: |
+  sort -nr scores.txt|head -3>top3.txt

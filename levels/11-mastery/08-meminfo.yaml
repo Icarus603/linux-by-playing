@@ -1,0 +1,19 @@
+id: "11-08"
+title: /proc/meminfo
+kind: practice
+story: "/proc 裡不只有程序。meminfo 是記憶體詳情、cpuinfo 是處理器、loadavg 是負載、uptime 是開機秒數。free 這類指令其實就是在讀這些檔案。"
+goal: "從 /proc/meminfo 讀出 MemTotal 的數值（kB，只要數字），answer 提交。"
+teaches: [cat, awk]
+xp: 30
+hints:
+  - "grep MemTotal /proc/meminfo"
+  - "awk '/^MemTotal/{print $2}' /proc/meminfo"
+setup: ""
+check: |
+  exp=$(awk '/^MemTotal/{print $2}' /proc/meminfo)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數字不對，只要 MemTotal 那一行的數值。"
+  exit 1
+solution: |
+  grep MemTotal /proc/meminfo
+  answer "$(awk '/^MemTotal/{print $2}' /proc/meminfo)"

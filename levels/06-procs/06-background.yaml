@@ -1,0 +1,16 @@
+id: "6-06"
+title: 背景執行 &
+kind: learn
+story: "在指令最後加上 & 會讓它在背景執行，你的終端機立刻就能繼續用。jobs 列出背景工作。"
+goal: "在背景啟動 sleep 600（指令結尾加 &）。"
+teaches: ["&", jobs]
+xp: 15
+hints:
+  - "sleep 600 &"
+setup: ""
+check: |
+  pgrep -u player -f '^sleep 600$' >/dev/null && [[ "$LBP_LAST" == *"&" ]]
+cleanup: |
+  pkill -u player -f '^sleep 600$' || true
+solution: |
+  sleep 600 &

@@ -1,0 +1,16 @@
+id: "4-03"
+title: 追加 >>
+kind: learn
+story: "> 會覆蓋檔案，>> 則是「追加」到檔案結尾。寫日誌時一定要用 >>，不然舊紀錄全沒了。"
+goal: "roster.txt 已有兩位成員。用 >> 追加一行 Pip，原本兩行不能被破壞。"
+teaches: [">>"]
+xp: 15
+hints:
+  - "echo Pip >> roster.txt"
+setup: |
+  cd /home/player
+  printf 'Ada\nLinus\n' > roster.txt
+check: |
+  [[ "$(cat /home/player/roster.txt)" == $'Ada\nLinus\nPip' ]]
+solution: |
+  echo Pip >> roster.txt

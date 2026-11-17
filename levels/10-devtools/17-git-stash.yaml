@@ -1,0 +1,22 @@
+id: "10-17"
+title: git stash：先收起來
+kind: practice
+story: "做到一半的修改還不想提交，卻要先切去別的分支？git stash 把未提交的變更暫時收進抽屜，工作目錄變乾淨；之後 git stash pop 再拿出來。"
+goal: "你在 main 上有一個還沒提交的修改（work.txt）。把它 stash 起來，然後切換到 hotfix 分支。stash 清單要有 1 筆，工作目錄要乾淨。"
+teaches: [git]
+xp: 45
+hints:
+  - "git status 看看狀況。"
+  - "git stash，然後 git switch hotfix。"
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/repo
+  P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo base > work.txt && git add . && git commit -qm base && git branch hotfix && echo "half done" >> work.txt'
+check: |
+  GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
+  [[ "$(GT branch --show-current)" == "hotfix" && "$(GT stash list | wc -l)" == "1" && -z "$(GT status --porcelain)" ]]
+solution: |
+  cd repo
+  git stash -q
+  git switch -q hotfix

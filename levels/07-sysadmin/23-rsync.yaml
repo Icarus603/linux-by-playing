@@ -1,0 +1,20 @@
+id: "7-23"
+title: rsync：同步目錄
+kind: practice
+story: "rsync 只傳送「有差異的部分」，所以比 cp 更適合備份與同步。-a 保留屬性並遞迴、-v 顯示過程。重要細節：來源目錄結尾的斜線 src/ 代表「裡面的內容」，沒有斜線則連目錄本身一起複製。"
+goal: "把 src 目錄的內容同步到 dst（dst 還不存在）。完成後 dst 要與 src 完全一致。"
+teaches: [rsync]
+xp: 30
+hints:
+  - "rsync -av src/ dst/"
+  - "注意 src 結尾的斜線。"
+setup: |
+  cd /home/player
+  rm -rf src dst
+  mkdir -p src/a src/b
+  echo 1 > src/a/one.txt; echo 2 > src/b/two.txt; echo 3 > src/root.txt
+check: |
+  cd /home/player
+  [[ -d dst ]] && diff -r src dst >/dev/null
+solution: |
+  rsync -av src/ dst/

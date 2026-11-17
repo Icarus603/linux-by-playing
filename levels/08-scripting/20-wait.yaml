@@ -1,0 +1,25 @@
+id: "8-20"
+title: 背景工作與 wait
+kind: practice
+story: "腳本裡用 & 把工作丟到背景平行執行，wait 會等所有背景工作結束。三件各要 1 秒的工作，平行做只要 1 秒，循序做要 3 秒。"
+goal: "寫 parallel.sh：用背景方式同時執行三個 sleep 1，用 wait 等它們全部完成，最後印 all done。整支腳本要在 2.5 秒內結束。"
+teaches: [wait, bash]
+xp: 45
+hints:
+  - "sleep 1 & 三次，再單獨一行 wait。"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/parallel.sh ]] || { echo "還沒有 parallel.sh。"; exit 1; }
+  s=$(date +%s.%N); out=$(P 'bash parallel.sh'); e=$(date +%s.%N)
+  [[ "$out" == "all done" ]] || { echo "最後要印 all done。"; exit 1; }
+  awk "BEGIN{exit !($e-$s < 2.5)}" || { echo "太慢了，三個工作要平行執行。"; exit 1; }
+solution: |
+  cat > parallel.sh <<'EOS'
+  #!/bin/bash
+  sleep 1 &
+  sleep 1 &
+  sleep 1 &
+  wait
+  echo "all done"
+  EOS

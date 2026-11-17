@@ -1,0 +1,19 @@
+id: "11-05"
+title: xxd -r：從十六進位還原
+kind: practice
+story: "xxd -r 做相反的事：把十六進位文字還原成原本的二進位檔。-p 表示輸入是連續的純十六進位。這是「用文字傳輸二進位資料」的老招。"
+goal: "hex.txt 是某個二進位檔的十六進位文字。把它還原成 restored.bin。"
+teaches: [xxd]
+xp: 40
+hints:
+  - "xxd -r -p hex.txt > restored.bin"
+setup: |
+  cd /home/player
+  head -c 64 /dev/urandom > /var/lib/lbp-expected.bin 2>/dev/null || { mkdir -p /var/lib/lbp; head -c 64 /dev/urandom > /var/lib/lbp-expected.bin; }
+  xxd -p /var/lib/lbp-expected.bin > hex.txt
+check: |
+  cmp -s /home/player/restored.bin /var/lib/lbp-expected.bin
+cleanup: |
+  rm -f /var/lib/lbp-expected.bin
+solution: |
+  xxd -r -p hex.txt > restored.bin

@@ -1,0 +1,15 @@
+id: "2-11"
+title: 大括號展開
+kind: practice
+story: "{a,b,c} 會被 shell 展開成多個字串。log-{jan,feb,mar}.txt 等於 log-jan.txt log-feb.txt log-mar.txt，一行建三個檔。"
+goal: 用大括號展開，一行指令建立 log-jan.txt、log-feb.txt、log-mar.txt。
+teaches: [touch, "{}"]
+xp: 15
+hints:
+  - "touch log-{jan,feb,mar}.txt"
+setup: ""
+check: |
+  cd /home/player
+  [[ -f log-jan.txt && -f log-feb.txt && -f log-mar.txt && "$LBP_LAST" == *"{"* ]]
+solution: |
+  touch log-{jan,feb,mar}.txt

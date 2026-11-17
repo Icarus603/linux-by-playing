@@ -1,0 +1,20 @@
+id: "7-09"
+title: 環境變數與 export
+kind: practice
+story: "環境變數是程式的「設定來源」。VAR=值 只在目前的 shell 裡有效，export VAR=值 才會傳給你之後啟動的程式。這是新手最常踩的坑。"
+goal: "report.sh 會把環境變數 MISSION 寫進 report.out。請讓報告內容是 mission=apollo，然後執行 ./report.sh。"
+teaches: [export, env, printenv]
+xp: 25
+hints:
+  - "先試 MISSION=apollo ./report.sh（只對這一次有效），或者 export MISSION=apollo"
+  - "export MISSION=apollo，接著 ./report.sh"
+  - "printenv MISSION 可以確認變數有沒有被設定。"
+setup: |
+  cd /home/player
+  printf '#!/bin/bash\necho "mission=$MISSION" > /home/player/report.out\n' > report.sh
+  chmod 755 report.sh
+check: |
+  [[ "$(cat /home/player/report.out 2>/dev/null)" == "mission=apollo" ]]
+solution: |
+  export MISSION=apollo
+  ./report.sh

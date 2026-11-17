@@ -1,0 +1,21 @@
+id: "11-06"
+title: nm：函式庫匯出了什麼
+kind: practice
+story: "nm 列出目的檔與函式庫裡的符號。-D 看動態符號、--defined-only 只看這個檔案自己定義（匯出）的。objdump -T 能得到類似的資訊。想知道一個函式庫「提供」哪些函式，這就是工具。"
+goal: "找出系統上的 libz.so.1（zlib 壓縮函式庫，用 ldconfig -p 可以查到路徑），用 nm -D --defined-only 數它匯出了幾個符號，answer 提交那個數字。"
+teaches: [nm, objdump]
+xp: 50
+hints:
+  - "ldconfig -p | grep libz.so.1"
+  - "nm -D --defined-only 路徑 | wc -l"
+setup: ""
+check: |
+  lib=$(ldconfig -p | awk '/libz.so.1 /{print $NF; exit}')
+  exp=$(nm -D --defined-only "$lib" | wc -l)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對，記得加 --defined-only。"
+  exit 1
+solution: |
+  lib=$(ldconfig -p | awk '/libz.so.1 /{print $NF; exit}')
+  nm -D --defined-only "$lib" | wc -l
+  answer "$(nm -D --defined-only "$lib" | wc -l)"

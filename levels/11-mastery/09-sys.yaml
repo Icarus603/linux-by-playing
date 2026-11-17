@@ -1,0 +1,18 @@
+id: "11-09"
+title: /sys：裝置與核心參數
+kind: practice
+story: "/sys 以檔案樹的形式呈現核心的裝置模型：/sys/class/net/ 是網路介面、/sys/block/ 是磁碟。讀它得到硬體屬性，寫它（需 root）甚至能調整裝置。"
+goal: "讀取 /sys/class/net/lo/mtu，answer 提交 lo 介面的 MTU 數值。"
+teaches: [cat]
+xp: 30
+hints:
+  - "cat /sys/class/net/lo/mtu"
+setup: ""
+check: |
+  exp=$(cat /sys/class/net/lo/mtu)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數字不對。"
+  exit 1
+solution: |
+  cat /sys/class/net/lo/mtu
+  answer "$(cat /sys/class/net/lo/mtu)"

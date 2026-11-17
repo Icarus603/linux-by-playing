@@ -1,0 +1,29 @@
+id: "10-16"
+title: git：解決合併衝突
+kind: combine
+story: "兩條分支改了同一行，git 不知道要留誰的，於是停下來請你決定。衝突的檔案裡會有 <<<<<<<、=======、>>>>>>> 標記。你編輯成想要的最終內容、移除標記，再 git add 與 git commit 完成合併。"
+goal: "把 feature 合併進 main 時會衝突：config.ini 的 mode 一邊是 fast、另一邊是 safe。合併它，把最終內容解決成 mode=balanced，然後完成合併提交。"
+teaches: [git, nano, vim]
+xp: 70
+hints:
+  - "git merge feature（會說有衝突）"
+  - "用編輯器開啟 config.ini，刪掉衝突標記，改成一行 mode=balanced。"
+  - "git add config.ini，然後 git commit（可以直接 git commit --no-edit）。"
+  - "git status 能看到合併進行到哪一步。"
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/repo
+  P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && printf "host=k7\nmode=base\n" > config.ini && git add . && git commit -qm base && git switch -q -c feature && printf "host=k7\nmode=safe\n" > config.ini && git commit -qam "mode safe" && git switch -q main && printf "host=k7\nmode=fast\n" > config.ini && git commit -qam "mode fast"'
+check: |
+  GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
+  [[ ! -f /home/player/repo/.git/MERGE_HEAD ]] || { echo "合併還沒完成，記得 git add 與 git commit。"; exit 1; }
+  [[ "$(GT log --merges --oneline | wc -l)" -ge 1 ]] || { echo "還沒有合併提交。先 git merge feature。"; exit 1; }
+  [[ "$(cat /home/player/repo/config.ini)" == $'host=k7\nmode=balanced' ]]
+reveal: "衝突的兩個版本，一個是 Vega 寫的 safe，一個是 Warden 寫的 fast。你選了中間：balanced。也許這就是他們一直缺少的第三種答案。"
+solution: |
+  cd repo
+  git merge feature >/dev/null 2>&1 || true
+  printf 'host=k7\nmode=balanced\n' > config.ini
+  git add config.ini
+  git commit -qm "resolve: balanced"

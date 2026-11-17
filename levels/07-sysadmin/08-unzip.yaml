@@ -1,0 +1,19 @@
+id: "7-08"
+title: unzip
+kind: practice
+story: "unzip 解開 zip 檔，-d 指定解開到哪個目錄（會自動建立），-l 只列出內容。"
+goal: "把 inbox.zip 解開到 extracted 目錄。"
+teaches: [unzip]
+xp: 15
+hints:
+  - "unzip inbox.zip -d extracted"
+setup: |
+  cd /home/player
+  mkdir -p z && echo "hello" > z/greeting.txt && echo "bye" > z/farewell.txt
+  (cd z && zip -q ../inbox.zip greeting.txt farewell.txt)
+  rm -rf z
+check: |
+  cd /home/player
+  [[ "$(cat extracted/greeting.txt 2>/dev/null)" == "hello" && -f extracted/farewell.txt ]]
+solution: |
+  unzip inbox.zip -d extracted

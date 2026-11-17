@@ -1,0 +1,29 @@
+id: "9-04"
+title: curl：發出 HTTP 請求
+kind: learn
+story: "curl 是命令列的瀏覽器，-s 靜音（不顯示進度條）。本機的 8080 埠上有個網站，首頁的標題藏著一個呼號。"
+goal: "用 curl 抓取 http://127.0.0.1:8080/，找出 <h1> 標籤裡的呼號，answer 提交。"
+teaches: [curl]
+xp: 25
+hints:
+  - "curl -s http://127.0.0.1:8080/"
+  - "輸出是 HTML，找 <h1>呼號</h1>。"
+setup: |
+  rm -rf /srv/site; mkdir -p /srv/site
+  c="VEGA-$((RANDOM % 9000 + 1000))"
+  printf '<html><body>\n<h1>%s</h1>\n<p>Station portal</p>\n</body></html>\n' "$c" > /srv/site/index.html
+  chmod -R a+rX /srv/site
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "呼號不對，看 <h1> 裡的文字。"
+  exit 1
+cleanup: |
+  pkill -f '[h]ttp.server 8080' 2>/dev/null || true
+  rm -rf /srv/site
+reveal: "網頁上的呼號是 Vega 的名字。星網的另一端有人在等回應，而且它已經等了很久。"
+solution: |
+  curl -s http://127.0.0.1:8080/
+  answer "$(curl -s http://127.0.0.1:8080/ | sed -n 's/.*<h1>\(.*\)<\/h1>.*/\1/p')"

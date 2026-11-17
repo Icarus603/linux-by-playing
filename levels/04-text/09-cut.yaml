@@ -1,0 +1,17 @@
+id: "4-09"
+title: cut：切出欄位
+kind: practice
+story: "cut 從每一行中取出指定的欄位：-d 指定分隔符號，-f 指定第幾欄。"
+goal: "users.csv 格式是 名字,Email,部門。把第 2 欄（Email）取出，存成 emails.txt。"
+teaches: [cut]
+xp: 20
+hints:
+  - "cut -d, -f2 users.csv > emails.txt"
+setup: |
+  cd /home/player
+  printf 'ann,ann@kernel7.io,ops\nbob,bob@kernel7.io,dev\ncat,cat@kernel7.io,ops\n' > users.csv
+check: |
+  cd /home/player
+  diff <(cut -d, -f2 users.csv) emails.txt >/dev/null
+solution: |
+  cut -d, -f2 users.csv > emails.txt

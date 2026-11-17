@@ -1,0 +1,54 @@
+id: "8-23"
+title: "Boss：Warden 的第一支腳本"
+kind: boss
+story: "Warden 決定自己寫備份腳本。它說它想把每一件事做對：檢查參數、處理錯誤、留下紀錄。你來幫它把規格落實。這是對你整個階段所學的總驗收。"
+goal: "寫 backup.sh [-v] SRC DEST：沒有參數印 Usage: backup.sh [-v] SRC DEST 結束碼 1；SRC 不是目錄就在 stderr 印 error: SRC not found 結束碼 2；DEST 不存在要建立；把 SRC 打包成 DEST/backup-年月日.tar.gz（年月日 = date +%Y%m%d）並印 OK 檔案路徑；加 -v 時最前面多印 Backing up SRC -> DEST。"
+teaches: [getopts, tar, mkdir, set, trap]
+xp: 150
+hints:
+  - "先處理選項（getopts \"v\"），再 shift $((OPTIND-1))。"
+  - "參數不夠：[ $# -lt 2 ]；SRC 檢查：[ ! -d \"$src\" ]。"
+  - "mkdir -p \"$dest\"，再 tar -czf \"$dest/backup-$(date +%Y%m%d).tar.gz\" -C \"$(dirname \"$src\")\" \"$(basename \"$src\")\"。"
+  - "輸出用 echo \"OK $file\"。"
+setup: ""
+check: |
+  PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }
+  [[ -f /home/player/backup.sh ]] || { echo "還沒有 backup.sh。"; exit 1; }
+  [[ "$(PR 'bash backup.sh')" == $'Usage: backup.sh [-v] SRC DEST\nRC=1' ]] || { echo "沒有參數時要印用法並以 1 結束。"; exit 1; }
+  [[ "$(PR 'bash backup.sh /no/such/dir /tmp/x')" == $'error: /no/such/dir not found\nRC=2' ]] || { echo "SRC 不是目錄：印 error: SRC not found，結束碼 2。"; exit 1; }
+  rm -rf /tmp/bk-src /tmp/bk-dest; mkdir -p /tmp/bk-src; echo hi > /tmp/bk-src/f.txt; chmod -R a+rwX /tmp/bk-src
+  d=$(date +%Y%m%d)
+  out=$(PR 'bash backup.sh /tmp/bk-src /tmp/bk-dest')
+  [[ "$out" == $"OK /tmp/bk-dest/backup-$d.tar.gz"$'\nRC=0' ]] || { echo "成功時印 OK 檔案路徑，結束碼 0。實際：$out"; exit 1; }
+  tar -tzf "/tmp/bk-dest/backup-$d.tar.gz" 2>/dev/null | grep -q 'f.txt' || { echo "打包檔裡沒有 f.txt。"; exit 1; }
+  out=$(PR 'bash backup.sh -v /tmp/bk-src /tmp/bk-dest')
+  [[ "$out" == $'Backing up /tmp/bk-src -> /tmp/bk-dest\nOK '"/tmp/bk-dest/backup-$d.tar.gz"$'\nRC=0' ]] || { echo "-v 時最前面多印 Backing up SRC -> DEST。"; exit 1; }
+  rm -rf /tmp/bk-src /tmp/bk-dest
+reveal: "Warden 把這支腳本排進了每晚的 cron，還在最上面註解了一行：「謝謝你教我，我不再需要硬撐了。」"
+solution: |
+  cat > backup.sh <<'EOS'
+  #!/bin/bash
+  verbose=0
+  while getopts "v" opt; do
+    case $opt in
+      v) verbose=1 ;;
+      *) echo "Usage: backup.sh [-v] SRC DEST"; exit 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  if [ $# -lt 2 ]; then
+    echo "Usage: backup.sh [-v] SRC DEST"
+    exit 1
+  fi
+  src=$1
+  dest=$2
+  if [ ! -d "$src" ]; then
+    echo "error: $src not found" >&2
+    exit 2
+  fi
+  mkdir -p "$dest"
+  [ "$verbose" -eq 1 ] && echo "Backing up $src -> $dest"
+  file="$dest/backup-$(date +%Y%m%d).tar.gz"
+  tar -czf "$file" -C "$(dirname "$src")" "$(basename "$src")"
+  echo "OK $file"
+  EOS

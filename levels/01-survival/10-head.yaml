@@ -1,0 +1,22 @@
+id: "1-10"
+title: 只看開頭
+kind: learn
+story: "有些日誌長達數千行，cat 會把螢幕洗版。head 只顯示開頭幾行，-n 指定行數。"
+goal: "signal.log 的第一行有個頻率值（freq=）。只看開頭，把那個數字用 answer 提交。"
+teaches: [head]
+xp: 15
+hints:
+  - "head -n 1 signal.log"
+  - "不加 -n 預設顯示前 10 行。"
+setup: |
+  cd /home/player
+  f="$((RANDOM % 20 + 80)).$((RANDOM % 10))"
+  { echo "HEADER: freq=$f"; for i in $(seq 2 300); do echo "sample $i: noise"; done; } > signal.log
+  mkdir -p /var/lib/lbp && echo "$f" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是這個值，看看第一行。"
+  exit 1
+solution: |
+  head -n 1 signal.log
+  answer "$(head -n 1 signal.log | sed 's/.*freq=//')"

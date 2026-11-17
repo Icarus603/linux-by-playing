@@ -1,0 +1,16 @@
+id: "7-11"
+title: alias：自訂捷徑
+kind: practice
+story: "常用的長指令可以取個短名字：alias 名字='指令'。別名只存在於目前的 shell，關掉就沒了。"
+goal: "建立別名 ll，內容是 ls -la，然後輸入 ll 執行它。"
+teaches: [alias]
+xp: 20
+hints:
+  - "alias ll='ls -la'"
+  - "建立後輸入 ll。"
+setup: ""
+check: |
+  [[ "$LBP_LAST" == "ll" && "$LBP_RC" == "0" ]]
+solution: |
+  alias ll='ls -la'
+  ll

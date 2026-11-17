@@ -1,0 +1,23 @@
+id: "7-17"
+title: systemctl：啟動服務
+kind: learn
+story: "現代 Linux 用 systemd 管理服務，指令是 systemctl。注意：這個學習容器沒有真的 systemd，我用一個「模擬 init」讓你練習一模一樣的指令介面（systemctl --version 會誠實告訴你）。啟動、停止都需要 root。"
+goal: "comms.service（通訊服務）目前沒有在跑。啟動它。"
+teaches: [systemctl]
+xp: 25
+hints:
+  - "systemctl status comms 看現況。"
+  - "啟動需要 root：sudo systemctl start comms"
+setup: |
+  mkdir -p /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal
+  cp -f /usr/bin/sleep /usr/local/bin/comms-daemon
+  printf '[Unit]\nDescription=Station Comms\n[Service]\nExecStart=/usr/local/bin/comms-daemon infinity\n' > /etc/lbp-systemd/comms.service
+  systemctl stop comms 2>/dev/null || true
+  rm -f /run/lbp-systemd/comms.service.* /var/log/lbp-journal/comms.service.log /etc/lbp-systemd/enabled/comms.service
+check: |
+  systemctl is-active comms >/dev/null 2>&1
+cleanup: |
+  systemctl stop comms 2>/dev/null || true
+  rm -f /etc/lbp-systemd/comms.service /usr/local/bin/comms-daemon /run/lbp-systemd/comms.service.* /var/log/lbp-journal/comms.service.log /etc/lbp-systemd/enabled/comms.service
+solution: |
+  sudo systemctl start comms

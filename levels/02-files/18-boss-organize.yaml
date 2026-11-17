@@ -1,0 +1,30 @@
+id: "2-18"
+title: "Boss：整理下載區"
+kind: boss
+story: "下載資料夾亂成災難現場。把你學會的 mkdir、mv、萬用字元全部派上用場，依類型分類。"
+goal: "在 downloads 裡建立 images、docs、music 三個子目錄，把 .jpg/.png 搬進 images，.pdf/.txt 搬進 docs，.mp3 搬進 music。.zip 檔留在原處。"
+teaches: [mkdir, mv, "*"]
+xp: 50
+hints:
+  - "先 cd downloads，再 mkdir images docs music"
+  - "mv *.jpg *.png images/ 可以一次搬多種副檔名。"
+  - "大括號也行：mv *.{jpg,png} images/"
+setup: |
+  cd /home/player
+  mkdir -p downloads && cd downloads
+  touch holiday.jpg logo.png avatar.jpg
+  touch invoice.pdf manual.pdf todo.txt readme.txt
+  touch song1.mp3 song2.mp3
+  touch backup.zip data.zip
+check: |
+  cd /home/player/downloads || exit 1
+  ok() { [[ $(ls "$1"/*."$2" 2>/dev/null | wc -l) -eq $3 ]]; }
+  ok images jpg 2 && ok images png 1 && ok docs pdf 2 && ok docs txt 2 && ok music mp3 2 || { echo "還有檔案沒歸位。"; exit 1; }
+  [[ $(ls *.jpg *.png *.pdf *.txt *.mp3 2>/dev/null | wc -l) -eq 0 && -f backup.zip && -f data.zip ]]
+solution: |
+  cd downloads
+  mkdir images docs music
+  mv *.jpg *.png images/
+  mv *.pdf *.txt docs/
+  mv *.mp3 music/
+reveal: "整理完下載區，你發現一個沒人下載過的 backup.zip，裡面是 warden-installer。是誰把它裝上站的？"

@@ -1,0 +1,20 @@
+id: "3-03"
+title: 依類型找
+kind: practice
+story: "-type f 只找檔案，-type d 只找目錄，-type l 找軟連結。可與 -name 組合。"
+goal: "在 archive 底下，有幾個「目錄」的名字叫 backup？answer 提交數量（檔案不算）。"
+teaches: [find]
+xp: 15
+hints:
+  - "find archive -type d -name backup"
+setup: |
+  cd /home/player
+  mkdir -p archive/{x,y,z}/backup archive/w/data
+  touch archive/w/backup
+check: |
+  [[ "$LBP_ANSWER" == "3" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對，記得只算目錄。"
+  exit 1
+solution: |
+  find archive -type d -name backup | wc -l
+  answer 3

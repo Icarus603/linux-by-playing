@@ -1,0 +1,19 @@
+id: "6-12"
+title: 記憶體與負載
+kind: practice
+story: "free 看記憶體、uptime 看開機多久與平均負載、vmstat 看整體資源概況。watch -n 秒數 指令 可以每隔幾秒自動重跑一次，做簡易監控。"
+goal: "用 free -m 查出這台機器的記憶體總量（MB，Mem: 那行第一個數字），answer 提交。"
+teaches: [free, uptime, vmstat]
+xp: 20
+hints:
+  - "free -m"
+  - "total 欄位就是總量。"
+setup: ""
+check: |
+  exp=$(free -m | awk '/^Mem:/{print $2}')
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數字不對，要看 Mem: 那行的 total。"
+  exit 1
+solution: |
+  free -m
+  answer "$(free -m | awk '/^Mem:/{print $2}')"

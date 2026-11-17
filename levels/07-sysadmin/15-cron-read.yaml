@@ -1,0 +1,25 @@
+id: "7-15"
+title: 讀懂排程
+kind: practice
+story: "cron 的五個欄位：分(0-59) 時(0-23) 日(1-31) 月(1-12) 星期(0-7，1-5 是週一到週五)。*/15 是「每 15 分鐘」。讀懂別人寫的排程是維運的基本功。"
+goal: "jobs.cron 裡有四筆排程。找出「每個平日（週一到週五）早上 9:00 執行」的是哪個腳本，answer 提交檔名（例如 foo.sh）。"
+teaches: [cron, cat]
+xp: 25
+hints:
+  - "cat jobs.cron"
+  - "時=9、分=0、星期欄是 1-5。"
+setup: |
+  cd /home/player
+  cat > jobs.cron <<'CRON'
+  0 9 * * 1-5 /opt/jobs/report.sh
+  30 2 * * 0 /opt/jobs/weekly-clean.sh
+  */15 * * * * /opt/jobs/heartbeat.sh
+  0 0 1 * * /opt/jobs/monthly-invoice.sh
+  CRON
+check: |
+  [[ "$LBP_ANSWER" == "report.sh" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，注意分、時、星期三個欄位。"
+  exit 1
+solution: |
+  cat jobs.cron
+  answer report.sh

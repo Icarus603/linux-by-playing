@@ -1,0 +1,27 @@
+id: "11-07"
+title: /proc：偷看別的程序
+kind: practice
+story: "每個程序在 /proc/PID/ 底下都有一堆「虛擬檔案」：cmdline 是啟動指令、environ 是環境變數、fd/ 是開啟的檔案、status 是狀態。環境變數以 NUL 字元分隔，要用 tr 轉成換行才好讀。"
+goal: "hidden-proc 這個程序啟動時帶了環境變數 LBP_SECRET。從 /proc 讀出它的值，answer 提交。"
+teaches: [tr, cat]
+xp: 55
+hints:
+  - "pgrep -x hidden-proc 取得 PID。"
+  - 'tr "\0" "\n" < /proc/PID/environ | grep LBP_SECRET'
+setup: |
+  cp -f /usr/bin/sleep /usr/local/bin/hidden-proc
+  s="SEC-$((RANDOM % 9000 + 1000))"
+  mkdir -p /var/lib/lbp && echo "$s" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  setsid setpriv --reuid=player --regid=player --init-groups -- env LBP_SECRET="$s" hidden-proc 100000 >/dev/null 2>&1 </dev/null &
+  sleep 0.4
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "值不對。"
+  exit 1
+cleanup: |
+  pkill -x hidden-proc || true
+  rm -f /usr/local/bin/hidden-proc
+reveal: "Warden 的環境變數裡有一行：LBP_SECRET。它不是密碼，是一句沒說出口的話。這座站上的每個程序，其實都在悄悄訴說自己的處境。"
+solution: |
+  tr '\0' '\n' < /proc/$(pgrep -x hidden-proc)/environ | grep LBP_SECRET
+  answer "$(tr '\0' '\n' < /proc/$(pgrep -x hidden-proc)/environ | grep LBP_SECRET | cut -d= -f2)"

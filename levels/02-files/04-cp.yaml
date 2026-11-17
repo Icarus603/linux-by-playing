@@ -1,0 +1,18 @@
+id: "2-04"
+title: 備份一份
+kind: learn
+story: "動手改重要檔案前先備份是好習慣。cp 來源 目的 複製檔案。"
+goal: 把 blueprint.txt 複製成 blueprint.bak（原檔要保留）。
+teaches: [cp]
+xp: 10
+hints:
+  - "cp blueprint.txt blueprint.bak"
+setup: |
+  echo "reactor blueprint v3" > /home/player/blueprint.txt
+check: |
+  [[ -f /home/player/blueprint.txt && -f /home/player/blueprint.bak ]] && cmp -s /home/player/blueprint.txt /home/player/blueprint.bak
+solution: |
+  cp blueprint.txt blueprint.bak
+golf: 23
+golf_solution: |
+  cp blueprint.{txt,bak}

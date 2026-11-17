@@ -1,0 +1,23 @@
+id: "11-10"
+title: comm 與處理替換
+kind: practice
+story: "comm 比較兩個「已排序」的檔案：-1 -2 -3 分別隱藏只在第一個、只在第二個、兩者共有的行。排序是前提，而 <(指令) 的「處理替換」可以讓你不建暫存檔就把指令輸出當檔案用。"
+goal: "crew-a.txt 與 crew-b.txt 是兩份船員名單（沒有排序）。數出兩份名單「都有」的人數，answer 提交。"
+teaches: [comm, sort]
+xp: 50
+hints:
+  - "comm 需要排序過的輸入：comm -12 <(sort crew-a.txt) <(sort crew-b.txt)"
+  - "-12 的意思是隱藏只在 a、只在 b 的，剩下共有的。接 wc -l 計數。"
+setup: |
+  cd /home/player
+  shuf -n 12 -e ann bob cat dan eve fay gus hal ivy jon kay lee max nia > crew-a.txt
+  shuf -n 12 -e ann bob cat dan eve fay gus hal ivy jon kay lee max nia > crew-b.txt
+check: |
+  cd /home/player
+  exp=$(comm -12 <(sort crew-a.txt) <(sort crew-b.txt) | wc -l)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對，兩份都要有才算。"
+  exit 1
+solution: |
+  comm -12 <(sort crew-a.txt) <(sort crew-b.txt) | wc -l
+  answer "$(comm -12 <(sort crew-a.txt) <(sort crew-b.txt) | wc -l)"

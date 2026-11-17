@@ -1,0 +1,20 @@
+id: "4-04"
+title: 管線 |
+kind: learn
+story: "管線 | 把前一個指令的輸出，直接當成下一個指令的輸入。每個工具只做一件事，串起來威力無窮。"
+goal: "hangar 目錄裡有很多檔案。用 ls hangar | wc -l 算出檔案數量，answer 提交。"
+teaches: ["|"]
+xp: 15
+hints:
+  - "ls hangar | wc -l"
+setup: |
+  cd /home/player
+  mkdir -p hangar
+  for i in $(seq 1 23); do touch hangar/ship-$i; done
+check: |
+  [[ "$LBP_ANSWER" == "23" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對。"
+  exit 1
+solution: |
+  ls hangar | wc -l
+  answer 23

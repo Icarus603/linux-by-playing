@@ -1,0 +1,20 @@
+id: "3-12"
+title: 上下文：-A -B -C
+kind: practice
+story: "光看到錯誤那一行常常不夠，原因通常在前後幾行。-A 看之後、-B 看之前、-C 看前後。"
+goal: "reactor.log 裡有一行 CRITICAL，它的「下一行」寫著 cause=...。用 grep -A 找出原因，answer 提交 cause 後面的值。"
+teaches: [grep]
+xp: 25
+hints:
+  - "grep -A 1 CRITICAL reactor.log"
+setup: |
+  cd /home/player
+  { for i in $(seq 1 100); do echo "ok $i"; done; echo "CRITICAL: reactor temp 9000"; echo "cause=coolant-leak"; for i in $(seq 1 100); do echo "ok $i"; done; } > reactor.log
+check: |
+  [[ "$LBP_ANSWER" == "coolant-leak" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "原因不對，要看 CRITICAL 的下一行。"
+  exit 1
+solution: |
+  grep -A 1 CRITICAL reactor.log
+  answer coolant-leak
+reveal: "反應爐過熱是冷卻液外洩造成的。但外洩前一分鐘，有人下過一道降低流量的指令。"

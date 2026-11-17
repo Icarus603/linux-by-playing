@@ -1,0 +1,21 @@
+id: "10-15"
+title: git merge：合併分支
+kind: practice
+story: "功能做完了，要把分支併回主線：切到主線（git switch main），再 git merge 分支名稱。沒有衝突時，git 會自己搞定。"
+goal: "分支 feature-y 上已有一筆新提交。回到 main，把 feature-y 合併進來。"
+teaches: [git]
+xp: 45
+hints:
+  - "git switch main"
+  - "git merge feature-y"
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/repo
+  P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo base > base.txt && git add . && git commit -qm base && git switch -q -c feature-y && echo feat > feat.txt && git add . && git commit -qm "add feat" && git switch -q main'
+check: |
+  GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
+  [[ "$(GT branch --show-current)" == "main" && -f /home/player/repo/feat.txt ]]
+solution: |
+  cd repo
+  git merge -q feature-y

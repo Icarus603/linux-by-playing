@@ -1,0 +1,24 @@
+id: "6-01"
+title: ps：誰在執行
+kind: learn
+story: "每個執行中的程式都是一個「程序」，有自己的編號 PID。ps 列出程序，ps aux 是最常用的「全部列出」寫法。站上有個叫 starlink-daemon 的常駐程式。"
+goal: "找出 starlink-daemon 的 PID，answer 提交那個數字。"
+teaches: [ps, pgrep]
+xp: 15
+hints:
+  - "ps aux | grep starlink"
+  - "pgrep -x starlink-daemon 直接給你 PID。"
+setup: |
+  cp -f /usr/bin/sleep /usr/local/bin/starlink-daemon
+  setsid setpriv --reuid=player --regid=player --init-groups -- starlink-daemon 100000 >/dev/null 2>&1 </dev/null &
+  sleep 0.3
+check: |
+  exp=$(pgrep -x starlink-daemon | head -1)
+  [[ -n "$exp" && "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "PID 不對，再用 ps 或 pgrep 查一次。"
+  exit 1
+cleanup: |
+  pkill -x starlink-daemon || true
+  rm -f /usr/local/bin/starlink-daemon
+solution: |
+  answer "$(pgrep -x starlink-daemon | head -1)"

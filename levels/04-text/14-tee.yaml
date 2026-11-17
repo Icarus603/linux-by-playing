@@ -1,0 +1,15 @@
+id: "4-14"
+title: tee：邊看邊存
+kind: practice
+story: "tee 像水管上的三通：資料一邊繼續往下流（印在螢幕），一邊複製一份存進檔案。"
+goal: "把 ls /etc 輸出的前 5 行，用 tee 同時顯示並存成 first5.txt。"
+teaches: [tee, head]
+xp: 20
+hints:
+  - "ls /etc | head -5 | tee first5.txt"
+setup: ""
+check: |
+  cd /home/player
+  [[ $(wc -l < first5.txt 2>/dev/null) -eq 5 && "$LBP_LAST" == *tee* ]]
+solution: |
+  ls /etc | head -5 | tee first5.txt

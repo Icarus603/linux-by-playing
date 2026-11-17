@@ -1,0 +1,16 @@
+id: "10-06"
+title: vim：搜尋與全域取代
+kind: practice
+story: "在一般模式輸入 /關鍵字 搜尋（n 下一個、N 上一個）。:%s/舊/新/g 對整個檔案做取代（% 代表全部行、g 代表每行所有符合）。跟 sed 的語法一脈相承。"
+goal: "notes.txt 裡有很多 alpha。用 vim 的全域取代，把所有 alpha 換成 omega，存檔離開。"
+teaches: [vim]
+xp: 40
+hints:
+  - "vim notes.txt，輸入 :%s/alpha/omega/g 然後 Enter。"
+  - "再 :wq。"
+setup: |
+  printf 'alpha one\nbeta alpha\nalpha alpha gamma\n' > /home/player/notes.txt
+check: |
+  [[ "$(cat /home/player/notes.txt)" == $'omega one\nbeta omega\nomega omega gamma' ]]
+solution: |
+  sed -i 's/alpha/omega/g' notes.txt

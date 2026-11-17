@@ -1,0 +1,23 @@
+id: "11-13"
+title: 安全稽核：找出人人可寫的檔案
+kind: practice
+story: "資安的基本功：找出權限過寬的東西。-perm -o+w 找「其他人有寫入權限」的檔案與目錄。人人可寫的檔案，等於任何人（包含被入侵的程序）都能竄改。"
+goal: "/srv/audit 底下有些檔案與目錄人人可寫。找出來，全部移除「其他人」的寫入權限（目錄也算），但不要刪任何東西。"
+teaches: [find, chmod, sudo]
+xp: 60
+hints:
+  - "find /srv/audit -perm -o+w"
+  - "sudo find /srv/audit -perm -o+w -exec chmod o-w {} +"
+setup: |
+  rm -rf /srv/audit; mkdir -p /srv/audit/sub
+  for i in 1 2 3 4 5 6; do echo $i > /srv/audit/f$i.conf; done
+  echo x > /srv/audit/sub/deep.conf
+  chmod 666 /srv/audit/f2.conf /srv/audit/f5.conf /srv/audit/sub/deep.conf
+  chmod 777 /srv/audit/sub
+check: |
+  [[ -z "$(find /srv/audit -perm -o+w)" ]] || { echo "還有人人可寫的項目。"; exit 1; }
+  [[ $(find /srv/audit -type f | wc -l) -eq 7 ]] || { echo "檔案數量不對，別刪東西。"; exit 1; }
+cleanup: |
+  rm -rf /srv/audit
+solution: |
+  sudo find /srv/audit -perm -o+w -exec chmod o-w {} +

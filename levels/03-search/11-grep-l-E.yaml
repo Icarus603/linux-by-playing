@@ -1,0 +1,23 @@
+id: "3-11"
+title: grep -l 與 -E
+kind: practice
+story: "-l 只列出檔名，-E 啟用延伸正規表示式（可用 + ? | () {} 等）。有人把內部 IP 外洩在某個檔案裡。"
+goal: "在 leak 目錄中，找出含有 192.168. 開頭 IP 位址的檔案，answer 提交檔名。"
+teaches: [grep]
+xp: 25
+hints:
+  - "grep -rlE '192\\.168\\.[0-9]+\\.[0-9]+' leak"
+  - "正規表示式中的 . 要寫成 \\. 才代表真正的點。"
+setup: |
+  cd /home/player
+  mkdir -p leak
+  echo "server at 10.0.0.5" > leak/a.txt
+  echo "gateway 192.168.1.254 is up" > leak/b.txt
+  echo "no address" > leak/c.txt
+check: |
+  [[ "$LBP_ANSWER" == "b.txt" || "$LBP_ANSWER" == "leak/b.txt" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是那個檔案。"
+  exit 1
+solution: |
+  grep -rlE '192\.168\.[0-9]+\.[0-9]+' leak
+  answer b.txt

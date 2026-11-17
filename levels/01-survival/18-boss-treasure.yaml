@@ -1,0 +1,30 @@
+id: "1-18"
+title: "Boss：失落的密碼"
+kind: boss
+story: "最後的考驗！Vega 把緊急密碼藏在站內某處，只留下線索。把你學會的 pwd、ls、cd、cat、ls -a 全部用上。"
+goal: "從 ~/station/START.txt 開始，順著線索找到藏起來的密碼，用 answer 提交。"
+teaches: [ls, cd, cat]
+xp: 50
+hints:
+  - "先 cat station/START.txt 看第一條線索。"
+  - "深入 deck-3，讀那裡的 note.txt。"
+  - "隱藏檔要用 ls -a 才看得到，檔名是 .vault。"
+setup: |
+  cd /home/player
+  mkdir -p station/deck-{1,2,3,4}/room-{a,b,c}
+  c="ORBIT-$((RANDOM % 9000 + 1000))"
+  echo "第一條線索：往 deck-3 去找。" > station/START.txt
+  echo "第二條線索：密碼藏在 room-b，用 ls -a 仔細看。" > station/deck-3/note.txt
+  echo "BOSS-CODE: $c" > station/deck-3/room-b/.vault
+  echo "BOSS-CODE: FAKE-0000" > station/deck-1/room-a/.vault
+  echo "這裡什麼都沒有。" > station/deck-3/room-a/empty.txt
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ "$LBP_ANSWER" == "FAKE-0000" ]] && echo "那是誘餌！回頭看線索指向哪一層。"
+  exit 1
+reveal: "緊急密碼打開了 Vega 的私人頻道。他留言：「去第 2 層的貨艙，我把證據藏在那裡。Warden 一直在看，所以我不能說太多。」"
+solution: |
+  cat station/START.txt
+  cat station/deck-3/note.txt
+  answer "$(cat station/deck-3/room-b/.vault | cut -d' ' -f2)"

@@ -1,0 +1,21 @@
+id: "8-18"
+title: bc：小數運算
+kind: practice
+story: "bash 的 $(( )) 只能算整數。要算小數就交給 bc：echo \"scale=2; 7/3\" | bc 會得到 2.33，scale 指定小數位數。"
+goal: "寫 avg.sh 數字…：印出平均值，固定兩位小數。例如 ./avg.sh 1 2 4 印 2.33。"
+teaches: [bc, bash]
+xp: 40
+hints:
+  - "先加總，再 echo \"scale=2; $total/$#\" | bc"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/avg.sh ]] || { echo "還沒有 avg.sh。"; exit 1; }
+  [[ "$(P 'bash avg.sh 1 2 4')" == "2.33" && "$(P 'bash avg.sh 10 20')" == "15.00" ]]
+solution: |
+  cat > avg.sh <<'EOS'
+  #!/bin/bash
+  total=0
+  for n in "$@"; do total=$((total + n)); done
+  echo "scale=2; $total/$#" | bc
+  EOS

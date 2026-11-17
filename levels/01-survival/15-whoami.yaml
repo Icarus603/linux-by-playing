@@ -1,0 +1,16 @@
+id: "1-15"
+title: 自我介紹
+kind: practice
+story: "管理員要先搞清楚「我是誰、在哪台機器」。whoami 顯示使用者名稱，hostname 顯示主機名稱。"
+goal: "用 whoami 與 hostname 查出資訊，answer 提交，格式：使用者@主機（例如 answer bob@server1）。"
+teaches: [whoami, hostname]
+xp: 15
+hints:
+  - "分別執行 whoami 和 hostname。"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "player@kernel-7" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "格式是 使用者@主機，兩個值都要查。"
+  exit 1
+solution: |
+  answer "$(whoami)@$(hostname)"

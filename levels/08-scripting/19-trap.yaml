@@ -1,0 +1,25 @@
+id: "8-19"
+title: set -e 與 trap
+kind: practice
+story: "寫腳本最值得養成的習慣：set -euo pipefail（出錯就停、用到未定義變數就報錯、管線中任何一段失敗都算失敗）。trap 指令 EXIT 則保證不論怎麼結束，都會執行清理。"
+goal: "寫 deploy.sh：先印 start；設定 trap 讓腳本結束時印 cleaned；開啟 set -e；然後執行 false；最後的 echo unreachable 不該被印出。預期總輸出是 start、cleaned 兩行，結束碼為 1。"
+teaches: [set, trap, bash]
+xp: 50
+hints:
+  - "set -euo pipefail"
+  - "trap 'echo cleaned' EXIT"
+  - "順序：echo start、trap、false、echo unreachable。"
+setup: ""
+check: |
+  PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }
+  [[ -f /home/player/deploy.sh ]] || { echo "還沒有 deploy.sh。"; exit 1; }
+  [[ "$(PR 'bash deploy.sh')" == $'start\ncleaned\nRC=1' ]]
+solution: |
+  cat > deploy.sh <<'EOS'
+  #!/bin/bash
+  set -euo pipefail
+  echo start
+  trap 'echo cleaned' EXIT
+  false
+  echo unreachable
+  EOS

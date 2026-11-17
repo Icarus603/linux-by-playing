@@ -1,0 +1,18 @@
+id: "7-05"
+title: gzip 與 gunzip
+kind: practice
+story: "gzip 檔案 會壓縮並把原檔換成 檔案.gz；gunzip 檔案.gz 則還原。壓縮日誌可以省下大量空間。"
+goal: "notes.txt.gz 是壓縮過的筆記。把它還原成 notes.txt。"
+teaches: [gunzip, gzip]
+xp: 15
+hints:
+  - "gunzip notes.txt.gz"
+setup: |
+  cd /home/player
+  echo "mission notes" > notes.txt
+  gzip -f notes.txt
+check: |
+  cd /home/player
+  [[ -f notes.txt && ! -e notes.txt.gz && "$(cat notes.txt)" == "mission notes" ]]
+solution: |
+  gunzip notes.txt.gz

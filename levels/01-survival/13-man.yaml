@@ -1,0 +1,18 @@
+id: "1-13"
+title: 自己查說明書
+kind: practice
+story: "沒有人記得所有選項，高手只是更會查。man 指令名稱 就是內建說明書，用 /搜尋、q 離開。"
+goal: "查 man ls，找出「依檔案大小排序」的選項字母，用 answer 提交（只要字母，例如 answer X）。"
+teaches: [man]
+xp: 20
+hints:
+  - "man ls，然後輸入 /size 搜尋。"
+  - "答案是一個大寫字母。"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "S" || "$LBP_ANSWER" == "-S" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，再查一次 man ls 的 sort 相關選項。"
+  exit 1
+solution: |
+  man ls | grep -i -m1 'sort by file size'
+  answer S

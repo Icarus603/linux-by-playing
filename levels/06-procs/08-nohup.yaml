@@ -1,0 +1,17 @@
+id: "6-08"
+title: nohup：登出也不死
+kind: practice
+story: "關掉終端機時，系統會送 SIGHUP 給底下的程序，通常它們就跟著結束了。nohup 讓程序忽略 SIGHUP，常配合 & 用在長時間任務。"
+goal: "用 nohup 在背景執行 sleep 500。"
+teaches: [nohup]
+xp: 20
+hints:
+  - "nohup sleep 500 &"
+  - "輸出會寫進 nohup.out；也可以重導向：nohup sleep 500 > /dev/null 2>&1 &"
+setup: ""
+check: |
+  pgrep -u player -f '^sleep 500$' >/dev/null && [[ "$LBP_LAST" == *nohup* ]]
+cleanup: |
+  pkill -u player -f '^sleep 500$' || true
+solution: |
+  nohup sleep 500 > /dev/null 2>&1 &

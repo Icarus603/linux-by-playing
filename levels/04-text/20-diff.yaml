@@ -1,0 +1,21 @@
+id: "4-20"
+title: diff：找差異
+kind: practice
+story: "diff 比較兩個檔案。< 開頭是第一個檔案的內容，> 開頭是第二個。-u 是更易讀的統一格式。"
+goal: "old.conf 與 new.conf 只有一行不同。用 diff 找出來，answer 提交新檔案（new.conf）裡 port= 的值。"
+teaches: [diff]
+xp: 20
+hints:
+  - "diff old.conf new.conf"
+setup: |
+  cd /home/player
+  printf 'host=a\nport=8080\nmode=x\n' > old.conf
+  printf 'host=a\nport=9090\nmode=x\n' > new.conf
+check: |
+  [[ "$LBP_ANSWER" == "9090" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，看 > 開頭那行（新檔案）。"
+  exit 1
+solution: |
+  diff old.conf new.conf
+  answer 9090
+reveal: "新舊設定檔只差一個 port，改成了 9090，剛好是 Warden 偷偷監聽的那個埠。"

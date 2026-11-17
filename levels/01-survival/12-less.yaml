@@ -1,0 +1,24 @@
+id: "1-12"
+title: 翻閱長文件
+kind: practice
+story: "less 是分頁瀏覽器：空白鍵下一頁、b 上一頁、/關鍵字 搜尋、n 找下一個、q 離開。操作手冊有 500 行，而且有一節被人動過手腳。"
+goal: "在 manual.txt 中找到含有 OVERRIDE 的那一行，answer 提交該行的代碼。"
+teaches: [less]
+xp: 20
+hints:
+  - "less manual.txt，然後輸入 /OVERRIDE 再按 Enter。"
+  - "按 q 離開 less。"
+setup: |
+  cd /home/player
+  z="ZULU-$((RANDOM % 9000 + 1000))"
+  at=$((RANDOM % 400 + 50))
+  { for i in $(seq 1 500); do if [ $i -eq $at ]; then echo "OVERRIDE code = $z"; else echo "section $i: nominal"; fi; done; } > manual.txt
+  mkdir -p /var/lib/lbp && echo "$z" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "代碼不對。"
+  exit 1
+reveal: "手冊的這一節被人改過。OVERRIDE 是唯一能暫停 Warden 的指令碼，但改動的時間，是 Vega 失蹤的前一天。"
+solution: |
+  grep OVERRIDE manual.txt
+  answer "$(grep OVERRIDE manual.txt | sed 's/.*= //')"

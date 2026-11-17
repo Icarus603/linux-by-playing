@@ -1,0 +1,22 @@
+id: "3-04"
+title: 依大小找
+kind: practice
+story: "-size 能依檔案大小篩選：+1M 大於 1MB，-10k 小於 10KB。清理磁碟時超好用。"
+goal: "在 cargo 底下找出大於 1MB 的那個檔案，answer 提交檔名。"
+teaches: [find]
+xp: 20
+hints:
+  - "find cargo -size +1M"
+setup: |
+  cd /home/player
+  mkdir -p cargo/{a,b,c}
+  truncate -s 100K cargo/a/small.dat
+  truncate -s 3M cargo/b/huge.dat
+  truncate -s 900K cargo/c/medium.dat
+check: |
+  [[ "$LBP_ANSWER" == "huge.dat" || "$LBP_ANSWER" == *cargo/b/huge.dat ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是這個，確認單位是 +1M。"
+  exit 1
+solution: |
+  find cargo -size +1M
+  answer huge.dat

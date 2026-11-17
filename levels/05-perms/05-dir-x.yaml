@@ -1,0 +1,19 @@
+id: "5-05"
+title: 目錄的 x 是什麼
+kind: practice
+story: "對目錄來說：r 是能列出內容、x 是能「進入」它。少了 x，cd 就會被拒絕。"
+goal: "vault 目錄的權限被設錯，你自己都進不去。修好它，讓擁有者能進入並列出內容。"
+teaches: [chmod, cd]
+xp: 20
+hints:
+  - "先試 cd vault，看錯誤訊息。"
+  - "chmod u+x vault（擁有者需要 r 與 x，也可以用 chmod 700 vault）"
+setup: |
+  cd /home/player
+  mkdir vault
+  echo ok > vault/note.txt
+  chmod 644 vault
+check: |
+  [[ "$(stat -c %a /home/player/vault)" =~ ^[57] ]]
+solution: |
+  chmod u+x vault

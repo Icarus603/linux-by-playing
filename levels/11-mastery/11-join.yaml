@@ -1,0 +1,18 @@
+id: "11-11"
+title: join：像資料庫一樣合併
+kind: practice
+story: "join 依「共同的欄位」把兩個檔案合併成一行，就像資料庫的 JOIN。輸入必須依該欄位排序。-t 指定分隔符號、-1 -2 指定各檔案用第幾欄當鍵。"
+goal: "ids.txt（編號 名字）與 scores.txt（編號 分數）都依編號排序。把它們合併，存成 merged.txt（每行：編號 名字 分數）。"
+teaches: [join]
+xp: 45
+hints:
+  - "join ids.txt scores.txt > merged.txt"
+setup: |
+  cd /home/player
+  printf '1 ann\n2 bob\n3 cat\n4 dan\n' > ids.txt
+  printf '1 90\n2 75\n3 88\n4 62\n' > scores.txt
+check: |
+  cd /home/player
+  diff <(join ids.txt scores.txt) merged.txt >/dev/null
+solution: |
+  join ids.txt scores.txt > merged.txt

@@ -1,0 +1,24 @@
+id: "2-16"
+title: 誰佔了空間
+kind: practice
+story: "磁碟快滿了！du -sh 顯示目錄大小（-s 總計、-h 人類可讀）；df -h 顯示各磁碟的剩餘空間。"
+goal: "找出 storage 底下哪個子目錄最大，answer 提交它的名稱。"
+teaches: [du, df]
+xp: 20
+hints:
+  - "cd storage 之後執行 du -sh *"
+  - "du -sh storage/* | sort -h 會把最大的排在最後（sort 之後會學到）。"
+setup: |
+  cd /home/player
+  mkdir -p storage/{videos,photos,docs,music}
+  truncate -s 8M storage/videos/a.mp4
+  truncate -s 3M storage/photos/b.jpg
+  truncate -s 1M storage/docs/c.pdf
+  truncate -s 5M storage/music/d.mp3
+check: |
+  [[ "$LBP_ANSWER" == "videos" || "$LBP_ANSWER" == "storage/videos" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是最大的那個，比較一下 du -sh 的數字。"
+  exit 1
+solution: |
+  du -sh storage/*
+  answer videos

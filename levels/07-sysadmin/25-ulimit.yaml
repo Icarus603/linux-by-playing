@@ -1,0 +1,20 @@
+id: "7-25"
+title: ulimit：資源上限
+kind: practice
+story: "每個程序都有資源上限，避免一個失控的程式拖垮整台機器。ulimit -a 列出全部，ulimit -n 是可同時開啟的檔案數。伺服器開不了更多連線時，這常是元凶之一。"
+goal: "用 ulimit -n 查出你這個 shell 目前「可開啟檔案數」的上限，answer 提交。"
+teaches: [ulimit]
+xp: 20
+hints:
+  - "ulimit -n"
+setup: ""
+check: |
+  # 標準答案取自玩家互動式 shell 的實際限制（sudo 執行的檢查腳本自己的限制可能不同）
+  pid=$(pgrep -u player -o -x bash)
+  if [[ -n "$pid" ]]; then exp=$(awk '/Max open files/{print $4}' /proc/$pid/limits); else exp=$(runuser -u player -- bash -c 'ulimit -n'); fi
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數字不對，直接執行 ulimit -n。"
+  exit 1
+solution: |
+  ulimit -n
+  answer "$(ulimit -n)"

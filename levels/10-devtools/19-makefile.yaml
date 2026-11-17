@@ -1,0 +1,22 @@
+id: "10-19"
+title: 寫一個有依賴的 Makefile
+kind: practice
+story: "規則寫法：目標: 依賴，下一行 Tab 開頭是指令。make 發現依賴比目標新，才會重做。這正是它能「只重建改過的部分」的原理。"
+goal: "寫一個 Makefile：目標 result.txt 依賴 input.txt，指令把 input.txt 轉成大寫寫進 result.txt。然後執行 make。"
+teaches: [make, tr]
+xp: 50
+hints:
+  - "Makefile 第一行：result.txt: input.txt"
+  - "第二行以 Tab 開頭：tr a-z A-Z < input.txt > result.txt"
+  - "用 printf 寫入比較不會搞錯 Tab：printf 'result.txt: input.txt\\n\\ttr a-z A-Z < input.txt > result.txt\\n' > Makefile"
+setup: |
+  cd /home/player
+  rm -f Makefile result.txt
+  echo "all systems nominal" > input.txt
+check: |
+  cd /home/player
+  grep -qE '^result.txt:[[:space:]]*input.txt' Makefile 2>/dev/null || { echo "Makefile 裡要有 result.txt: input.txt 這條規則。"; exit 1; }
+  [[ "$(cat result.txt 2>/dev/null)" == "ALL SYSTEMS NOMINAL" ]]
+solution: |
+  printf 'result.txt: input.txt\n\ttr a-z A-Z < input.txt > result.txt\n' > Makefile
+  make

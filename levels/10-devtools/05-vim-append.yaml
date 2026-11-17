@@ -1,0 +1,15 @@
+id: "10-05"
+title: vim：在結尾新增
+kind: practice
+story: "快速進入插入模式的幾種方式：i 在游標前、a 在游標後、o 在下方新開一行、O 在上方新開一行、A 跳到行尾再插入。寫日誌最常用 o。"
+goal: "在 log.txt 最後新增一行：mission complete，存檔離開。"
+teaches: [vim]
+xp: 30
+hints:
+  - "vim log.txt，按 G 跳到檔尾，按 o 新開一行，輸入文字，Esc，:wq。"
+setup: |
+  printf 'boot ok\nsystems nominal\n' > /home/player/log.txt
+check: |
+  [[ "$(cat /home/player/log.txt)" == $'boot ok\nsystems nominal\nmission complete' ]]
+solution: |
+  echo "mission complete" >> log.txt

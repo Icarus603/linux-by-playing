@@ -1,0 +1,21 @@
+id: "5-02"
+title: 讀懂權限字串
+kind: learn
+story: "ls -l 最左邊那串 -rw-r--r-- 就是權限：第一個字元是類型，接著三組 rwx 依序是「擁有者、群組、其他人」。有個檔案被不小心設成任何人都能寫入，非常危險。"
+goal: "a.txt、b.txt、c.txt 其中一個「其他人」也可以寫入（最後一組有 w）。找出它，answer 提交檔名。"
+teaches: [ls]
+xp: 15
+hints:
+  - "ls -l 看每個檔案的權限。"
+  - "看權限字串的最後三個字元，有 w 的就是。"
+setup: |
+  cd /home/player
+  touch a.txt b.txt c.txt
+  chmod 644 a.txt; chmod 666 b.txt; chmod 600 c.txt
+check: |
+  [[ "$LBP_ANSWER" == "b.txt" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是這個，找最後一組權限有 w 的。"
+  exit 1
+solution: |
+  ls -l
+  answer b.txt

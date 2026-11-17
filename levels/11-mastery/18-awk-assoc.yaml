@@ -1,0 +1,24 @@
+id: "11-18"
+title: awk 進階：統計
+kind: practice
+story: "awk 有關聯式陣列，一行就能做分組統計：awk -F: '{c[$7]++} END{for (s in c) print c[s], s}'。這種「依欄位分組計數」，是資料分析最常見的操作之一。"
+goal: "users.txt 是仿照 /etc/passwd 的名單（冒號分隔，第 7 欄是登入 shell）。找出「最多人使用」的 shell，answer 提交（例如 /bin/xxx）。"
+teaches: [awk, sort]
+xp: 55
+hints:
+  - "awk -F: '{c[$7]++} END{for (s in c) print c[s], s}' users.txt"
+  - "再接 sort -nr | head -1。"
+setup: |
+  cd /home/player
+  { for i in 1 2 3 4 5; do echo "u$i:x:100$i:100$i::/home/u$i:/bin/bash"; done
+    for i in 6 7 8; do echo "u$i:x:100$i:100$i::/home/u$i:/bin/sh"; done
+    for i in 9 10; do echo "u$i:x:10$i:10$i::/home/u$i:/usr/sbin/nologin"; done; } | shuf > users.txt
+check: |
+  cd /home/player
+  exp=$(awk -F: '{c[$7]++} END{for(s in c) print c[s], s}' users.txt | sort -nr | head -1 | awk '{print $2}')
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是最多人用的那個。"
+  exit 1
+solution: |
+  awk -F: '{c[$7]++} END{for(s in c) print c[s], s}' users.txt | sort -nr
+  answer /bin/bash

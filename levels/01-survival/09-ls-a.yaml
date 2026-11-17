@@ -1,0 +1,24 @@
+id: "1-09"
+title: 隱藏的檔案
+kind: practice
+story: "名字以 . 開頭的檔案是「隱藏檔」，普通 ls 看不到。Vega 習慣把重要的東西藏在這種地方，大概是怕被 Warden 看見。"
+goal: "這間艙房裡藏著一把看不見的金鑰。找到它，讀出內容，用 answer 提交。"
+teaches: [ls, cat]
+xp: 20
+hints:
+  - "ls -a 會顯示包含隱藏檔在內的全部檔案。"
+  - "隱藏檔叫 .access-token，用 cat .access-token 讀它。"
+setup: |
+  cd /home/player
+  echo "普通檔案" > readme.txt
+  t="TOKEN-$((RANDOM % 9000 + 1000))"
+  echo "$t" > .access-token
+  mkdir -p /var/lib/lbp && echo "$t" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "金鑰不對。"
+  exit 1
+reveal: "那把金鑰屬於 Vega。他把所有重要的東西都藏在「點開頭」的檔案裡，這個習慣後來救了他一命。"
+solution: |
+  ls -a
+  answer "$(cat .access-token)"

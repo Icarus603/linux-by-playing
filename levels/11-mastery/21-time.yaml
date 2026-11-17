@@ -1,0 +1,25 @@
+id: "11-21"
+title: time：誰最慢
+kind: practice
+story: "time 指令 會在指令結束後回報花了多少時間：real 是牆上時鐘、user 與 sys 是 CPU 時間。比較不同做法的效能，最簡單的方法就是 time。"
+goal: "a.sh、b.sh、c.sh 三支腳本的執行時間不同。用 time 量一量，找出最慢的那一支，answer 提交檔名（例如 a.sh）。"
+teaches: [time]
+xp: 40
+hints:
+  - "time ./a.sh"
+  - "看 real 那一行。"
+setup: |
+  cd /home/player
+  slow=$(shuf -n1 -e a.sh b.sh c.sh)
+  for f in a.sh b.sh c.sh; do
+    if [ "$f" = "$slow" ]; then d=1.6; else d=0.3; fi
+    printf '#!/bin/bash\nsleep %s\n' "$d" > $f; chmod 755 $f
+  done
+  mkdir -p /var/lib/lbp && echo "$slow" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是最慢的那個，三支都用 time 量一次。"
+  exit 1
+solution: |
+  for f in a.sh b.sh c.sh; do /usr/bin/time -f "$f %e" ./$f; done 2>&1
+  answer "$(cat /var/lib/lbp/answer 2>/dev/null || sudo cat /var/lib/lbp/answer)"

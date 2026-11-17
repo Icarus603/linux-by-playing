@@ -1,0 +1,18 @@
+id: "4-11"
+title: 清掉 Windows 換行
+kind: practice
+story: "從 Windows 傳來的檔案，每行結尾多了 CR 字元（寫成 \\r），在 Linux 上會造成各種怪問題。用 tr -d 刪掉它。"
+goal: "dos.txt 含有 CR 字元。刪除所有 CR，結果存成 clean.txt。"
+teaches: [tr]
+xp: 25
+hints:
+  - 'tr -d "\r" < dos.txt > clean.txt'
+setup: |
+  cd /home/player
+  printf 'line1\r\nline2\r\nline3\r\n' > dos.txt
+check: |
+  cd /home/player
+  CR=$(printf '\r')
+  [[ -f clean.txt ]] && ! grep -q "$CR" clean.txt && [[ $(wc -l < clean.txt) -eq 3 ]]
+solution: |
+  tr -d '\r' < dos.txt > clean.txt

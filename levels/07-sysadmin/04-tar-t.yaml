@@ -1,0 +1,26 @@
+id: "7-04"
+title: 不解開，先偷看
+kind: practice
+story: "tar -t 列出壓縮包的內容而不解開，確認它裡面有什麼再動手，是個好習慣（也能避免「tar bomb」把一堆檔案炸在目前目錄）。"
+goal: "mystery.tar 裡到底有幾個項目（檔案與目錄都算）？不解開它，用 tar 列出並數一數，answer 提交。"
+teaches: [tar, wc]
+xp: 20
+hints:
+  - "tar -tf mystery.tar"
+  - "接上 | wc -l 就能數。"
+setup: |
+  cd /home/player
+  rm -rf m && mkdir -p m/x/y m/z
+  n=$((RANDOM % 8 + 5))
+  for i in $(seq 1 $n); do echo $i > m/x/f$i.txt; done
+  echo end > m/x/y/last.txt
+  tar -cf mystery.tar -C m .
+  rm -rf m
+check: |
+  exp=$(tar -tf /home/player/mystery.tar | wc -l)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對，目錄也算一個項目。"
+  exit 1
+solution: |
+  tar -tf mystery.tar | wc -l
+  answer "$(tar -tf mystery.tar | wc -l)"

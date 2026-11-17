@@ -1,0 +1,256 @@
+# 專業知識：檔案系統與儲存
+- q: df 顯示磁碟滿了，但 du 加起來沒那麼大，空間去哪了？
+  keys: df du 空間不一致 已刪除 deleted lsof 被佔用 磁碟滿 釋放空間
+  a: |-
+    多半是「檔案已刪除但仍有程序開著」。用 lsof +L1 找出來，重啟或結束該程序才會釋放。
+  d: |-
+    刪除檔案只是移除目錄項，資料要等所有開啟它的檔案描述符關閉才真正釋放。
+    排查：`lsof +L1`（連結數為 0 的開啟檔）或 `lsof | grep deleted`。
+    不想重啟程序時可清空內容：`: > /proc/PID/fd/N`（N 是 fd 編號）。
+    日誌被 logrotate 刪除但程序沒重開檔案是最常見原因，應該讓服務 reload 或用 copytruncate。
+- q: 磁碟還有空間卻無法建立檔案，No space left on device？
+  keys: inode 用盡 df -i no space left 小檔案 無法建立檔案
+  a: |-
+    可能是 inode 用盡。用 df -i 看 IUse%，找出小檔案特別多的目錄清掉。
+  d: |-
+    inode 數量在建立檔案系統時固定（ext4），大量小檔案（快取、session、郵件佇列）會先耗盡 inode。
+    找檔案數最多的目錄：`for d in /*; do echo "$(find "$d" -xdev 2>/dev/null | wc -l) $d"; done | sort -nr | head`。
+    xfs 的 inode 是動態配置，較少遇到此問題。
+- q: ext4、xfs、btrfs 該怎麼選？
+  keys: ext4 xfs btrfs 檔案系統 選擇 差別 zfs
+  a: |-
+    ext4 穩定通用；xfs 擅長大檔案與高併發但不能縮小；btrfs 有快照與壓縮但需要更多維運經驗。
+  d: |-
+    ext4：成熟、可擴可縮（需卸載縮小）、fsck 工具完整。
+    xfs：RHEL 預設，大檔案、平行 I/O 好，只能擴大不能縮小，修復用 xfs_repair（需卸載）。
+    btrfs：寫入時複製（CoW）、子卷、快照、校驗和、透明壓縮；RAID5/6 長期不建議用於正式環境。
+    zfs 不在主線核心，需額外模組（授權因素），但資料完整性與快照能力極強。
+- q: LVM 是什麼？怎麼擴充邏輯卷？
+  keys: lvm pv vg lv pvcreate vgcreate lvcreate lvextend resize2fs 擴充 邏輯卷
+  a: |-
+    LVM 把實體磁碟（PV）集合成卷群（VG），再切出可彈性調整的邏輯卷（LV）。擴充用 lvextend -r。
+  d: |-
+    建立：`pvcreate /dev/sdb`、`vgcreate vg0 /dev/sdb`、`lvcreate -L 20G -n data vg0`、`mkfs.ext4 /dev/vg0/data`。
+    線上擴充：`lvextend -r -L +10G /dev/vg0/data`（-r 會一併 resize 檔案系統）；或用 `-l +100%FREE`。
+    檢視：`pvs`、`vgs`、`lvs`、`lvdisplay`。新增磁碟到卷群：`vgextend vg0 /dev/sdc`。
+- q: 可以縮小 LVM 或檔案系統嗎？有什麼風險？
+  keys: 縮小 shrink lvreduce resize2fs xfs 資料遺失
+  a: |-
+    ext4 可以離線縮小，xfs 不能縮。順序錯了會毀資料：先縮檔案系統，再縮 LV。
+  d: |-
+    ext4 縮小流程：卸載 → `e2fsck -f` → `resize2fs /dev/vg0/data 10G` → `lvreduce -L 10G /dev/vg0/data`。
+    如果先 lvreduce 再縮檔案系統，檔案系統尾端資料會被截斷。
+    xfs 無法縮小，只能備份後重建。動手前務必備份。
+- q: 怎麼建立與管理軟體 RAID？
+  keys: mdadm raid raid1 raid5 raid10 軟體磁碟陣列 mdstat
+  a: |-
+    用 mdadm 建立，例如 mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/sdc，用 cat /proc/mdstat 看狀態。
+  d: |-
+    常見：RAID0 條帶（無容錯）、RAID1 鏡像、RAID5 單校驗（至少 3 顆）、RAID6 雙校驗、RAID10 鏡像加條帶。
+    查看：`mdadm --detail /dev/md0`、`cat /proc/mdstat`。換壞碟：`mdadm /dev/md0 --fail /dev/sdb --remove /dev/sdb` 再 `--add` 新碟。
+    設定要寫入 /etc/mdadm/mdadm.conf（`mdadm --detail --scan`）並更新 initramfs，否則重開後裝置名可能變動。RAID 不是備份。
+- q: /etc/fstab 怎麼寫？寫錯會怎樣？
+  keys: fstab mount uuid nofail noatime 開機掛載 寫錯 無法開機 mount -a
+  a: |-
+    每行六欄：裝置 掛載點 類型 選項 dump fsck順序。改完先用 mount -a 測試，寫錯可能開不了機。
+  d: |-
+    例：`UUID=xxxx /data ext4 defaults,noatime,nofail 0 2`。優先用 UUID（blkid 可查）而非 /dev/sdX，因為裝置名可能變。
+    nofail 讓裝置不存在時不卡住開機；x-systemd.automount 可延遲到首次存取才掛載。
+    驗證：`findmnt --verify` 或 `mount -a`；修改後 `systemctl daemon-reload`。
+- q: 怎麼查裝置、UUID、掛載資訊？
+  keys: blkid lsblk findmnt uuid 裝置 掛載點 分割區 檔案系統類型
+  a: |-
+    lsblk -f 看磁碟樹與檔案系統，blkid 看 UUID，findmnt 看掛載樹。
+  d: |-
+    `lsblk -f`（含 FSTYPE、UUID、掛載點）、`blkid`、`findmnt /data`、`findmnt -T /path`（某路徑屬於哪個掛載）。
+    `df -hT` 看使用量與類型，`cat /proc/self/mountinfo` 是最原始的掛載資料（含 namespace 資訊）。
+- q: fdisk、gdisk、parted 有什麼差別？MBR 和 GPT？
+  keys: fdisk gdisk parted mbr gpt 分割 磁碟分割 2tb
+  a: |-
+    MBR 最多 2TB、4 個主分割區；GPT 無此限制且有備份分割表。parted 兩者都支援且可腳本化。
+  d: |-
+    fdisk（新版支援 GPT）互動式；gdisk 專攻 GPT；parted 可非互動：`parted -s /dev/sdb mklabel gpt mkpart primary ext4 1MiB 100%`。
+    分割後用 `partprobe` 或 `udevadm settle` 讓核心重讀分割表；`lsblk` 確認。大於 2TB 的磁碟必須用 GPT。
+- q: 怎麼建立檔案系統並掛載？
+  keys: mkfs mkfs.ext4 mkfs.xfs mount umount 格式化 掛載
+  a: |-
+    mkfs.ext4 /dev/sdb1 格式化，mount /dev/sdb1 /mnt 掛載。umount 卸載時要確認沒有程序在使用。
+  d: |-
+    mkfs 會清掉資料，動手前用 `lsblk -f` 確認裝置。umount 失敗 target is busy：`lsof +f -- /mnt` 或 `fuser -vm /mnt` 找佔用者；
+    萬不得已 `umount -l`（lazy，之後才真正卸載）。掛載選項：`ro`、`noexec`、`nosuid`、`noatime`、`discard`（SSD TRIM）。
+- q: 怎麼用檔案當磁碟？loop 裝置是什麼？
+  keys: loop loopback 映像 dd 磁碟映像 mount -o loop losetup iso
+  a: |-
+    loop 裝置讓一般檔案被當成區塊裝置：mount -o loop disk.img /mnt。
+  d: |-
+    建立測試用磁碟：`truncate -s 1G disk.img && mkfs.ext4 disk.img && mount -o loop disk.img /mnt`。
+    手動管理：`losetup -fP disk.img`（-P 掃描分割）、`losetup -a`、`losetup -d /dev/loop0`。掛載 ISO：`mount -o loop,ro x.iso /mnt`。
+- q: fsck 什麼時候用？要注意什麼？
+  keys: fsck e2fsck xfs_repair 檔案系統修復 損毀 掛載 唯讀
+  a: |-
+    只能對「未掛載」的檔案系統跑 fsck，否則可能損壞。xfs 用 xfs_repair，ext4 用 e2fsck -f。
+  d: |-
+    先備份映像（`dd` 或 `ddrescue`）再修復。ext4：`e2fsck -f -n /dev/sdb1` 先唯讀模擬，再 `-y` 自動修復。
+    根目錄損毀可從救援模式或 live 系統處理。出現大量 I/O error 時先檢查硬體（`smartctl -a`、`dmesg`）。
+- q: 怎麼建立與使用 swap？
+  keys: swap swapon swapoff mkswap swapfile swappiness 虛擬記憶體 交換
+  a: |-
+    mkswap 建立再 swapon 啟用；swappiness 控制核心使用 swap 的傾向。
+  d: |-
+    swapfile：`fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile`（btrfs 需特別處理）。
+    永久：加進 fstab `/swapfile none swap sw 0 0`。查看：`swapon --show`、`free -h`。
+    `vm.swappiness`（預設 60）調低會較晚換出；資料庫伺服器常設 1–10。swap 持續大量進出（vmstat si/so）代表記憶體不足。
+- q: tmpfs 和 /dev/shm 是什麼？
+  keys: tmpfs shm 記憶體檔案系統 ramdisk /tmp
+  a: |-
+    tmpfs 是存在記憶體（可換出到 swap）的檔案系統，/dev/shm 是共享記憶體用的 tmpfs，重開機就消失。
+  d: |-
+    建立：`mount -t tmpfs -o size=512m tmpfs /mnt/ram`。佔用的是 page cache，不會被當成程序記憶體，但仍消耗實體記憶體。
+    systemd 系統的 /tmp 可能是 tmpfs，大檔案暫存要注意；`df -h /dev/shm` 查看用量。
+- q: 硬連結和軟連結的差別？
+  keys: 硬連結 軟連結 符號連結 ln -s inode 跨檔案系統 hard link symlink
+  a: |-
+    硬連結是同一個 inode 的另一個名字，不能跨檔案系統也不能連目錄；軟連結是指向路徑的小檔案，可跨系統但目標刪了就失效。
+  d: |-
+    `ls -li` 看 inode；`stat 檔案` 的 Links 是硬連結數，歸零才真正釋放資料。
+    軟連結用 `ln -s 目標 連結名`，相對路徑是相對「連結所在目錄」而非目前目錄。`readlink -f` 解出最終實體路徑。
+    `find -L`、`cp -L`、`rsync -L` 會跟隨軟連結；備份時要注意是否要保留連結本身（`-a`）。
+- q: 稀疏檔案是什麼？為什麼 ls 和 du 大小不同？
+  keys: sparse 稀疏檔案 truncate fallocate ls du 大小不同 視覺大小
+  a: |-
+    稀疏檔案裡未寫入的區塊不占用磁碟，所以 ls -l 的邏輯大小可遠大於 du 的實際占用。
+  d: |-
+    `truncate -s 10G f` 建立稀疏檔；`fallocate -l 10G f` 則真的預先配置區塊。
+    複製時用 `cp --sparse=always` 或 `rsync -S` 才能保留稀疏性；虛擬機映像與資料庫檔案常見。`du --apparent-size` 看邏輯大小。
+- q: iostat 怎麼看磁碟是不是瓶頸？
+  keys: iostat await util iowait 磁碟瓶頸 io 效能 sar iotop
+  a: |-
+    iostat -x 1 看 %util 與 await；%util 接近 100% 且 await 很高，代表磁碟飽和。
+  d: |-
+    欄位：r/s w/s 每秒讀寫次數、rkB/s wkB/s 吞吐、await 平均等待毫秒（含排隊）、aqu-sz 佇列深度、%util 忙碌比例。
+    NVMe 可平行處理，%util 100% 不一定飽和，要看 await 與 aqu-sz。找兇手：`iotop -oP`、`pidstat -d 1`。
+    iowait 高是「CPU 閒著等 I/O」，不是 CPU 吃緊。
+- q: 怎麼檢查硬碟是否快壞了？
+  keys: smartctl smart 硬碟健康 壞軌 reallocated 磁碟壞掉 badblocks
+  a: |-
+    用 smartctl -a /dev/sda 看 SMART，注意 Reallocated_Sector_Ct 與 Pending 數值，並看 dmesg 有無 I/O error。
+  d: |-
+    `smartctl -H /dev/sda` 整體判定；`smartctl -t short|long /dev/sda` 執行自我測試，之後 `-l selftest` 看結果。
+    NVMe：`smartctl -a /dev/nvme0` 或 `nvme smart-log`。換碟前先備份；`ddrescue` 可從壞碟盡量搶救資料。
+- q: rsync 做增量備份有哪些重要選項？
+  keys: rsync -a --delete --link-dest 增量備份 同步 排除 exclude 備份
+  a: |-
+    rsync -aHAX --delete src/ dst/ 完整同步；--link-dest 可做硬連結快照式增量備份。
+  d: |-
+    -a 保留權限時間等；-H 硬連結、-A ACL、-X 擴充屬性；-n 先試跑；--exclude 排除；-z 壓縮傳輸；--progress。
+    來源結尾斜線差異：`src/` 是內容、`src` 連目錄本身一起。遠端：`rsync -a -e "ssh -p 2222" src/ user@host:/dst/`。
+    快照式：`rsync -a --link-dest=../前一次 src/ 新一次/`，未變動檔案用硬連結，省空間。--delete 很危險，先 -n。
+- q: dd 的常見用法與風險？
+  keys: dd 複製磁碟 bs count status=progress conv=fsync 燒錄 映像 of=
+  a: |-
+    dd 以區塊複製資料。of= 寫錯裝置會直接覆蓋整顆磁碟，動手前務必用 lsblk 確認。
+  d: |-
+    `dd if=/dev/zero of=f bs=1M count=100 status=progress conv=fsync`。備份分割：`dd if=/dev/sda1 of=sda1.img bs=4M status=progress`。
+    測寫入速度要加 `oflag=direct` 或 `conv=fsync` 避開 page cache。損壞磁碟請用 ddrescue 而不是 dd。
+- q: atime、mtime、ctime 差在哪？
+  keys: atime mtime ctime 時間戳 存取時間 修改時間 stat noatime touch
+  a: |-
+    mtime 是內容修改、ctime 是中繼資料（權限、連結數）變更、atime 是最後讀取。ctime 不能用 touch 任意改。
+  d: |-
+    `stat 檔案` 全部列出。find 的 `-mtime +7` 是「超過 7×24 小時前」；`-mmin`、`-newer 參考檔`、`-atime`、`-ctime`。
+    預設掛載選項 relatime 已大幅減少 atime 寫入；追求效能可用 noatime。
+- q: chattr +i 是什麼？檔案刪不掉怎麼辦？
+  keys: chattr lsattr 不可變 immutable +i +a 刪不掉 屬性 擴充屬性
+  a: |-
+    chattr +i 讓檔案不可修改也不可刪除（連 root 都不行），要先 chattr -i。lsattr 查看。
+  d: |-
+    +a 只能追加（適合日誌）。這是檔案系統屬性，與 rwx 權限無關。`lsattr -d 目錄`。
+    遇到 root 也刪不掉的檔案，先 `lsattr` 確認，再考慮唯讀掛載（mount ro）或 SELinux/AppArmor 限制。
+- q: 怎麼找出占用最多空間的目錄與檔案？
+  keys: du ncdu 大檔案 找最大 排序 占用空間 清理 磁碟 find large files biggest files disk usage which directory uses most space
+  a: |-
+    du -xh --max-depth=1 / | sort -h 逐層找；ncdu 有互動介面。
+  d: |-
+    `du -xh --max-depth=1 /var | sort -hr | head`（-x 不跨檔案系統）。找大檔：`find / -xdev -type f -size +500M -exec ls -lh {} +`。
+    常見元兇：/var/log、/var/lib/docker、journald（`journalctl --disk-usage`）、套件快取（apt clean）、舊核心。
+- q: 檔案系統突然變唯讀怎麼辦？
+  keys: 唯讀 read-only remount errors=remount-ro 檔案系統錯誤 io error
+  a: |-
+    核心偵測到檔案系統錯誤時會自動變唯讀。先看 dmesg 找原因，修復後 mount -o remount,rw。
+  d: |-
+    `dmesg -T | grep -iE "error|ext4|xfs|i/o"`。可能是磁碟壞、線材或 RAID 問題、雲端磁碟斷線。
+    臨時恢復：`mount -o remount,rw /`；但根因未解決會再次發生。需要 fsck 時用救援模式。確認掛載選項：`findmnt -o TARGET,OPTIONS`。
+- q: LUKS 加密磁碟怎麼用？
+  keys: luks cryptsetup 加密 磁碟加密 dm-crypt 解密
+  a: |-
+    cryptsetup luksFormat 建立加密卷，luksOpen 解鎖成 /dev/mapper/名字，再格式化掛載。
+  d: |-
+    `cryptsetup luksFormat /dev/sdb1`、`cryptsetup luksOpen /dev/sdb1 secret`、`mkfs.ext4 /dev/mapper/secret`。
+    關閉：卸載後 `cryptsetup luksClose secret`。自動掛載設定在 /etc/crypttab。luksDump 看金鑰槽，務必備份 header（`luksHeaderBackup`）。
+- q: lsof 怎麼用？能查哪些東西？
+  keys: lsof 開啟檔案 誰在用 連接埠 佔用 fuser 程序開了哪些檔
+  a: |-
+    lsof 列出程序開啟的檔案（包含 socket）。lsof -i :80 查誰佔用 80 埠，lsof 檔案 查誰在用該檔。
+  d: |-
+    `lsof -p PID` 某程序開的檔案；`lsof -u 使用者`；`lsof +D /dir` 目錄下被開啟的檔案；`lsof -i TCP:22 -sTCP:LISTEN`。
+    `fuser -v 檔案或目錄`、`fuser -k 80/tcp` 直接結束佔用者。搭配 `ss -tlnp` 更快看埠。
+- q: ulimit 與 too many open files？
+  keys: ulimit nofile too many open files 檔案描述符 file-max limits.conf LimitNOFILE
+  a: |-
+    每個程序有開檔數上限（ulimit -n）。伺服器耗盡時調高 limits.conf 或 systemd 的 LimitNOFILE。
+  d: |-
+    查看某程序實際限制：`cat /proc/PID/limits`；已用數量：`ls /proc/PID/fd | wc -l`。
+    systemd 服務在 unit 設 `LimitNOFILE=65536`（/etc/security/limits.conf 對 systemd 服務無效）。系統總上限 `fs.file-max`、`fs.nr_open`。
+    出現 EMFILE（單程序）或 ENFILE（全系統）代表對應層級耗盡；同時檢查是否有 fd 洩漏。
+- q: tar 進階用法？
+  keys: tar exclude 保留權限 --same-owner 增量 傳輸 ssh pipe tar 排除 排除檔案 exclude 不要打包 忽略 壓縮時略過
+  a: |-
+    tar -czf 打包壓縮、--exclude 排除、-C 切換目錄；可用管線經 ssh 傳輸整個目錄。
+  d: |-
+    `tar -czf b.tgz --exclude="*.log" -C /srv app`；解壓到指定目錄 `tar -xzf b.tgz -C /dst`；只看內容 `-tzf`；抽單一檔案 `tar -xzf b.tgz path/file`。
+    經 ssh：`tar -C /srv -cz app | ssh host "tar -xz -C /dst"`。保留權限擁有者要以 root 解壓並加 `-p --same-owner`。
+    增量：`--listed-incremental=snapshot.file`。
+- q: gzip、bzip2、xz、zstd 該選哪個？
+  keys: 壓縮 gzip bzip2 xz zstd pigz 壓縮比 速度 平行
+  a: |-
+    要快用 gzip 或 zstd；要壓得小用 xz；zstd 兼顧速度與壓縮比，pigz 是平行版 gzip。
+  d: |-
+    速度 gzip > bzip2 > xz，壓縮比 xz 通常最好。zstd 支援 `-T0` 多執行緒與 `--long` 大視窗，現代首選。
+    `tar -I zstd -cf x.tar.zst dir`、`xz -T0 -9e file`。解壓速度 zstd 與 gzip 最快。
+- q: 日誌或容器佔滿磁碟怎麼清理？
+  keys: journald vacuum docker prune apt clean 清理 日誌太大 磁碟滿了
+  a: |-
+    journalctl --vacuum-size=500M 限制日誌；docker system prune 清容器資源；apt clean 清套件快取。
+  d: |-
+    `journalctl --disk-usage`、`--vacuum-time=7d`；永久限制在 /etc/systemd/journald.conf 設 SystemMaxUse。
+    Docker：`docker system df` 看占用，`docker system prune -a --volumes` 很徹底（會刪未使用的 volume，小心）。
+    舊核心：`apt autoremove --purge`。大型日誌用 logrotate 搭配 compress 與 maxsize。
+- q: page cache 是什麼？free 的 available 怎麼看？
+  keys: page cache free available buff/cache 記憶體 快取 drop_caches
+  a: |-
+    核心把讀過的檔案資料放在 page cache 加速，需要時會自動回收。看 available 而非 free 才是真正可用記憶體。
+  d: |-
+    buff/cache 大是正常且有益的，不是記憶體洩漏。`free -h` 的 available 估算「不用 swap 還能分配多少」。
+    `echo 3 > /proc/sys/vm/drop_caches` 只在測試時用，正式環境會造成效能暫時下降。髒頁寫回受 `vm.dirty_ratio` 等參數控制。
+- q: btrfs 與快照的基本觀念？
+  keys: btrfs snapshot 快照 子卷 subvolume cow zfs
+  a: |-
+    btrfs 以子卷（subvolume）為單位建立瞬間完成的寫入時複製快照，適合回復與備份。
+  d: |-
+    `btrfs subvolume create /data/vol`、`btrfs subvolume snapshot -r /data/vol /data/snap1`（-r 唯讀）。
+    `btrfs filesystem usage /data` 看真實用量（df 會誤導）；`btrfs scrub start /data` 校驗資料；`btrfs send | receive` 增量傳輸快照。
+    快照不是備份：與原資料在同一個磁碟，磁碟壞了就一起沒了。
+- q: bind mount 是什麼？
+  keys: bind mount mount --bind 綁定掛載 chroot 容器 目錄映射
+  a: |-
+    bind mount 把某個目錄「再掛載」到另一處，兩處看到同一份資料，常用於 chroot 與容器。
+  d: |-
+    `mount --bind /src /dst`；唯讀：`mount -o remount,ro,bind /dst`（需分兩步）。`--rbind` 連同子掛載點一起。
+    fstab 寫法：`/src /dst none bind 0 0`。容器的 `-v` 掛載本質就是 bind mount。
+- q: 怎麼查檔案屬於哪個套件、套件裝了哪些檔案？
+  keys: dpkg -S dpkg -L rpm -qf 檔案屬於 套件 哪個套件
+  a: |-
+    Debian 系 dpkg -S 路徑 查歸屬、dpkg -L 套件 列檔案；RPM 系 rpm -qf 與 rpm -ql。
+  d: |-
+    `dpkg -S /usr/bin/ssh`、`dpkg -L openssh-client`、`apt-file search 檔名`（找「哪個套件有這個檔」，未安裝也能查）。
+    RPM：`rpm -qf /usr/bin/ssh`、`rpm -ql 套件`、`dnf provides 路徑`。驗證檔案是否被改動：`dpkg -V`、`rpm -V`。

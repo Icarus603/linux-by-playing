@@ -1,0 +1,21 @@
+id: "7-10"
+title: PATH：指令從哪裡來
+kind: practice
+story: "你打 ls，shell 怎麼知道它在哪？靠 PATH：一串用冒號隔開的目錄，shell 會依序在裡面找可執行檔。把你自己的工具目錄加進去，就能像內建指令一樣呼叫它。"
+goal: "~/tools 裡有個可執行檔 hello。讓你可以直接輸入 hello（不加路徑）就執行成功。"
+teaches: [export, which]
+xp: 25
+hints:
+  - "echo $PATH 先看目前的 PATH。"
+  - "export PATH=$PATH:$HOME/tools"
+  - "設好之後輸入 hello。"
+setup: |
+  cd /home/player
+  mkdir -p tools
+  printf '#!/bin/bash\necho hello-ran > /home/player/ran.txt\necho "Hello from the station!"\n' > tools/hello
+  chmod 755 tools/hello
+check: |
+  [[ "$LBP_LAST" == "hello" && "$LBP_RC" == "0" && "$(cat /home/player/ran.txt 2>/dev/null)" == "hello-ran" ]]
+solution: |
+  export PATH=$PATH:$HOME/tools
+  hello

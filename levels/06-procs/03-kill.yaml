@@ -1,0 +1,21 @@
+id: "6-03"
+title: kill：請它離開
+kind: learn
+story: "kill PID 預設送出 SIGTERM（15），客氣地請程序自己收拾後結束。starlink-daemon 該下班了。"
+goal: "找出 starlink-daemon 並用 kill 結束它。"
+teaches: [kill, pgrep]
+xp: 15
+hints:
+  - "pgrep -x starlink-daemon 取得 PID。"
+  - "kill <PID>"
+setup: |
+  cp -f /usr/bin/sleep /usr/local/bin/starlink-daemon
+  setsid setpriv --reuid=player --regid=player --init-groups -- starlink-daemon 100000 >/dev/null 2>&1 </dev/null &
+  sleep 0.3
+check: |
+  ! pgrep -x starlink-daemon >/dev/null
+cleanup: |
+  pkill -x starlink-daemon || true
+  rm -f /usr/local/bin/starlink-daemon
+solution: |
+  kill "$(pgrep -x starlink-daemon)"

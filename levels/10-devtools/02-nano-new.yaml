@@ -1,0 +1,14 @@
+id: "10-02"
+title: nano：建立新檔案
+kind: practice
+story: "nano 檔名 如果檔案不存在，就會建立一個新的空檔案，存檔時才真正寫入磁碟。寫短腳本、筆記都很方便。"
+goal: "用 nano 建立 motd.txt，內容只有一行：Kernel-7 online"
+teaches: [nano]
+xp: 25
+hints:
+  - "nano motd.txt，輸入文字，Ctrl-O 存檔，Ctrl-X 離開。"
+setup: ""
+check: |
+  [[ "$(cat /home/player/motd.txt 2>/dev/null)" == "Kernel-7 online" ]]
+solution: |
+  echo "Kernel-7 online" > motd.txt

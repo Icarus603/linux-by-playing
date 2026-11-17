@@ -1,0 +1,19 @@
+id: "4-01"
+title: wc：數一數
+kind: learn
+story: "接下來進入 Unix 的靈魂：文字處理。第一個工具 wc（word count）：-l 數行、-w 數字、-c 數位元組。"
+goal: "crew.txt 每行一位船員。用 wc -l 算出船員人數，answer 提交。"
+teaches: [wc]
+xp: 10
+hints:
+  - "wc -l crew.txt"
+setup: |
+  cd /home/player
+  for i in $(seq 1 42); do echo "crew-$i"; done > crew.txt
+check: |
+  [[ "$LBP_ANSWER" == "42" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "人數不對。"
+  exit 1
+solution: |
+  wc -l crew.txt
+  answer 42

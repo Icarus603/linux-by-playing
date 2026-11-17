@@ -1,0 +1,16 @@
+id: "1-14"
+title: 指令住在哪
+kind: practice
+story: "你打的每個指令其實都是磁碟上的一個程式。which 會告訴你它的完整路徑，type 還能分辨它是別名、內建還是外部程式。"
+goal: "用 which 找出 python3 的完整路徑，answer 提交。"
+teaches: [which, type]
+xp: 15
+hints:
+  - "which python3"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "/usr/bin/python3" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "路徑不對，直接用 which 查。"
+  exit 1
+solution: |
+  answer "$(which python3)"

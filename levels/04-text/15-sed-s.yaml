@@ -1,0 +1,20 @@
+id: "4-15"
+title: sed：搜尋取代
+kind: learn
+story: "sed 是串流編輯器。最常用的是 s/舊/新/g 取代文字，-i 直接修改檔案本身（改之前記得想想要不要備份）。"
+goal: "app.conf 裡的 localhost 全部要換成 10.0.0.5，直接修改檔案。"
+teaches: [sed]
+xp: 25
+hints:
+  - "sed -i 's/localhost/10.0.0.5/g' app.conf"
+setup: |
+  cd /home/player
+  printf 'db=localhost\ncache=localhost\nqueue=localhost\nname=kernel7\n' > app.conf
+check: |
+  cd /home/player
+  ! grep -q localhost app.conf && [[ $(grep -c '10.0.0.5' app.conf) -eq 3 ]] && grep -q 'name=kernel7' app.conf
+solution: |
+  sed -i 's/localhost/10.0.0.5/g' app.conf
+golf: 39
+golf_solution: |
+  sed -i s/localhost/10.0.0.5/g app.conf

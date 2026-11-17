@@ -1,0 +1,22 @@
+id: "4-07"
+title: 排行榜：uniq -c
+kind: practice
+story: "sort | uniq -c | sort -nr 是文字分析的經典三連招：統計每項出現幾次，再依次數排行。"
+goal: "ips.txt 是訪客 IP 紀錄。找出出現次數最多的 IP，answer 提交。"
+teaches: [uniq, sort]
+xp: 25
+hints:
+  - "sort ips.txt | uniq -c | sort -nr | head -1"
+setup: |
+  cd /home/player
+  { for i in 1 2 3 4 5 6 7; do echo 10.0.0.9; done; for i in 1 2 3; do echo 10.0.0.2; done; echo 10.0.0.5; echo 10.0.0.2; for i in 1 2 3 4; do echo 10.0.0.9; done; echo 10.0.0.7; } > ips.txt
+check: |
+  cd /home/player
+  exp=$(sort ips.txt | uniq -c | sort -nr | awk 'NR==1{print $2}')
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是出現最多的那個。"
+  exit 1
+solution: |
+  sort ips.txt | uniq -c | sort -nr | head -1
+  answer 10.0.0.9
+reveal: "最常出現的訪客 IP 是 10.0.0.9。它不屬於任何一位船員的設備。"

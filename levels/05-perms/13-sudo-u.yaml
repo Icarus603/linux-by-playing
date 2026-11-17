@@ -1,0 +1,25 @@
+id: "5-13"
+title: 以別人的身分執行
+kind: practice
+story: "sudo -u 使用者 指令 可以用指定使用者的身分執行指令，常用來測試「那個人實際看得到什麼」。ghost 的家目錄只有他自己進得去。"
+goal: "用 sudo -u ghost 讀出 /home/ghost/note.txt，answer 提交內容裡的暗號。"
+teaches: [sudo, su]
+xp: 25
+hints:
+  - "直接 cat /home/ghost/note.txt 會被拒絕。"
+  - "sudo -u ghost cat /home/ghost/note.txt"
+setup: |
+  id ghost >/dev/null 2>&1 || useradd -m -s /bin/bash ghost
+  echo "SIGNAL: ECHO-LIMA" > /home/ghost/note.txt
+  chown ghost:ghost /home/ghost/note.txt
+  chmod 700 /home/ghost
+check: |
+  [[ "$LBP_ANSWER" == "ECHO-LIMA" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "暗號不對。"
+  exit 1
+cleanup: |
+  userdel -r ghost 2>/dev/null || true
+solution: |
+  sudo -u ghost cat /home/ghost/note.txt
+  answer ECHO-LIMA
+reveal: "ghost 的暗號是 ECHO-LIMA。那個幽靈帳號是 Vega 替自己留的後門。"

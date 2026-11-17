@@ -1,0 +1,30 @@
+id: "9-18"
+title: scp：遠端複製
+kind: practice
+story: "scp 來源 目的 透過 SSH 複製檔案，遠端位置寫成 使用者@主機:路徑。注意 scp 的連接埠選項是大寫 -P（ssh 是小寫 -p）。"
+goal: "把本機的 local.txt 複製到 vaultkeeper 的家目錄，檔名叫 received.txt。（連接埠 2222）"
+teaches: [scp]
+xp: 45
+hints:
+  - "scp -P 2222 -o StrictHostKeyChecking=accept-new local.txt vaultkeeper@127.0.0.1:received.txt"
+setup: |
+  # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
+  id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper
+  usermod -p "*" vaultkeeper
+  mkdir -p /run/sshd; ssh-keygen -A >/dev/null 2>&1
+  rm -rf /home/player/.ssh; install -d -m 700 -o player -g player /home/player/.ssh
+  runuser -u player -- ssh-keygen -q -t ed25519 -N "" -f /home/player/.ssh/id_ed25519
+  install -d -m 700 -o vaultkeeper -g vaultkeeper /home/vaultkeeper/.ssh
+  install -m 600 -o vaultkeeper -g vaultkeeper /home/player/.ssh/id_ed25519.pub /home/vaultkeeper/.ssh/authorized_keys
+  /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o UsePAM=no -o PidFile=/run/lbp-sshd.pid
+  sleep 0.6
+  echo "report-$((RANDOM % 9000 + 1000))" > /home/player/local.txt; chown player:player /home/player/local.txt
+check: |
+  cmp -s /home/player/local.txt /home/vaultkeeper/received.txt
+cleanup: |
+  pkill -f "[s]shd -p 2222" 2>/dev/null || true
+  pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true
+  userdel -r vaultkeeper 2>/dev/null || true
+  rm -rf /home/player/.ssh
+solution: |
+  scp -q -P 2222 -o StrictHostKeyChecking=accept-new local.txt vaultkeeper@127.0.0.1:received.txt

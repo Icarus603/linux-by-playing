@@ -1,0 +1,20 @@
+id: "2-10"
+title: 萬用字元 ? 與 []
+kind: practice
+story: "? 剛好匹配「一個」任意字元；[abc] 匹配括號內任一字元。用它們可以精準挑檔案。"
+goal: "刪除 report-1.txt 到 report-9.txt（單一位數），但 report-10.txt 與 report-final.txt 要保留。"
+teaches: ["?", "[]"]
+xp: 20
+hints:
+  - "report-?.txt 只會匹配單一字元的那些。"
+  - "rm report-?.txt"
+setup: |
+  cd /home/player
+  for i in 1 2 3 4 5 6 7 8 9 10; do echo $i > report-$i.txt; done
+  echo f > report-final.txt
+check: |
+  cd /home/player
+  [[ -f report-10.txt && -f report-final.txt && $(ls report-?.txt 2>/dev/null | wc -l) -eq 0 ]]
+solution: |
+  rm report-?.txt
+golf: 15

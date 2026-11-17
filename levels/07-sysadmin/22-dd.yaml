@@ -1,0 +1,14 @@
+id: "7-22"
+title: dd：精確複製
+kind: practice
+story: "dd 以「區塊」為單位複製資料，if 是來源、of 是目的、bs 是區塊大小、count 是區塊數。常用來建立固定大小的測試檔，或複製磁碟映像。用錯 of= 會直接覆蓋掉整個磁碟，請格外小心。"
+goal: "用 dd 從 /dev/zero 讀取，建立一個剛好 5MB（5 × 1MB 區塊）的檔案 blob.bin。"
+teaches: [dd]
+xp: 25
+hints:
+  - "dd if=/dev/zero of=blob.bin bs=1M count=5"
+setup: ""
+check: |
+  [[ "$(stat -c %s /home/player/blob.bin 2>/dev/null)" == "5242880" ]]
+solution: |
+  dd if=/dev/zero of=blob.bin bs=1M count=5

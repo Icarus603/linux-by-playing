@@ -1,0 +1,22 @@
+#!/bin/bash
+# lbp-journalctl — 學習用的模擬日誌檢視器（配合 lbp-systemctl，不是真的 journald）。
+# 支援：-u 單元、-n 行數、-f 追蹤、-p err 只看錯誤、--no-pager（忽略）。
+LOGDIR=/var/log/lbp-journal
+units=(); n=""; follow=0; errs=0
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -u|--unit) u=$2; [[ $u == *.service ]] || u=$u.service; units+=("$u"); shift 2 ;;
+    -n|--lines) n=$2; shift 2 ;;
+    -f|--follow) follow=1; shift ;;
+    -p|--priority) errs=1; shift 2 ;;
+    --version) echo "lbp-journalctl (simulated journal for learning — not real journald)"; exit 0 ;;
+    *) shift ;;
+  esac
+done
+files=()
+if ((${#units[@]})); then for u in "${units[@]}"; do files+=("$LOGDIR/$u.log"); done
+else files=("$LOGDIR"/*.log); fi
+filter() { if ((errs)); then grep -iE 'error|fail|fatal|crit'; else cat; fi; }
+if ((follow)); then exec tail -n "${n:-10}" -f "${files[@]}"; fi
+out=$(cat "${files[@]}" 2>/dev/null | sort -s -k1,3 | filter)
+if [[ -n $n ]]; then echo "$out" | tail -n "$n"; else echo "$out"; fi

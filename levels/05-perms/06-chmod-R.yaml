@@ -1,0 +1,21 @@
+id: "5-06"
+title: 遞迴與大寫 X
+kind: practice
+story: "chmod -R 對整棵目錄樹生效。大寫 X 很聰明：只對「目錄」（以及本來就可執行的檔案）加 x，普通檔案不會被誤加執行權限。"
+goal: "public 目錄樹要對所有人公開唯讀：所有檔案其他人可讀，所有目錄其他人可讀可進入。檔案不要被加上執行權限。"
+teaches: [chmod]
+xp: 25
+hints:
+  - "chmod -R a+rX public"
+setup: |
+  cd /home/player
+  mkdir -p public/docs/old
+  echo a > public/index.html
+  echo b > public/docs/guide.txt
+  echo c > public/docs/old/legacy.txt
+  chmod -R go-rwx public
+check: |
+  cd /home/player/public
+  [[ -z "$(find . -type f ! -perm -o=r)" && -z "$(find . -type d ! -perm -o=rx)" && -z "$(find . -type f -perm /111)" ]]
+solution: |
+  chmod -R a+rX public

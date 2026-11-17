@@ -1,0 +1,36 @@
+id: "9-17"
+title: ssh：遠端登入
+kind: practice
+story: "ssh 使用者@主機 登入遠端機器，後面加指令就只執行那個指令再回來。-p 指定連接埠。第一次連線會問你是否信任主機指紋（-o StrictHostKeyChecking=accept-new 自動接受新的）。vaultkeeper 的保管室在本機 2222 埠，你的公鑰已經放好了。"
+goal: "用 ssh 以 vaultkeeper 的身分連到 127.0.0.1 的 2222 埠，讀出 ~/note.txt 的內容，answer 提交。"
+teaches: [ssh]
+xp: 45
+hints:
+  - "ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt"
+setup: |
+  # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
+  id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper
+  usermod -p "*" vaultkeeper
+  mkdir -p /run/sshd; ssh-keygen -A >/dev/null 2>&1
+  rm -rf /home/player/.ssh; install -d -m 700 -o player -g player /home/player/.ssh
+  runuser -u player -- ssh-keygen -q -t ed25519 -N "" -f /home/player/.ssh/id_ed25519
+  install -d -m 700 -o vaultkeeper -g vaultkeeper /home/vaultkeeper/.ssh
+  install -m 600 -o vaultkeeper -g vaultkeeper /home/player/.ssh/id_ed25519.pub /home/vaultkeeper/.ssh/authorized_keys
+  /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o UsePAM=no -o PidFile=/run/lbp-sshd.pid
+  sleep 0.6
+  c="NOTE-$((RANDOM % 9000 + 1000))"
+  echo "$c" > /home/vaultkeeper/note.txt; chown vaultkeeper:vaultkeeper /home/vaultkeeper/note.txt
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "內容不對。"
+  exit 1
+cleanup: |
+  pkill -f "[s]shd -p 2222" 2>/dev/null || true
+  pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true
+  userdel -r vaultkeeper 2>/dev/null || true
+  rm -rf /home/player/.ssh
+reveal: "保管員帳號裡有一張紙條：「我沒有失蹤。我被困在星網的離線節點裡，只能靠這些零碎的訊號求救。」"
+solution: |
+  ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt
+  answer "$(ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt)"

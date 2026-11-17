@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# 啟動遊戲。用法: scripts/play [build|verify|shell]
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd -P)"
+REG=ghcr.io/icarus603/linux-by-playing:latest
+# 在原始碼目錄裡執行就用本機建置的映像；用 install.sh 安裝的版本則使用 GHCR 上發布的映像
+if [ -f "$HERE/../Dockerfile" ]; then cd "$HERE/.."; IMAGE="${LBP_IMAGE:-lbp:dev}"; else IMAGE="${LBP_IMAGE:-$REG}"; fi
+SAVE="${LBP_SAVE_DIR:-$HOME/.linux-by-playing}"
+mkdir -p "$SAVE"
+
+build() { if [ -f Dockerfile ]; then docker build -t "$IMAGE" .; else docker pull "$IMAGE"; fi; }
+
+# 安全預設：不特權、不連外網、限制資源。需要 strace / 網路工具的 capability 另外加回。
+RUN_ARGS=(--rm --hostname kernel-7
+  --network "${LBP_NET:-none}"
+  --cap-add NET_ADMIN --cap-add SYS_PTRACE
+  --memory "${LBP_MEM:-5g}" --pids-limit 512
+  -v "$SAVE:/save")
+
+case "${1:-play}" in
+  build|update) build ;;
+  verify) docker image inspect "$IMAGE" >/dev/null 2>&1 || build
+          docker run --init "${RUN_ARGS[@]}" -e LBP_SAVE=/tmp/verify-save --entrypoint lbp "$IMAGE" verify "${2:-}" ;;
+  shell)  docker run -it "${RUN_ARGS[@]}" --entrypoint bash "$IMAGE" ;;
+  play)   docker image inspect "$IMAGE" >/dev/null 2>&1 || build
+          docker run -it "${RUN_ARGS[@]}" -e TERM=xterm-256color -e COLORTERM=truecolor "$IMAGE" ;;
+  reset)  if [ ! -f "$SAVE/state.json" ]; then echo "沒有存檔，不需要重置。"; exit 0; fi
+          read -r -p "這會清除 $SAVE 的所有進度，無法復原。輸入 yes 確認: " ans
+          [ "$ans" = "yes" ] && rm -f "$SAVE/state.json" && echo "已重置進度。" || echo "已取消。" ;;
+  *) echo "用法: $0 [play|update|build|verify|shell|reset]"; exit 1 ;;
+esac

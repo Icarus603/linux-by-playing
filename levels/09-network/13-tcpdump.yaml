@@ -1,0 +1,30 @@
+id: "9-13"
+title: tcpdump：抓封包
+kind: practice
+story: "tcpdump 直接看網路卡上的封包，是排查「到底有沒有送出去、有沒有收到」的最後手段。-i 指定介面、-nn 不解析名稱、-c 抓幾個就停、-w 存成檔案、後面可加過濾條件如 port 8080。抓封包需要 root。"
+goal: "抓取 lo 介面上 8080 埠的封包，存成 ~/cap.pcap：先在背景用 sudo tcpdump 抓（-c 6 抓六個就停），等它準備好，再用 curl 請求一次 http://127.0.0.1:8080/，最後 wait 等待抓包結束。"
+teaches: [tcpdump, sudo]
+xp: 50
+hints:
+  - "sudo tcpdump -i lo -nn -c 6 -w cap.pcap port 8080 &"
+  - "sleep 1，然後 curl -s http://127.0.0.1:8080/ > /dev/null"
+  - "最後 wait。可以用 sudo tcpdump -nn -r cap.pcap 讀回來看。"
+setup: |
+  rm -rf /srv/site; mkdir -p /srv/site; echo hello > /srv/site/index.html; chmod -R a+rX /srv/site
+  rm -f /home/player/cap.pcap
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  f=/home/player/cap.pcap
+  [[ -s $f ]] || { echo "還沒有 cap.pcap。"; exit 1; }
+  n=$(tcpdump -nn -r $f 2>/dev/null | grep -c '\.8080')
+  [[ $n -ge 4 ]] || { echo "封包檔裡沒有足夠的 8080 埠封包（要先開始抓，再發請求）。"; exit 1; }
+cleanup: |
+  pkill -f '[h]ttp.server 8080' 2>/dev/null || true
+  pkill -f '[t]cpdump -i lo' 2>/dev/null || true
+  rm -rf /srv/site
+solution: |
+  sudo tcpdump -i lo -nn -c 6 -w cap.pcap port 8080 >/dev/null 2>&1 &
+  sleep 1
+  curl -s http://127.0.0.1:8080/ > /dev/null
+  wait

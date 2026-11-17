@@ -1,0 +1,26 @@
+id: "10-12"
+title: git status 與 diff
+kind: practice
+story: "git status 是你最常下的指令：看哪些檔案改了、哪些已暫存、哪些沒被追蹤。git diff 顯示具體改了什麼（沒加 --staged 是還沒暫存的變更）。"
+goal: "版本庫 ~/repo 裡有三個檔案，其中只有一個被修改過但還沒提交。找出它，answer 提交檔名。"
+teaches: [git]
+xp: 35
+hints:
+  - "cd repo && git status"
+  - "git status --short 更簡潔，M 代表修改過。"
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/repo
+  P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo a > nav.conf && echo b > comms.conf && echo c > power.conf && git add . && git commit -qm base'
+  f=$(shuf -n1 -e nav.conf comms.conf power.conf)
+  P "echo changed >> /home/player/repo/$f"
+  mkdir -p /var/lib/lbp && echo "$f" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，用 git status 找標示 modified 的那個。"
+  exit 1
+solution: |
+  cd repo
+  git status --short
+  answer "$(git status --short | awk '{print $2}')"

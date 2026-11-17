@@ -1,0 +1,22 @@
+id: "11-04"
+title: xxd：十六進位檢視
+kind: practice
+story: "xxd 把檔案顯示成十六進位加對照的文字。檔案開頭的幾個位元組（魔術數字）能告訴你它真正的格式。-l 限制長度、-p 輸出純十六進位。"
+goal: "magic.bin 開頭 4 個位元組是這個檔案的識別碼。用 xxd 讀出來，answer 提交（8 個小寫十六進位字元，不含空格）。"
+teaches: [xxd, hexdump]
+xp: 40
+hints:
+  - "xxd -l 4 magic.bin"
+  - "xxd -l 4 -p magic.bin 直接得到連續的十六進位。"
+setup: |
+  cd /home/player
+  h=$(openssl rand -hex 4)
+  { echo "$h" | xxd -r -p; head -c 100 /dev/urandom; } > magic.bin
+  mkdir -p /var/lib/lbp && echo "$h" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "${LBP_ANSWER,,}" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，要前 4 個位元組，共 8 個十六進位字元。"
+  exit 1
+solution: |
+  xxd -l 4 -p magic.bin
+  answer "$(xxd -l 4 -p magic.bin)"

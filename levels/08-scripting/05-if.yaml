@@ -1,0 +1,22 @@
+id: "8-05"
+title: if 與檔案測試
+kind: practice
+story: "if 搭配 test（[ ]）或 [[ ]] 判斷條件：-f 是一般檔案、-d 是目錄、-e 是存在。這是腳本做決策的基本功。"
+goal: "寫 probe.sh PATH：路徑是檔案就印 file、是目錄就印 dir、不存在就印 missing。"
+teaches: [test, bash]
+xp: 30
+hints:
+  - "if [ -f \"$1\" ]; then ... elif [ -d \"$1\" ]; then ... else ... fi"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/probe.sh ]] || { echo "還沒有 probe.sh。"; exit 1; }
+  [[ "$(P 'bash probe.sh /etc/hostname')" == file && "$(P 'bash probe.sh /etc')" == dir && "$(P 'bash probe.sh /no/such/path')" == missing ]]
+solution: |
+  cat > probe.sh <<'EOS'
+  #!/bin/bash
+  if [ -f "$1" ]; then echo file
+  elif [ -d "$1" ]; then echo dir
+  else echo missing
+  fi
+  EOS

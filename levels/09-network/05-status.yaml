@@ -1,0 +1,28 @@
+id: "9-05"
+title: HTTP 狀態碼
+kind: practice
+story: "HTTP 回應的第一件事是狀態碼：200 成功、301 轉址、403 禁止、404 找不到、500 伺服器錯誤。curl -I 只看標頭，-s -o /dev/null -w '%{http_code}' 可以只印狀態碼。"
+goal: "p1.html、p2.html、p3.html 三個路徑裡，只有一個真的存在（回 200）。找出是哪一個，answer 提交檔名。"
+teaches: [curl]
+xp: 30
+hints:
+  - "curl -I http://127.0.0.1:8080/p1.html 看第一行。"
+  - "curl -s -o /dev/null -w '%{http_code}\\n' 網址 只印狀態碼。"
+setup: |
+  rm -rf /srv/site; mkdir -p /srv/site
+  n=$((RANDOM % 3 + 1))
+  echo "ok" > /srv/site/p$n.html
+  chmod -R a+rX /srv/site
+  mkdir -p /var/lib/lbp && echo "p$n.html" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，逐一檢查三個路徑的狀態碼。"
+  exit 1
+cleanup: |
+  pkill -f '[h]ttp.server 8080' 2>/dev/null || true
+  rm -rf /srv/site
+solution: |
+  for i in 1 2 3; do curl -s -o /dev/null -w "p$i %{http_code}\n" http://127.0.0.1:8080/p$i.html; done
+  answer "$(for i in 1 2 3; do [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/p$i.html)" = 200 ] && echo p$i.html; done)"

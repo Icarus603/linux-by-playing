@@ -1,0 +1,22 @@
+id: "2-13"
+title: 軟連結（捷徑）
+kind: learn
+story: "ln -s 目標 連結名 建立軟連結，類似捷徑。常見用法：讓 latest.log 永遠指向最新的日誌。"
+goal: 建立軟連結 latest.log，指向 logs/2024-05.log。
+teaches: [ln]
+xp: 15
+hints:
+  - "ln -s 目標 連結名稱"
+  - "ln -s logs/2024-05.log latest.log"
+setup: |
+  cd /home/player
+  mkdir -p logs
+  echo "may" > logs/2024-05.log
+  echo "apr" > logs/2024-04.log
+check: |
+  cd /home/player
+  [[ -L latest.log && "$(readlink latest.log)" == "logs/2024-05.log" && "$(cat latest.log)" == may ]]
+solution: |
+  ln -s logs/2024-05.log latest.log
+reveal: "latest.log 這個捷徑，被人改過指向。有人（或什麼東西）在偷偷改你的路徑。"
+golf: 33

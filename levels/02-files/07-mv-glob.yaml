@@ -1,0 +1,24 @@
+id: "2-07"
+title: 萬用字元 *
+kind: practice
+story: "日誌檔散落在家目錄。* 能匹配任意字元，*.log 代表「所有 .log 結尾的檔案」，一次搬完。"
+goal: 把所有 .log 檔案搬進 archive 目錄（readme.txt 要留在原地）。
+teaches: [mv, "*"]
+xp: 15
+hints:
+  - "archive 目錄已經存在了。"
+  - "mv *.log archive/"
+setup: |
+  cd /home/player
+  mkdir -p archive
+  for n in engine nav comms; do echo "$n" > $n.log; done
+  echo keep > readme.txt
+check: |
+  cd /home/player
+  [[ $(ls archive/*.log 2>/dev/null | wc -l) -eq 3 && $(ls *.log 2>/dev/null | wc -l) -eq 0 && -f readme.txt ]]
+solution: |
+  mv *.log archive/
+reveal: "歸檔的日誌裡，每晚 03:00 都有一筆不屬於任何人的寫入。寫入者的名字是 warden。"
+golf: 16
+golf_solution: |
+  mv *.log archive

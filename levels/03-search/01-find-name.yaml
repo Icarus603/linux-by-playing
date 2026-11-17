@@ -1,0 +1,21 @@
+id: "3-01"
+title: find：用名字找
+kind: learn
+story: "站上有幾千個檔案，不可能一個個翻。find 從指定目錄往下遞迴搜尋，-name 依檔名比對。"
+goal: "在 ship 目錄底下找出 radar.cfg 的位置，answer 提交完整路徑（相對或絕對都可以）。"
+teaches: [find]
+xp: 15
+hints:
+  - "find ship -name radar.cfg"
+setup: |
+  cd /home/player
+  mkdir -p ship/deck-{1,2,3,4}/{nav,comms,engine}
+  echo cfg > ship/deck-3/nav/radar.cfg
+  for d in ship/deck-*/comms; do echo x > $d/radio.cfg; done
+check: |
+  [[ "$LBP_ANSWER" == *ship/deck-3/nav/radar.cfg ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "路徑不對，用 find 的輸出直接複製。"
+  exit 1
+solution: |
+  find ship -name radar.cfg
+  answer ship/deck-3/nav/radar.cfg

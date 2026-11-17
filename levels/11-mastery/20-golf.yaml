@@ -1,0 +1,22 @@
+id: "11-20"
+title: 指令高爾夫：最大的三個檔案
+kind: combine
+story: "高手的標誌之一，是用最少的字元解決問題。不是為了炫技，而是代表你真的懂每個工具的行為。"
+goal: "logs/ 裡有 8 個大小不同的檔案。把「最大的三個檔名」（由大到小，每行一個）存成 top3.txt。"
+teaches: [ls, head]
+xp: 50
+hints:
+  - "ls -S 依大小排序（大到小）。"
+  - "接 head -3，再重導向到 top3.txt。"
+setup: |
+  cd /home/player
+  rm -rf logs; mkdir logs
+  i=0; for s in $(shuf -e 100 900 300 5000 700 2500 50 1200); do i=$((i+1)); truncate -s $s logs/log$i.txt; done
+check: |
+  cd /home/player
+  diff <(ls -S logs | head -3) top3.txt >/dev/null
+golf: 31
+golf_solution: |
+  ls -S logs|head -3>top3.txt
+solution: |
+  ls -S logs | head -3 > top3.txt

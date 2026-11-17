@@ -1,0 +1,35 @@
+id: "9-23"
+title: "Boss：入口網站打不開"
+kind: boss
+story: "星網傳來訊號，要求你開啟入口網站 http://portal:8088/。但它打不開。網路排錯要逐層來：名稱解析 → 服務有沒有在聽 → 防火牆有沒有擋。每一層都有問題。"
+goal: "讓 curl http://portal:8088/ 能成功取得內容。三個問題都要找出來並修好：名稱 portal 無法解析、沒有服務監聽 8088、防火牆擋住了 8088。（啟動服務可以執行 start-portal。）"
+teaches: [curl, getent, ss, iptables, tee]
+xp: 170
+hints:
+  - "先 curl -v http://portal:8088/，看是卡在哪一步。"
+  - "第一層：getent hosts portal 沒有結果 → 加進 /etc/hosts（127.0.0.1 portal）。"
+  - "第二層：ss -tln 沒有 8088 → 執行 start-portal。"
+  - "第三層：sudo iptables -S 會看到 DROP 8088 的規則 → 用 -D 刪掉。"
+  - "每修好一層就再 curl 一次，錯誤訊息會變。"
+setup: |
+  grep -v ' portal$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
+  rm -rf /srv/portal; mkdir -p /srv/portal; echo "PORTAL-OK" > /srv/portal/index.html; chmod -R a+rX /srv/portal
+  iptables -F INPUT; iptables -A INPUT -p tcp --dport 8088 -j DROP
+  printf '#!/bin/bash\nnohup python3 -m http.server 8088 --bind 127.0.0.1 --directory /srv/portal >/dev/null 2>&1 &\n' > /usr/local/bin/start-portal
+  chmod 755 /usr/local/bin/start-portal
+check: |
+  getent hosts portal >/dev/null || { echo "第一層：名稱 portal 還無法解析。"; exit 1; }
+  ss -tln | grep -q ':8088 ' || { echo "第二層：沒有服務在聽 8088。"; exit 1; }
+  ! iptables -S INPUT | grep -q 'dport 8088' || { echo "第三層：服務在聽，但防火牆還擋著 8088。"; exit 1; }
+  [[ "$(curl -s --max-time 2 http://portal:8088/ 2>/dev/null | tr -d '\n')" == "PORTAL-OK" ]]
+cleanup: |
+  pkill -f '[h]ttp.server 8088' 2>/dev/null || true
+  grep -v ' portal$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
+  iptables -F INPUT
+  rm -rf /srv/portal /usr/local/bin/start-portal
+reveal: "入口網站恢復了。第一則訊息從星網傳來：「我是 Vega。謝謝你們沒有放棄 Warden。我正在回來的路上。」"
+solution: |
+  echo '127.0.0.1 portal' | sudo tee -a /etc/hosts
+  start-portal
+  sleep 1
+  sudo iptables -D INPUT -p tcp --dport 8088 -j DROP

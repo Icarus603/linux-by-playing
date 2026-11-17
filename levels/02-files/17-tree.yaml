@@ -1,0 +1,22 @@
+id: "2-17"
+title: 看見整棵樹
+kind: practice
+story: "tree 把目錄結構畫成一棵樹，一眼看清層次。-L 限制深度，-a 顯示隱藏檔。"
+goal: "用 tree 觀察 vault，找出藏在最深一層的檔案名稱（含副檔名），answer 提交。"
+teaches: [tree]
+xp: 20
+hints:
+  - "tree vault"
+setup: |
+  cd /home/player
+  mkdir -p vault/a/b/c/d
+  echo x > vault/a/one.txt
+  echo x > vault/a/b/two.txt
+  echo x > vault/a/b/c/d/deepest.key
+check: |
+  [[ "$LBP_ANSWER" == "deepest.key" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "再往下看，要最深的一層。"
+  exit 1
+solution: |
+  tree vault
+  answer deepest.key

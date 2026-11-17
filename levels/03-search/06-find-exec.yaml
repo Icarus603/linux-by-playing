@@ -1,0 +1,19 @@
+id: "3-06"
+title: find 配 -exec
+kind: practice
+story: "-exec 讓 find 對每個結果執行指令，{} 代表目前的檔案，以 \\; 結尾。這是批次處理的利器。"
+goal: "scripts 底下所有 .sh 檔都還沒有執行權限。用 find -exec chmod +x 一次全部加上。"
+teaches: [find, chmod]
+xp: 25
+hints:
+  - "find scripts -name '*.sh' -exec chmod +x {} \\;"
+setup: |
+  cd /home/player
+  mkdir -p scripts/sub
+  for f in scripts/a.sh scripts/b.sh scripts/sub/c.sh; do echo '#!/bin/bash' > $f; chmod 644 $f; done
+  echo note > scripts/readme.txt
+check: |
+  cd /home/player/scripts
+  [[ -x a.sh && -x b.sh && -x sub/c.sh && ! -x readme.txt ]]
+solution: |
+  find scripts -name '*.sh' -exec chmod +x {} \;

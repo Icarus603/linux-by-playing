@@ -1,0 +1,21 @@
+id: "2-15"
+title: 偵探：file 與 stat
+kind: practice
+story: "副檔名不可信。file 會看檔案內容判斷真實類型，stat 則顯示詳細的元資料。"
+goal: "mystery 這個檔案沒有副檔名。用 file 查出它是哪種壓縮格式，answer 提交（gzip、bzip2 或 zip）。"
+teaches: [file, stat]
+xp: 20
+hints:
+  - "file mystery"
+setup: |
+  cd /home/player
+  echo "top secret" > s.txt
+  gzip -c s.txt > mystery
+  rm s.txt
+check: |
+  [[ "${LBP_ANSWER,,}" == "gzip" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，用 file 看它怎麼說。"
+  exit 1
+solution: |
+  file mystery
+  answer gzip

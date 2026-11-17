@@ -1,0 +1,209 @@
+# 專業知識：系統管理（systemd、套件、開機、核心）
+- q: systemctl 最常用的指令有哪些？
+  keys: systemctl start stop restart reload enable disable status is-active list-units mask 服務管理 systemd
+  a: |-
+    start/stop/restart/reload 控制現在；enable/disable 控制開機自動啟動；status 看狀態；mask 徹底禁止啟動。
+  d: |-
+    `systemctl status 服務`、`systemctl enable --now 服務`（啟用並立即啟動）、`systemctl list-units --failed`、`systemctl list-unit-files --state=enabled`、
+    `systemctl is-active/is-enabled/is-failed`、`systemctl daemon-reload`（改過 unit 檔後必做）、`systemctl cat 服務`（看最終生效的 unit，含 drop-in）、`systemctl show -p 屬性 服務`。
+    reload 只重新讀設定（服務需支援），restart 會中斷服務。
+- q: unit 檔怎麼寫？drop-in 是什麼？
+  keys: unit 檔 service unit systemctl edit drop-in override ExecStart Restart WantedBy 寫服務
+  a: |-
+    unit 分 [Unit]、[Service]、[Install] 三區。不要改套件提供的檔，用 systemctl edit 服務 建立 drop-in 覆寫。
+  d: |-
+    範例：[Unit] Description、After=network-online.target；[Service] ExecStart=/usr/local/bin/app、User=app、Restart=on-failure、RestartSec=5、Environment=KEY=val、EnvironmentFile=/etc/app.env；[Install] WantedBy=multi-user.target。
+    自訂檔放 /etc/systemd/system/，drop-in 在 /etc/systemd/system/服務.d/override.conf。改完 `daemon-reload` 再 restart。
+    Type：simple（預設）、forking、oneshot、notify（服務通知就緒）。ExecStart 必須用完整路徑。
+- q: 服務啟動失敗怎麼排查？
+  keys: 服務失敗 failed journalctl -xe status exit-code 啟動失敗 排查 systemd 錯誤
+  a: |-
+    先 systemctl status 看狀態與最後幾行日誌，再用 journalctl -u 服務 -b 看完整輸出，注意 exit code 與 signal。
+  d: |-
+    `journalctl -xeu 服務`、`journalctl -u 服務 --since "10 min ago" -o short-precise`。status 的 `Main PID ... status=203/EXEC` 代表執行檔找不到或不能執行，`217/USER` 是使用者不存在，
+    `200/CHDIR` 工作目錄不存在，`226/NAMESPACE` 沙箱設定問題。權限、SELinux、路徑、依賴順序（After=）是四大常見原因。
+    手動以相同使用者執行 ExecStart 的指令重現問題最快。
+- q: systemd timer 與 cron 比較？
+  keys: systemd timer cron 排程 OnCalendar systemctl list-timers Persistent 定時 timer unit
+  a: |-
+    timer 搭配同名 service，優勢是日誌整合、可補跑錯過的排程（Persistent）、不會重疊執行、可設資源限制。
+  d: |-
+    `foo.timer`：[Timer] OnCalendar=*-*-* 03:00:00、Persistent=true、RandomizedDelaySec=300；啟用 `systemctl enable --now foo.timer`；`systemctl list-timers`。
+    驗證時間表達式：`systemd-analyze calendar "Mon *-*-* 02:00"`。相對時間用 OnBootSec、OnUnitActiveSec。
+- q: cron 常見陷阱有哪些？
+  keys: cron 陷阱 環境變數 百分號 % PATH 不執行 crontab 日誌 mail 時區 每五分鐘 每幾分鐘 */5 crontab 怎麼寫 語法 範例 定時 每小時 每天
+  a: |-
+    cron 環境極簡（PATH 很短）、% 要跳脫成 \%、輸出會寄信、預設用系統時區。腳本一律用絕對路徑並重導向輸出。
+  d: |-
+    `*/5 * * * * /usr/local/bin/job.sh >> /var/log/job.log 2>&1`。`crontab -e` 編輯使用者的，系統級在 /etc/crontab 與 /etc/cron.d/（多一欄使用者）。
+    排查：`grep CRON /var/log/syslog` 或 `journalctl -u cron`。語法：分 時 日 月 星期（0 和 7 都是週日），`日` 與 `星期` 同時指定是「或」關係。
+    重要工作加 `flock` 避免重疊，並以 `MAILTO=""` 或日誌控制通知。
+- q: journalctl 有哪些實用過濾方式？
+  keys: journalctl -u -f -b -p --since --until -k -o json 日誌 過濾 journald
+  a: |-
+    journalctl -u 服務 -f 追蹤、-b 只看本次開機、-p err 只看錯誤以上、--since "1 hour ago" 限時間、-k 看核心訊息。
+  d: |-
+    `journalctl -b -1`（上次開機）、`-p warning..err`、`_PID=123`、`_SYSTEMD_UNIT=sshd.service`、`-o json-pretty`、`--no-pager`、`-g "關鍵字"`（grep）、`--disk-usage`。
+    預設可能不持久：建立 `/var/log/journal` 目錄後重啟 journald 即可永久保存。限制大小設 `SystemMaxUse=` 於 /etc/systemd/journald.conf。
+- q: systemd-analyze 能分析開機速度嗎？
+  keys: systemd-analyze blame critical-chain 開機慢 開機時間 啟動速度 plot
+  a: |-
+    systemd-analyze 看總開機時間，blame 列出各服務耗時，critical-chain 顯示關鍵路徑。
+  d: |-
+    `systemd-analyze`、`systemd-analyze blame | head`、`systemd-analyze critical-chain`、`systemd-analyze plot > boot.svg`。
+    等待網路（NetworkManager-wait-online）是常見拖慢來源；不需要的服務可 disable 或 mask。
+- q: 開機流程大致是什麼？
+  keys: 開機流程 boot uefi bios grub initramfs kernel systemd target 啟動順序
+  a: |-
+    韌體（UEFI/BIOS）→ 開機載入器（GRUB）→ 核心與 initramfs → systemd（PID 1）→ 依 target 啟動服務。
+  d: |-
+    initramfs 是臨時根檔案系統，負責載入驅動、組裝 RAID/LVM、解鎖加密並掛載真正的根。systemd 預設目標 `systemctl get-default`（multi-user.target 或 graphical.target）。
+    開機失敗常見位置：GRUB 設定、initramfs 缺驅動、/etc/fstab 錯誤、根檔案系統損壞。`journalctl -b -1` 可看上次開機日誌。
+- q: GRUB 與核心開機參數怎麼修改？
+  keys: grub 核心參數 /etc/default/grub update-grub grub2-mkconfig cmdline 開機參數 救援模式
+  a: |-
+    改 /etc/default/grub 的 GRUB_CMDLINE_LINUX，再 update-grub（Debian）或 grub2-mkconfig -o /boot/grub2/grub.cfg（RHEL）。
+  d: |-
+    查看當前參數：`cat /proc/cmdline`。臨時修改：開機時在 GRUB 選單按 e 編輯該次參數。
+    救援：附加 `systemd.unit=rescue.target`（單人模式）或 `init=/bin/bash`（根 shell，需 `mount -o remount,rw /`）。忘記 root 密碼也是此類流程。
+- q: 核心模組怎麼載入與管理？
+  keys: lsmod modprobe insmod rmmod modinfo blacklist 核心模組 驅動 dkms modules-load
+  a: |-
+    lsmod 列出已載入模組，modprobe 載入（自動處理依賴）、modprobe -r 移除、modinfo 看資訊。
+  d: |-
+    開機自動載入：`/etc/modules-load.d/*.conf`；禁用：`/etc/modprobe.d/blacklist.conf` 寫 `blacklist 模組`（需要時加 `install 模組 /bin/false` 更徹底）；參數：`options 模組 key=val`。
+    DKMS 會在核心更新時自動重編第三方模組。查驅動屬於哪個裝置：`lspci -k`、`lsusb`、`dmesg | grep 模組`。
+- q: dmesg 與核心日誌怎麼看？
+  keys: dmesg 核心訊息 -T -w --level 硬體錯誤 kernel ring buffer journalctl -k
+  a: |-
+    dmesg -T 顯示可讀時間，-w 持續追蹤，--level=err,warn 過濾；journalctl -k 效果相同且可回溯。
+  d: |-
+    硬體、驅動、OOM、檔案系統錯誤都會出現在這裡。若 `Operation not permitted`，是 `kernel.dmesg_restrict=1`，需要 sudo。
+    `dmesg -T | grep -iE "error|fail|oom|i/o|nvme|ext4|xfs|link is"`。
+- q: apt 與 dpkg 常用指令（Debian/Ubuntu）？
+  keys: apt dpkg apt-get apt-cache install remove purge autoremove hold 套件 debian ubuntu
+  a: |-
+    apt update 更新索引、apt install 安裝、apt remove/purge 移除、apt autoremove 清孤兒；dpkg -l / -L / -S 查詢本機套件。
+  d: |-
+    `apt search`、`apt show 套件`、`apt policy 套件`（版本與來源）、`apt list --installed`、`apt-mark hold 套件`（鎖版本）、`apt install 套件=版本`、`apt -f install`（修復依賴）、`dpkg --configure -a`（中斷後修復）。
+    `apt-get -s install`（模擬）。來源在 /etc/apt/sources.list(.d/)，金鑰管理改用 signed-by 而非全域 apt-key。
+- q: dnf 與 rpm 常用指令（RHEL/Fedora）？
+  keys: dnf yum rpm install remove update history versionlock 套件 rhel fedora centos
+  a: |-
+    dnf install/remove/update 管理套件；dnf provides 檔案 查檔案屬於誰；dnf history 可回復交易；rpm -qa、-qi、-ql 查詢。
+  d: |-
+    `dnf search`、`dnf info`、`dnf list installed`、`dnf history undo N`、`dnf versionlock add 套件`、`dnf repolist`、`dnf module list`。
+    `rpm -qf 檔案`、`rpm -V 套件`（驗證）、`rpm -qa --last`（最近安裝）。倉庫設定在 /etc/yum.repos.d/。
+- q: 怎麼處理套件衝突、鎖版本與降級？
+  keys: 降級 downgrade hold pin apt preferences versionlock 套件衝突 依賴 broken
+  a: |-
+    鎖版本用 apt-mark hold 或 dnf versionlock；降級指定版本安裝；依賴損壞用 apt -f install 修復。
+  d: |-
+    `apt install 套件=舊版本`、`apt-cache madison 套件` 列出可用版本。優先權設定在 /etc/apt/preferences.d/（Pin-Priority）。
+    dnf：`dnf downgrade 套件`。避免混用多個第三方倉庫造成依賴地獄；必要時用容器或獨立前綴安裝。
+- q: update-alternatives 是做什麼的？
+  keys: update-alternatives alternatives java python editor 預設版本 切換 版本管理
+  a: |-
+    update-alternatives 管理同一指令有多個實作時的預設（例如 editor、java、python），透過符號連結切換。
+  d: |-
+    `update-alternatives --config editor`（互動選擇）、`--display java`、`--set`、`--install /usr/bin/python python /usr/bin/python3.12 10`。
+    設定存在 /etc/alternatives/。多版本語言執行環境更建議用 mise、pyenv、nvm 或容器。
+- q: shell 啟動檔的載入順序？.bashrc 與 .profile 差在哪？
+  keys: .bashrc .profile .bash_profile /etc/profile 登入 shell 非登入 載入順序 環境變數 永久
+  a: |-
+    login shell 讀 /etc/profile 與 ~/.profile（或 .bash_profile）；互動非登入 shell 讀 ~/.bashrc。環境變數放 profile，別名與函式放 bashrc。
+  d: |-
+    SSH 登入是 login shell，開終端機視窗通常是非登入互動 shell。很多發行版的 .profile 會再 source ~/.bashrc。
+    非互動腳本兩者都不讀。系統層：/etc/environment（單純 KEY=VAL，不是 shell 語法）、/etc/profile.d/*.sh、/etc/bash.bashrc。
+    systemd 服務不會讀這些，要在 unit 設 Environment=。
+- q: 怎麼查系統與硬體資訊？
+  keys: uname lscpu lsblk lspci lsusb dmidecode lshw hwinfo os-release 硬體 系統資訊 版本
+  a: |-
+    uname -a 看核心、cat /etc/os-release 看發行版、lscpu、lsblk、lspci、lsusb、dmidecode 看硬體。
+  d: |-
+    `hostnamectl`（OS、核心、虛擬化）、`lscpu`、`free -h`、`lsblk -f`、`lspci -nnk`（含驅動）、`lsusb -t`、`sudo dmidecode -t memory`、`lshw -short`、`systemd-detect-virt`（是否虛擬機/容器）。
+    `getconf LONG_BIT`、`arch`。`cat /proc/cpuinfo`、`/proc/meminfo`、`/sys/class/` 是原始來源。
+- q: udev 是什麼？怎麼寫規則？
+  keys: udev udevadm 規則 裝置 命名 rules.d 熱插拔 usb
+  a: |-
+    udev 負責裝置節點與熱插拔事件。規則放在 /etc/udev/rules.d/，用 udevadm 測試與重載。
+  d: |-
+    `udevadm info -a -n /dev/sdb` 找可比對的屬性、`udevadm monitor` 即時看事件、`udevadm test`、`udevadm control --reload && udevadm trigger`。
+    範例：固定裝置名稱 `SUBSYSTEM=="net", ATTR{address}=="aa:bb:..", NAME="lan0"`；USB 插入觸發腳本用 `RUN+=`（不要做耗時工作）。
+- q: logrotate 怎麼設定？
+  keys: logrotate 日誌輪替 copytruncate postrotate compress rotate 設定 /etc/logrotate.d
+  a: |-
+    在 /etc/logrotate.d/ 為每個應用寫設定：rotate 份數、daily/weekly、compress、missingok、notifempty、必要時 postrotate 重新載入服務。
+  d: |-
+    測試：`logrotate -d /etc/logrotate.d/app`（模擬）、`logrotate -f` 強制。若程式不會重開日誌檔，用 `copytruncate`（有少量丟日誌風險）或在 postrotate 送 SIGHUP / `systemctl reload`。
+    `size 100M`、`maxage 30`、`dateext`、`create 0640 app app`。狀態記在 /var/lib/logrotate/status。
+- q: rsyslog 與 journald 的關係？
+  keys: rsyslog journald syslog 日誌 轉送 /var/log/syslog 日誌架構 遠端日誌
+  a: |-
+    journald 收集結構化日誌並存二進位；rsyslog 可從 journald 取走並寫成傳統文字檔或轉送到遠端。
+  d: |-
+    設定遠端日誌：rsyslog 的 `*.* @@loghost:514`（TCP）。journald 的 `ForwardToSyslog=yes`。
+    傳統位置：/var/log/syslog、messages、auth.log（Debian）／secure（RHEL）、kern.log。大型環境通常改送集中式日誌系統（Loki、ELK）。
+- q: 怎麼安全地重開機與排查「為什麼重開機」？
+  keys: reboot shutdown last -x 為什麼重開機 異常重啟 kernel panic watchdog 意外重開
+  a: |-
+    用 systemctl reboot；查原因用 last -x reboot shutdown 和 journalctl -b -1 -e 看上次開機的最後日誌。
+  d: |-
+    `last -x | head`、`journalctl -b -1 -n 100`、`journalctl --list-boots`。異常斷電通常沒有乾淨的 shutdown 紀錄。
+    kernel panic：設定 kdump 取得 vmcore；`/var/crash`。看 `dmesg` 有無 MCE、watchdog、OOM。雲端平台也可能是宿主機維護事件。
+- q: SysRq 魔術鍵是什麼？系統卡死時怎麼救？
+  keys: sysrq magic key REISUB 系統卡死 救援 強制重啟 /proc/sysrq-trigger
+  a: |-
+    SysRq 是核心層級的緊急指令。REISUB 序列可安全地重開機：unRaw、tErminate、kIll、Sync、Unmount、reBoot。
+  d: |-
+    啟用：`sysctl kernel.sysrq=1`。遠端也可 `echo b > /proc/sysrq-trigger`（立即重開，不同步，慎用）、`echo s > ...`（sync）、`echo f > ...`（觸發 OOM killer）。
+    鍵盤：Alt+SysRq+對應鍵。雲端主機無鍵盤時用 /proc/sysrq-trigger 或平台的強制重啟。
+- q: systemd 的 socket activation 與 tmpfiles 是什麼？
+  keys: socket activation systemd.socket tmpfiles.d sysusers 隨需啟動 暫存目錄 systemd-tmpfiles
+  a: |-
+    socket activation 讓 systemd 先監聽埠，有連線才啟動服務；tmpfiles.d 宣告開機要建立或清理的目錄與檔案。
+  d: |-
+    `foo.socket` 內 `ListenStream=8080`，連線到來時啟動 `foo.service`，可實現零停機重啟與延遲啟動。
+    /etc/tmpfiles.d/app.conf 範例：`d /run/app 0755 app app -`；套用 `systemd-tmpfiles --create`。/tmp 的清理期限也由它控制。
+- q: 怎麼管理本地化、時區與鍵盤設定？
+  keys: locale localectl timedatectl 時區 語系 utf-8 LANG LC_ALL 鍵盤 亂碼
+  a: |-
+    localectl 設定語系與鍵盤，timedatectl 設時區。亂碼多半是 LANG 與終端機編碼不一致，用 UTF-8。
+  d: |-
+    `locale -a`（已產生的語系）、`localectl set-locale LANG=zh_TW.UTF-8`、`timedatectl set-timezone Asia/Taipei`。Debian 系需 `locale-gen` 或 `dpkg-reconfigure locales`。
+    腳本中排序與字元比較受 LC_ALL 影響：需要位元組順序時用 `LC_ALL=C sort`，也更快。
+- q: ldconfig 與共享函式庫搜尋路徑？
+  keys: ldconfig ld.so.conf LD_LIBRARY_PATH ldd 共享函式庫 找不到 libxxx.so rpath
+  a: |-
+    動態連結器依 /etc/ld.so.conf.d/ 與快取找 .so；新增路徑後執行 ldconfig 更新快取。LD_LIBRARY_PATH 只適合臨時測試。
+  d: |-
+    `ldd 程式`（看依賴，不要對不信任的程式執行）、`ldconfig -p | grep 名稱`、`readelf -d 程式 | grep -E "NEEDED|RPATH|RUNPATH"`。
+    報錯 error while loading shared libraries：安裝對應套件，或把目錄寫入 /etc/ld.so.conf.d/xxx.conf 後 ldconfig。
+- q: 怎麼檢查某個指令實際會執行哪個檔案？
+  keys: which type command -v whereis hash alias 指令位置 哪個指令 優先順序 shadow
+  a: |-
+    type -a 指令 顯示所有同名項目（別名、函式、內建、檔案）的優先順序；which 只找 PATH 內的檔案。
+  d: |-
+    解析順序：別名 → 關鍵字 → 函式 → 內建 → PATH 內檔案。shell 會快取路徑，改過 PATH 或安裝新版後可用 `hash -r` 清除。
+    `command -v 名稱` 是腳本裡最可攜的檢查方式（`which` 行為因系統而異）。
+- q: 怎麼做系統層級的備份策略？
+  keys: 備份 策略 3-2-1 快照 還原測試 rsync borg restic 異地備份 備份驗證
+  a: |-
+    3-2-1 原則：三份資料、兩種媒體、一份異地。備份沒有「定期還原測試」就不能算有備份。
+  d: |-
+    工具：`rsync`（檔案同步）、`borgbackup` 與 `restic`（去重、加密、增量）、LVM/btrfs/ZFS 快照搭配外送。資料庫要用專屬工具（`pg_dump`、`mysqldump --single-transaction`）而非複製資料檔。
+    排程備份腳本要有失敗通知與保留策略（保留最近 N 份）。還原演練至少每季一次。
+- q: Linux 的目錄結構（FHS）有什麼重點？
+  keys: fhs 目錄結構 /etc /var /usr /opt /srv /proc /sys /dev /run /tmp /boot /home
+  a: |-
+    /etc 設定、/var 變動資料（日誌、快取）、/usr 程式與函式庫、/opt 第三方軟體、/srv 服務資料、/proc 與 /sys 是核心虛擬檔案系統、/run 執行期資料。
+  d: |-
+    /bin、/sbin、/lib 現多為指向 /usr 的連結（usrmerge）。/dev 是裝置檔；/mnt 與 /media 掛載點；/boot 核心與 GRUB；/root 是 root 的家；/tmp 重開機可清空；/var/tmp 重開機仍保留。
+    資料放 /srv 或 /var/lib/應用，設定放 /etc，不要把資料混在 /usr。
+- q: 怎麼設定 sudo 免密碼與安全地給使用者管理特定服務的權限？
+  keys: sudo 免密碼 管理服務 systemctl restart 最小權限 sudoers.d 特定指令
+  a: |-
+    在 /etc/sudoers.d/ 針對群組寫精確的指令授權，例如允許 systemctl restart nginx，避免開放完整 root。
+  d: |-
+    `%web ALL=(root) NOPASSWD: /usr/bin/systemctl restart nginx, /usr/bin/systemctl reload nginx`。路徑要用 `which systemctl` 確認。
+    萬用字元要小心（`systemctl * nginx` 可被濫用）。用 `visudo -cf` 檢查語法。

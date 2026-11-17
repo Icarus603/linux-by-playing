@@ -1,0 +1,177 @@
+# 專業知識：容器、虛擬化、版本控制與開發除錯
+- q: 容器的本質是什麼？和虛擬機有什麼不同？
+  keys: 容器 container 虛擬機 vm namespace cgroup 隔離 docker 原理
+  a: |-
+    容器是「被 namespace 隔離視野、被 cgroup 限制資源」的一般 Linux 程序，共用主機核心；虛擬機則各自有完整核心與虛擬硬體。
+  d: |-
+    容器啟動快、開銷小，但隔離較弱（核心漏洞影響所有容器）。主要機制：namespace（pid、net、mnt、uts、ipc、user）、cgroup、capabilities、seccomp、overlayfs 的分層檔案系統。
+    查看：`lsns`、`cat /proc/PID/cgroup`、`systemd-detect-virt --container`。容器內的 PID 1 要正確處理訊號與回收子程序（tini、`--init`）。
+- q: docker 常用的排查指令有哪些？
+  keys: docker ps logs exec inspect stats top 排查 容器 除錯 docker logs -f
+  a: |-
+    docker ps -a 看容器、docker logs -f 追日誌、docker exec -it 進入、docker inspect 看完整設定、docker stats 看資源。
+  d: |-
+    `docker logs --tail 100 -f 容器`、`docker exec -it 容器 sh`、`docker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}}' 容器`、`docker top`、`docker events`、`docker system df`。
+    容器一直重啟：看 ExitCode（137 常是被 SIGKILL 或 OOM，143 是 SIGTERM）。沒有 shell 的精簡映像可用 `docker debug`（新版）或 `nsenter -t $(docker inspect -f '{{.State.Pid}}' c) -a` 從主機進入。
+- q: Dockerfile 最佳實務？映像怎麼變小？
+  keys: dockerfile 映像 image 分層 multi-stage 多階段 縮小 快取 最佳實務 build
+  a: |-
+    用多階段建置、把變動少的層放前面利用快取、合併 RUN 並清理快取、使用精簡基底映像、不要以 root 執行。
+  d: |-
+    `FROM golang AS build ... FROM debian:stable-slim COPY --from=build /app /app`。`.dockerignore` 排除無關檔案。
+    `RUN apt-get update && apt-get install -y --no-install-recommends 套件 && rm -rf /var/lib/apt/lists/*`。釘住版本或摘要（digest）確保可重現。
+    `USER app` 降權、`HEALTHCHECK`、避免把秘密寫進映像層（用 BuildKit secret mount）。
+- q: docker 網路與資料卷怎麼運作？
+  keys: docker network bridge host volume bind mount -p 埠對應 網路模式 資料卷 持久化
+  a: |-
+    預設 bridge 網路用 -p 主機埠:容器埠 對外開放；volume 與 bind mount 讓資料在容器刪除後仍保留。
+  d: |-
+    `docker network ls`、`docker network inspect bridge`；同一自訂網路內容器可用名稱互相解析。`--network host` 直接使用主機網路。
+    資料：`-v 資料卷名:/data`（由 docker 管理）、`-v /主機路徑:/data:ro`（bind mount）、`--tmpfs /tmp`。-p 會透過 iptables DNAT 實作，所以可能繞過 ufw 的規則。
+- q: 容器資源限制怎麼設？
+  keys: docker run --memory --cpus --pids-limit 資源限制 cgroup oom 容器限制
+  a: |-
+    docker run --memory 512m --cpus 1.5 --pids-limit 256 限制記憶體、CPU 與程序數，底層就是 cgroup。
+  d: |-
+    超過記憶體上限會被 OOM kill（容器 ExitCode 137，`OOMKilled=true`）。`--memory-swap` 控制 swap。CPU：`--cpus` 是配額上限，`--cpu-shares` 是相對權重。
+    Java 等執行環境要使用感知容器限制的版本，否則會以主機資源配置堆積而被殺。
+- q: rootless 容器與 podman 有什麼優勢？
+  keys: podman rootless 無根容器 docker 替代 user namespace 安全 buildah
+  a: |-
+    podman 無常駐 daemon，可用一般使用者執行容器（rootless），透過 user namespace 降低逃逸風險，CLI 與 docker 相容。
+  d: |-
+    `podman run`、`podman ps`、`podman generate systemd`（或 Quadlet）把容器變成 systemd 服務、`podman build`、`podman-compose`。
+    rootless 限制：綁定 1024 以下埠、部分網路與 cgroup 功能需要額外設定（`net.ipv4.ip_unprivileged_port_start`、subuid/subgid）。
+- q: nsenter 與 unshare 怎麼用？
+  keys: nsenter unshare 命名空間 進入容器 lsns 隔離 pid mount net
+  a: |-
+    nsenter -t PID -a 進入某程序的所有命名空間（排查容器很好用）；unshare 建立新的命名空間執行指令。
+  d: |-
+    `nsenter -t PID -n ss -tlnp`（只進網路命名空間，用主機的工具看容器內網路）、`nsenter -t PID -m -p`、`lsns -t net`。
+    `unshare -fp --mount-proc -r bash` 建立新 PID 與使用者命名空間；`unshare -n` 沒有網路的環境。
+- q: Kubernetes 常用的 kubectl 排查指令？
+  keys: kubectl k8s kubernetes pod describe logs exec get events 排查 crashloopbackoff
+  a: |-
+    kubectl get pods -o wide 看狀態，kubectl describe pod 看事件，kubectl logs 看日誌，kubectl exec -it 進入容器。
+  d: |-
+    `kubectl logs -f pod -c 容器 --previous`（上一次崩潰的日誌）、`kubectl get events --sort-by=.lastTimestamp`、`kubectl top pod`、`kubectl rollout status/undo deployment/x`、`kubectl get pod x -o yaml`。
+    CrashLoopBackOff：看 previous 日誌與探針；ImagePullBackOff：映像名稱或憑證；Pending：資源不足或排程條件（describe 的 Events）；OOMKilled：提高 limits 或修記憶體。
+- q: git rebase 與 merge 有什麼差別？
+  keys: git rebase merge 差別 歷史 線性 變基 衝突 fast-forward
+  a: |-
+    merge 保留分支歷史並產生合併提交；rebase 把你的提交「重新接到」目標分支最新點之後，歷史較線性，但會改寫提交。
+  d: |-
+    `git rebase main`（在功能分支上）、衝突解決後 `git rebase --continue`、放棄 `--abort`。互動式整理：`git rebase -i HEAD~5`（squash、fixup、reword、drop）。
+    黃金守則：不要 rebase 已經推送且他人在用的公共分支。推送改寫過的分支要用 `git push --force-with-lease`（比 --force 安全）。
+- q: git 怎麼找回遺失的提交（reflog）？
+  keys: git reflog reset --hard 找回 遺失 提交 誤刪分支 復原 cherry-pick
+  a: |-
+    git reflog 記錄 HEAD 的所有移動，誤用 reset --hard 或刪分支後，從 reflog 找到舊提交再 git reset 或 git branch 還原。
+  d: |-
+    `git reflog`、`git reset --hard HEAD@{2}`、`git branch 救援 <hash>`、`git cherry-pick <hash>`。reflog 只在本地、預設保留約 90 天，未被引用的物件最終會被 gc。
+    放棄工作區修改：`git restore 檔案`；取消暫存：`git restore --staged 檔案`；退回上一提交但保留修改：`git reset --soft HEAD~1`。
+- q: git bisect 怎麼二分尋找引入錯誤的提交？
+  keys: git bisect 二分 找 bug 引入 提交 良好 壞 自動化
+  a: |-
+    git bisect start、標記 bad 與 good，git 會二分搜尋；用 git bisect run 腳本 可全自動找出是哪個提交壞掉。
+  d: |-
+    `git bisect start; git bisect bad HEAD; git bisect good v1.2; git bisect run ./test.sh`（腳本退出碼 0 好、1–127（125 除外）壞、125 跳過）。結束 `git bisect reset`。
+    範圍內提交越小越準，測試要穩定、可重現。
+- q: git stash、worktree、cherry-pick 的使用情境？
+  keys: git stash worktree cherry-pick 暫存 多工作目錄 挑選提交 hotfix 切換分支
+  a: |-
+    stash 暫存未提交修改；worktree 讓同一個倉庫同時檢出多個分支到不同目錄；cherry-pick 把某個提交套用到目前分支。
+  d: |-
+    `git stash push -m 訊息 -u`（含未追蹤）、`git stash list/pop/apply`；`git worktree add ../hotfix hotfix-branch`；`git cherry-pick -x <hash>`（記錄來源）。
+    緊急修補時用 worktree 不需要先收拾手上的修改。`git stash` 衝突時處理方式與 merge 相同。
+- q: git 設定、hooks 與常見效能問題？
+  keys: git config hooks pre-commit gitignore lfs 大檔案 設定 .gitconfig 全域
+  a: |-
+    git config --global 設定使用者與別名；hooks 放在 .git/hooks 或用 core.hooksPath 共用；大二進位檔案用 Git LFS。
+  d: |-
+    `git config --global user.name/user.email`、`git config --global alias.st status -sb`、`core.autocrlf input`、`pull.rebase true`、`init.defaultBranch main`。
+    pre-commit 可跑 lint 與測試。誤提交機密：刪除歷史要用 `git filter-repo`，而且已推送的機密必須視為外洩並更換。`.gitignore` 對已追蹤的檔案無效，需要 `git rm --cached`。
+- q: Makefile 的基本結構與常見陷阱？
+  keys: makefile make target 依賴 phony 變數 tab 自動變數 $@ $< 建置
+  a: |-
+    規則是「目標: 依賴」換行後用 Tab 開頭寫指令；.PHONY 宣告不對應檔案的目標；$@ 是目標、$< 是第一個依賴。
+  d: |-
+    `CC=gcc`、`%.o: %.c`（模式規則）、`$(wildcard *.c)`、`$(patsubst %.c,%.o,$(SRC))`、`-j$(nproc)` 平行編譯、`make -n` 只列出將執行的指令、`make V=1` 或 `-d` 除錯。
+    錯誤 `missing separator` 多半是用了空格取代 Tab。每條指令行是獨立 shell，要連續執行用 `&&` 或 `.ONESHELL`。
+- q: 編譯 C 程式的基本流程與 gcc 常用選項？
+  keys: gcc 編譯 連結 -o -g -O2 -Wall -I -L -l pkg-config 靜態 動態 c程式
+  a: |-
+    gcc -Wall -O2 -g main.c -o app；-I 指定標頭檔路徑、-L 函式庫路徑、-l 連結函式庫；用 pkg-config 取得旗標。
+  d: |-
+    `gcc -Wall -Wextra -O2 -g -c a.c`（只編譯）、`gcc a.o b.o -o app -lm`（連結）、`$(pkg-config --cflags --libs openssl)`、`-static`（靜態連結）、`-fsanitize=address,undefined`（偵錯神器）。
+    `ldd app`、`nm app`、`objdump -d app`、`readelf -a app`、`strings app` 檢視產物。多檔專案用 make 或 cmake。
+- q: valgrind 與 sanitizer 怎麼找記憶體錯誤？
+  keys: valgrind sanitizer asan memcheck 記憶體錯誤 洩漏 越界 use after free
+  a: |-
+    valgrind --leak-check=full 程式 檢查洩漏與非法存取；編譯加 -fsanitize=address 速度更快、輸出更清楚。
+  d: |-
+    valgrind 會讓程式慢 10–50 倍，適合離線測試：`valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./app`。
+    ASan 需要重新編譯，額外開銷約 2 倍。同時考慮 `-fsanitize=undefined`、`thread`（資料競爭）。
+- q: Python 虛擬環境與套件管理的最佳實務？
+  keys: python venv pip uv virtualenv 虛擬環境 套件 依賴 requirements pyproject
+  a: |-
+    每個專案獨立虛擬環境：python3 -m venv .venv 再 source .venv/bin/activate；或使用 uv 這類快速工具管理環境與鎖檔。
+  d: |-
+    不要用系統 pip 全域安裝（PEP 668 的 externally-managed-environment 會阻擋）。`uv venv && uv pip install -r requirements.txt`、`uv run script.py`。
+    鎖定依賴：`pip freeze > requirements.txt` 或 pyproject 加鎖檔。系統自帶的 python3 是給系統工具用的，別動它。
+- q: tmux 進階使用？
+  keys: tmux 進階 attach detach session window pane copy-mode 設定 .tmux.conf 前綴 remote
+  a: |-
+    tmux new -s 名 建立、tmux attach -t 名 回來、前綴 Ctrl-b 加 d 離開（detach）；長時間遠端工作的標準工具。
+  d: |-
+    前綴後：`c` 新視窗、`n/p` 切換、`%` 左右分割、`"` 上下分割、`方向鍵` 切窗格、`z` 最大化窗格、`[` 進入複製模式（可捲動，vi 鍵位需 `setw -g mode-keys vi`）、`,` 重新命名視窗、`$` 重新命名 session。
+    `tmux ls`、`tmux kill-session -t 名`、`tmux send-keys -t 名 'cmd' Enter`、`tmux capture-pane -p -t 名`。設定檔 ~/.tmux.conf 改完 `tmux source-file ~/.tmux.conf`。
+- q: vim 的高效操作有哪些？
+  keys: vim 操作 效率 動作 文字物件 巨集 寄存器 搜尋取代 視覺模式 分割視窗
+  a: |-
+    記住「動詞 + 文字物件」：d、c、y 搭配 iw、ap、i" 等；. 重複上一個修改；q 錄製巨集；/ 搜尋；:%s 全域取代。
+  d: |-
+    移動：`w b e 0 $ gg G % { }`、`f字元`、`*`（搜尋游標下的詞）。編輯：`ci"`（改引號內）、`dap`（刪段落）、`yy p`、`u` 復原、`Ctrl-r` 重做、`.` 重複。
+    視覺：`v V Ctrl-v`（區塊模式可多行同時編輯）。巨集：`qa ... q` 後 `@a`、`10@a`。分割：`:sp :vsp Ctrl-w h/j/k/l`。取代前先確認：`:%s/舊/新/gc`。
+- q: ssh-agent 與金鑰管理？
+  keys: ssh-agent ssh-add 金鑰 通關密語 passphrase 代理 keychain 多把金鑰
+  a: |-
+    ssh-agent 把解鎖後的私鑰暫存在記憶體，用 ssh-add 加入，之後連線不必重複輸入通關密語。
+  d: |-
+    `eval "$(ssh-agent -s)"`、`ssh-add ~/.ssh/id_ed25519`、`ssh-add -l`、`ssh-add -D`。~/.ssh/config 用 `IdentityFile` 與 `IdentitiesOnly yes` 避免嘗試太多把金鑰被伺服器拒絕。
+    私鑰務必加通關密語；不同用途（GitHub、伺服器）使用不同金鑰。
+- q: KVM、libvirt 與 qemu 的基本概念？
+  keys: kvm qemu libvirt virsh 虛擬化 vm virt-install 虛擬機 kvm-ok
+  a: |-
+    KVM 是核心內建的虛擬化，qemu 提供裝置模擬，libvirt（virsh）是管理介面。
+  d: |-
+    檢查支援：`lscpu | grep -i virtualization`、`ls /dev/kvm`。`virsh list --all`、`virsh start/shutdown/destroy 名稱`、`virsh console`、`virt-install ...`、`qemu-img create -f qcow2 disk.qcow2 20G`、`qemu-img info`。
+    雲端映像搭配 cloud-init 初始化。雲端虛擬機內再開 KVM 需要巢狀虛擬化（nested）。
+- q: 怎麼做程序與服務的壓力測試與基準測試？
+  keys: 壓力測試 stress-ng ab wrk hey fio sysbench 基準 負載測試 效能測試
+  a: |-
+    CPU/記憶體用 stress-ng，磁碟用 fio，HTTP 用 wrk 或 ab，並對照監控指標判斷瓶頸。
+  d: |-
+    `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --timeout 60s`、`fio --name=t --rw=randread --bs=4k --iodepth=32 --size=1G --runtime=30 --direct=1`、`wrk -t4 -c100 -d30s URL`、`sysbench cpu run`。
+    壓測時同時看 `vmstat`、`iostat`、`ss -s`。在生產環境壓測要先取得許可並限制範圍。
+- q: GNU Make、cmake、autotools 差在哪？從原始碼安裝要注意什麼？
+  keys: 原始碼安裝 ./configure make install cmake autotools checkinstall prefix /usr/local
+  a: |-
+    傳統流程 ./configure && make && make install；cmake 用 cmake -B build && cmake --build build。盡量用套件管理員，源碼安裝預設放 /usr/local。
+  d: |-
+    `./configure --prefix=/opt/app`、`make -j$(nproc)`、`sudo make install`（用 `checkinstall` 或 `stow` 方便日後移除）。缺少依賴通常是 `-dev`/`-devel` 套件。
+    安裝在非標準路徑要處理 `PATH`、`LD_LIBRARY_PATH` 或 `ld.so.conf.d`。
+- q: 怎麼讀 strace 與 ltrace 的輸出找出問題？
+  keys: strace 輸出 解讀 enoent eacces futex epoll 卡住 系統呼叫 慢 -T
+  a: |-
+    找 -1 ENOENT（找不到檔案）、EACCES（權限）；卡在 futex、poll、epoll_wait 代表在等鎖或事件；-T 看每個呼叫花多久。
+  d: |-
+    `strace -f -tt -T -e trace=%file,%network -o t.txt cmd`。看 `connect(...) = -1 ECONNREFUSED`、`openat(...) = -1 ENOENT` 立即得知失敗原因。
+    統計：`strace -c -f cmd` 看哪個系統呼叫佔時間。對 Go 等多執行緒程式一定要加 -f。ltrace 追蹤函式庫呼叫（動態連結程式）。
+- q: 怎麼製作與使用 systemd 的使用者層級服務與容器化 cron？
+  keys: systemd --user 使用者服務 linger loginctl enable-linger user unit 背景服務 quadlet
+  a: |-
+    systemctl --user 管理使用者服務；loginctl enable-linger 使用者 讓它在登出後仍持續執行。
+  d: |-
+    unit 放 ~/.config/systemd/user/。`systemctl --user enable --now app.service`、`journalctl --user -u app`。遠端 ssh 使用者操作需要 `XDG_RUNTIME_DIR` 正確。
+    podman Quadlet：把 `.container` 檔放在 ~/.config/containers/systemd/，由 systemd 管理容器生命週期。

@@ -1,0 +1,20 @@
+id: "7-19"
+title: 開機自動啟動
+kind: practice
+story: "start 只是「現在啟動」；enable 才是「開機時自動啟動」。兩件事互不相干：可以 enable 了卻沒 start，也可以 start 了卻沒 enable。"
+goal: "nav.service 目前不會在開機時啟動。把它設成開機自動啟動。"
+teaches: [systemctl]
+xp: 25
+hints:
+  - "systemctl is-enabled nav 看目前狀態。"
+  - "sudo systemctl enable nav"
+setup: |
+  mkdir -p /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal
+  printf '[Unit]\nDescription=Station Nav\n[Service]\nExecStart=/usr/bin/sleep infinity\n' > /etc/lbp-systemd/nav.service
+  rm -f /etc/lbp-systemd/enabled/nav.service
+check: |
+  systemctl is-enabled nav >/dev/null 2>&1
+cleanup: |
+  rm -f /etc/lbp-systemd/nav.service /etc/lbp-systemd/enabled/nav.service
+solution: |
+  sudo systemctl enable nav

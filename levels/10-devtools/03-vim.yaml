@@ -1,0 +1,17 @@
+id: "10-03"
+title: vim：模式的藝術
+kind: learn
+story: "vim 是幾乎每台伺服器都有的編輯器。關鍵觀念：它有「模式」。一般模式（按 Esc 回來）用來移動與下指令；按 i 進入插入模式才能打字；: 開頭是命令列，:w 存檔、:q 離開、:wq 存檔離開、:q! 放棄修改離開。"
+goal: "用 vim 開啟 config.txt，把 mode=safe 改成 mode=fast，存檔離開。"
+teaches: [vim]
+xp: 35
+hints:
+  - "vim config.txt"
+  - "移到 safe 的位置，按 cw（改變一個單字）輸入 fast，再按 Esc。或按 i 進入插入模式手動改。"
+  - "輸入 :wq 然後 Enter 存檔離開。"
+setup: |
+  printf 'host=kernel7\nport=8080\nmode=safe\n' > /home/player/config.txt
+check: |
+  [[ "$(cat /home/player/config.txt)" == $'host=kernel7\nport=8080\nmode=fast' ]]
+solution: |
+  sed -i 's/mode=safe/mode=fast/' config.txt

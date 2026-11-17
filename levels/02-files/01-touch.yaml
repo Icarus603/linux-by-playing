@@ -1,0 +1,15 @@
+id: "2-01"
+title: 建立第一個檔案
+kind: learn
+story: "好的艙房需要整理。touch 能建立一個空檔案（如果檔案已存在，則只更新時間）。"
+goal: 在家目錄建立一個空檔案 notes.txt。
+teaches: [touch]
+xp: 10
+hints:
+  - "touch notes.txt"
+setup: ""
+check: |
+  [[ -f /home/player/notes.txt ]]
+solution: |
+  touch notes.txt
+golf: 15

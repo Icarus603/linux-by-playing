@@ -1,0 +1,18 @@
+id: "11-15"
+title: 移除帳號
+kind: practice
+story: "證據收好了，該清除入侵者的帳號。userdel 帳號 只刪帳號，加 -r 會連家目錄與信箱一起刪除。刪除前務必確認他沒有正在執行的程序。"
+goal: "刪除使用者 intruder，連同他的家目錄。"
+teaches: [userdel]
+xp: 40
+hints:
+  - "sudo userdel -r intruder"
+setup: |
+  id intruder >/dev/null 2>&1 || useradd -m -s /bin/bash intruder
+  echo "planted" > /home/intruder/.hidden
+check: |
+  ! id intruder >/dev/null 2>&1 && [[ ! -d /home/intruder ]]
+cleanup: |
+  userdel -r intruder 2>/dev/null || true
+solution: |
+  sudo userdel -r intruder

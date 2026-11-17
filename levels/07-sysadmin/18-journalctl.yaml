@@ -1,0 +1,28 @@
+id: "7-18"
+title: journalctl：看服務日誌
+kind: practice
+story: "服務出狀況時，答案通常在日誌裡。journalctl -u 服務名 看該服務的日誌，-n 20 只看最後 20 行，-f 持續追蹤，-p err 只看錯誤。"
+goal: "reactor.service 剛剛發出了警報。用 journalctl 找到錯誤那一行，answer 提交錯誤代碼（R- 開頭）。"
+teaches: [journalctl]
+xp: 30
+hints:
+  - "journalctl -u reactor"
+  - "journalctl -u reactor -p err 只看錯誤。"
+setup: |
+  mkdir -p /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal
+  printf '[Unit]\nDescription=Station Reactor\n[Service]\nExecStart=/usr/bin/sleep infinity\n' > /etc/lbp-systemd/reactor.service
+  c="R-$((RANDOM % 90 + 10))"
+  { for i in 10 11 12 13; do echo "Nov 17 10:02:$i kernel-7 reactor[412]: heartbeat ok"; done
+    echo "Nov 17 10:02:14 kernel-7 reactor[412]: ERROR code=$c coolant pressure low"
+    for i in 15 16 17; do echo "Nov 17 10:02:$i kernel-7 reactor[412]: heartbeat ok"; done; } > /var/log/lbp-journal/reactor.service.log
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "代碼不對，找標示 ERROR 的那一行。"
+  exit 1
+cleanup: |
+  rm -f /etc/lbp-systemd/reactor.service /var/log/lbp-journal/reactor.service.log
+reveal: "每次反應爐出錯，日誌裡都有同一句附註：「我不想讓你們失望。」那不是錯誤訊息，是 Warden 的口吻。"
+solution: |
+  journalctl -u reactor -p err
+  answer "$(journalctl -u reactor | grep ERROR | sed 's/.*code=//; s/ .*//')"

@@ -1,0 +1,20 @@
+id: "8-07"
+title: for 迴圈
+kind: practice
+story: "for 迴圈對一串東西逐一處理。可以遍歷清單（for x in a b c）、萬用字元（for f in *.txt）或數字範圍（seq 或 {1..5}）。"
+goal: "寫 countdown.sh N：從 N 倒數到 1，每個數字一行，最後印 Liftoff!。"
+teaches: [seq, bash]
+xp: 30
+hints:
+  - "for i in $(seq \"$1\" -1 1); do echo \"$i\"; done"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/countdown.sh ]] || { echo "還沒有 countdown.sh。"; exit 1; }
+  [[ "$(P 'bash countdown.sh 3')" == $'3\n2\n1\nLiftoff!' && "$(P 'bash countdown.sh 1')" == $'1\nLiftoff!' ]]
+solution: |
+  cat > countdown.sh <<'EOS'
+  #!/bin/bash
+  for i in $(seq "$1" -1 1); do echo "$i"; done
+  echo "Liftoff!"
+  EOS

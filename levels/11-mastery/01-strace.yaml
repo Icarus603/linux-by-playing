@@ -1,0 +1,34 @@
+id: "11-01"
+title: strace：看穿程式在做什麼
+kind: learn
+story: "最後的階段。launch-sys 啟動就失敗，只印出一句沒用的 launch failed。程式不肯說，但核心知道：strace 追蹤程式發出的每一個系統呼叫。-f 連子程序一起追、-e trace=openat 只看開檔動作。失敗的開檔會標示 ENOENT（找不到檔案）。"
+goal: "用 strace 找出 launch-sys 到底想打開哪個 /etc/station/ 底下的檔案卻失敗了，answer 提交完整路徑。"
+teaches: [strace]
+xp: 50
+hints:
+  - "strace -f -e trace=openat launch-sys"
+  - "輸出會有很多雜訊，用 2>&1 | grep station 過濾。"
+setup: |
+  mkdir -p /etc/station /var/lib/lbp
+  n=$((RANDOM % 9000 + 1000))
+  echo "/etc/station/relay-$n.conf" > /var/lib/lbp/answer; chmod 600 /var/lib/lbp/answer
+  cat > /usr/local/bin/launch-sys <<PY
+  #!/usr/bin/env python3
+  import sys
+  try:
+      open("/etc/station/relay-$n.conf")
+  except OSError:
+      print("launch failed")
+      sys.exit(1)
+  PY
+  chmod 755 /usr/local/bin/launch-sys
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "路徑不對，找 ENOENT 且在 /etc/station/ 底下的那一行。"
+  exit 1
+cleanup: |
+  rm -f /usr/local/bin/launch-sys; rm -rf /etc/station
+reveal: "程式不肯說的話，核心都記得。你忽然懂了 Warden 一路以來的處境：它一直在說「我沒事」，而真正的原因，藏在沒人看的系統呼叫裡。"
+solution: |
+  strace -f -e trace=openat launch-sys 2>&1 | grep station
+  answer "$(strace -f -e trace=openat launch-sys 2>&1 | grep -oE '/etc/station/[^"]+' | head -1)"

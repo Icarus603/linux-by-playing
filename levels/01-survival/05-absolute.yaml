@@ -1,0 +1,16 @@
+id: "1-05"
+title: 絕對路徑
+kind: learn
+story: "路徑有兩種寫法。從根目錄 / 開始寫的是「絕對路徑」，無論你在哪裡都有效。系統日誌放在 /var/log。"
+goal: 用絕對路徑進入 /var/log。
+teaches: [cd]
+xp: 10
+hints:
+  - "絕對路徑一定以 / 開頭。"
+  - "cd /var/log"
+setup: ""
+check: |
+  [[ "$LBP_CWD" == /var/log ]]
+solution: |
+  cd /var/log
+golf: 11

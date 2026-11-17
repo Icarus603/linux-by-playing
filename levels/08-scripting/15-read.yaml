@@ -1,0 +1,21 @@
+id: "8-15"
+title: 從標準輸入讀取
+kind: practice
+story: "腳本不只能吃參數，也能從標準輸入讀資料：read 變數 讀一行。這讓腳本能放在管線中間，接收別的指令的輸出。"
+goal: "寫 ask.sh：從標準輸入讀一行名字，印出 Hi, 名字!。例如 echo Ada | ./ask.sh 印 Hi, Ada!。"
+teaches: [read, bash]
+xp: 30
+hints:
+  - "read name"
+  - "echo \"Hi, $name!\""
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/ask.sh ]] || { echo "還沒有 ask.sh。"; exit 1; }
+  [[ "$(P 'echo Ada | bash ask.sh')" == "Hi, Ada!" && "$(P 'echo "Grace Hopper" | bash ask.sh')" == "Hi, Grace Hopper!" ]]
+solution: |
+  cat > ask.sh <<'EOS'
+  #!/bin/bash
+  read -r name
+  echo "Hi, $name!"
+  EOS

@@ -1,0 +1,17 @@
+id: "4-16"
+title: sed 取出指定行
+kind: practice
+story: "sed -n '起,迄p' 只印出指定範圍的行（-n 關掉預設輸出，p 是印出）。"
+goal: "story.txt 共 30 行。取出第 10 到第 12 行，存成 mid.txt。"
+teaches: [sed]
+xp: 20
+hints:
+  - "sed -n '10,12p' story.txt > mid.txt"
+setup: |
+  cd /home/player
+  for i in $(seq 1 30); do echo "chapter line $i"; done > story.txt
+check: |
+  cd /home/player
+  diff <(sed -n '10,12p' story.txt) mid.txt >/dev/null
+solution: |
+  sed -n '10,12p' story.txt > mid.txt

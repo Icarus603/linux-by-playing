@@ -1,0 +1,26 @@
+id: "4-21"
+title: jq：處理 JSON
+kind: practice
+story: "現代的 API 都回傳 JSON，grep 對它很吃力。jq 是專門處理 JSON 的工具：.欄位 取值，.[] 展開陣列，select() 篩選。"
+goal: "crew.json 是船員名單。找出職位（role）是 pilot 的人，answer 提交他的名字。"
+teaches: [jq]
+xp: 30
+hints:
+  - "jq '.crew[]' crew.json 先看結構。"
+  - "jq -r '.crew[] | select(.role==\"pilot\") | .name' crew.json"
+setup: |
+  cd /home/player
+  cat > crew.json <<'JSON'
+  {"station":"kernel-7","crew":[
+    {"name":"Ada","role":"engineer"},
+    {"name":"Grace","role":"pilot"},
+    {"name":"Linus","role":"medic"}
+  ]}
+  JSON
+check: |
+  [[ "$LBP_ANSWER" == "Grace" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是那位，確認 role 是 pilot。"
+  exit 1
+solution: |
+  jq -r '.crew[] | select(.role=="pilot") | .name' crew.json
+  answer Grace

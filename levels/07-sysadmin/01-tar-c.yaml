@@ -1,0 +1,18 @@
+id: "7-01"
+title: tar：打包
+kind: learn
+story: "tar 把多個檔案與目錄打包成一個檔案。-c 建立、-f 指定檔名（f 一定要放最後）、-v 顯示過程。備份的第一步就是打包。"
+goal: "把 docs 目錄打包成 archive.tar。"
+teaches: [tar]
+xp: 20
+hints:
+  - "tar -cf archive.tar docs"
+setup: |
+  cd /home/player
+  mkdir -p docs/sub
+  echo a > docs/a.txt; echo b > docs/sub/b.txt
+check: |
+  cd /home/player
+  [[ -f archive.tar ]] && tar -tf archive.tar | grep -q 'docs/a.txt' && tar -tf archive.tar | grep -q 'docs/sub/b.txt'
+solution: |
+  tar -cf archive.tar docs

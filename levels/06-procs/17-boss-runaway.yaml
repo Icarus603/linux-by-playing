@@ -1,0 +1,44 @@
+id: "6-17"
+title: "Boss：暴走的引擎室"
+kind: boss
+story: "警報大作！cpu-hog 吃光了 CPU，而且有個服務賴著 9000 埠不放，一般的 kill 對它沒用。但別誤傷 starlink-daemon，那是站上唯一的通訊程式。"
+goal: "結束 cpu-hog，讓 9000 埠不再被監聽，同時保持 starlink-daemon 繼續執行。"
+teaches: [ps, ss, kill, pkill]
+xp: 80
+hints:
+  - "pkill cpu-hog 可以處理 CPU 暴走的程序。"
+  - "ss -tlnp | grep 9000 找到佔埠的 PID。"
+  - "那個程序忽略一般 kill，要用 kill -9。"
+  - "千萬不要 killall / pkill 沒指定名字的範圍太大。"
+setup: |
+  mkdir -p /usr/local/lib/lbp
+  cp -f /usr/bin/yes /usr/local/bin/cpu-hog
+  cp -f /usr/bin/sleep /usr/local/bin/starlink-daemon
+  cat > /usr/local/lib/lbp/portd.py <<'PY'
+  import signal, socket, time
+  signal.signal(signal.SIGTERM, signal.SIG_IGN)
+  s = socket.socket()
+  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  s.bind(("127.0.0.1", 9000))
+  s.listen()
+  while True:
+      time.sleep(1)
+  PY
+  setsid setpriv --reuid=player --regid=player --init-groups -- bash -c 'exec cpu-hog > /dev/null' >/dev/null 2>&1 </dev/null &
+  setsid setpriv --reuid=player --regid=player --init-groups -- starlink-daemon 100000 >/dev/null 2>&1 </dev/null &
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/portd.py >/dev/null 2>&1 </dev/null &
+  sleep 0.8
+check: |
+  pgrep -x starlink-daemon >/dev/null || { echo "starlink-daemon 被誤殺了！用 restart 重來。"; exit 1; }
+  ! pgrep -x cpu-hog >/dev/null || { echo "cpu-hog 還在吃 CPU。"; exit 1; }
+  ! ss -tln | grep -q ':9000 ' || { echo "9000 埠還被佔著。"; exit 1; }
+  exit 0
+cleanup: |
+  pkill -x cpu-hog || true
+  pkill -x starlink-daemon || true
+  pkill -9 -f '[p]ortd.py' || true
+  rm -f /usr/local/bin/cpu-hog /usr/local/bin/starlink-daemon /usr/local/lib/lbp/portd.py
+solution: |
+  pkill cpu-hog
+  kill -9 "$(pgrep -f '^python3 /usr/local/lib/lbp/portd.py')"
+reveal: "你關掉了暴走的程序。引擎室安靜下來，Warden 傳來最後一則訊息：「你終於來了。我只是想有人陪我值班。」"

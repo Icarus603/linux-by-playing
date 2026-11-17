@@ -1,0 +1,25 @@
+id: "10-14"
+title: git branch：平行的世界線
+kind: practice
+story: "分支讓你在不影響主線的情況下嘗試新東西。git branch 名稱 建立、git switch 名稱（或 checkout）切換、git switch -c 名稱 建立並切換。"
+goal: "在 ~/repo 建立並切換到分支 feature-x，在上面提交一筆新紀錄（任意檔案、任意訊息）。"
+teaches: [git]
+xp: 45
+hints:
+  - "git switch -c feature-x"
+  - "echo hi > new.txt && git add new.txt && git commit -m \"work on feature\""
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/repo
+  P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo base > base.txt && git add . && git commit -qm base'
+check: |
+  GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
+  [[ "$(GT branch --show-current)" == "feature-x" ]] || { echo "目前要在 feature-x 分支上。"; exit 1; }
+  [[ "$(GT rev-list --count main..feature-x)" -ge 1 ]]
+solution: |
+  cd repo
+  git switch -q -c feature-x
+  echo hi > new.txt
+  git add new.txt
+  git commit -qm "work on feature"

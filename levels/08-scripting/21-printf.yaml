@@ -1,0 +1,23 @@
+id: "8-21"
+title: printf 排版
+kind: practice
+story: "printf 比 echo 更精確：%s 字串、%d 整數、%-8s 靠左對齊寬度 8、%5d 靠右對齊寬度 5，格式字串結尾要自己加 \\n。做報表非用它不可。"
+goal: "items.txt 每行是「品名 數量」。寫 table.sh：每行輸出成「品名靠左寬度 8、一條直線、數量靠右寬度 5」的格式，例如 fuel    |   10。"
+teaches: [printf, read, bash]
+xp: 45
+hints:
+  - "while read -r name qty; do printf '%-8s|%5d\\n' \"$name\" \"$qty\"; done < items.txt"
+setup: |
+  printf 'fuel 10\nfood 200\nparts 7\n' > /home/player/items.txt
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/table.sh ]] || { echo "還沒有 table.sh。"; exit 1; }
+  exp=$(while read -r a b; do printf '%-8s|%5d\n' "$a" "$b"; done < /home/player/items.txt)
+  [[ "$(P 'bash table.sh')" == "$exp" ]]
+solution: |
+  cat > table.sh <<'EOS'
+  #!/bin/bash
+  while read -r name qty; do
+    printf '%-8s|%5d\n' "$name" "$qty"
+  done < items.txt
+  EOS

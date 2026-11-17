@@ -1,0 +1,39 @@
+id: "10-23"
+title: "Boss：從零建立專案"
+kind: boss
+story: "站台需要一個全新的『任務』專案，要有版本控制、自動化建置與發行標記。這是你把編輯器、git、make 串起來的總驗收。"
+goal: "在 ~/mission 建立專案：git 版本庫；有 README.md；有 Makefile，其中 test 目標會印出 tests passed；至少兩筆提交；建立分支 release；並在最新提交上打上標籤 v1.0（git tag v1.0）。最後 make test 要能成功。"
+teaches: [git, make, nano, vim]
+xp: 180
+hints:
+  - "mkdir mission && cd mission && git init"
+  - "README.md 隨便寫幾個字；Makefile 的 test 目標：@echo tests passed（前面是 Tab）"
+  - "兩筆提交：先提交 README，再提交 Makefile。"
+  - "git branch release、git tag v1.0"
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/mission
+check: |
+  d=/home/player/mission
+  GT() { git -c safe.directory='*' -C $d "$@"; }
+  [[ -d $d/.git ]] || { echo "還沒有 git 版本庫 ~/mission。"; exit 1; }
+  [[ -f $d/README.md && -f $d/Makefile ]] || { echo "需要 README.md 與 Makefile。"; exit 1; }
+  [[ "$(GT rev-list --count HEAD 2>/dev/null)" -ge 2 ]] || { echo "至少要有兩筆提交。"; exit 1; }
+  GT rev-parse --verify -q release >/dev/null || { echo "還沒有 release 分支。"; exit 1; }
+  GT rev-parse --verify -q v1.0 >/dev/null || { echo "還沒有 v1.0 標籤。"; exit 1; }
+  [[ -z "$(GT status --porcelain)" ]] || { echo "還有沒提交的變更。"; exit 1; }
+  out=$(runuser -u player -- bash -c "cd $d && make test 2>&1")
+  [[ "$out" == "tests passed" ]] || { echo "make test 要印出 tests passed。"; exit 1; }
+reveal: "專案上線了。在最後一筆提交紀錄裡，你讀到 Vega 留下的一行字：「敵人從來不是 Warden。是我忘了關掉的那個清理排程。」"
+solution: |
+  mkdir mission && cd mission
+  git init -q
+  echo "# Mission" > README.md
+  git add README.md
+  git commit -qm "add readme"
+  printf 'test:\n\t@echo tests passed\n' > Makefile
+  git add Makefile
+  git commit -qm "add makefile"
+  git branch release
+  git tag v1.0

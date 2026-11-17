@@ -1,0 +1,23 @@
+id: "9-06"
+title: 下載檔案
+kind: practice
+story: "curl -o 檔名 網址 把回應存成檔案（-O 沿用遠端檔名），wget 網址 則預設就是下載存檔。-L 會跟隨轉址。"
+goal: "把 http://127.0.0.1:8080/firmware.bin 下載到家目錄，檔名叫 firmware.bin（內容要與伺服器上完全相同）。"
+teaches: [curl, wget]
+xp: 30
+hints:
+  - "curl -o firmware.bin http://127.0.0.1:8080/firmware.bin"
+  - "wget http://127.0.0.1:8080/firmware.bin 也行。"
+setup: |
+  rm -rf /srv/site; mkdir -p /srv/site
+  head -c 4096 /dev/urandom > /srv/site/firmware.bin
+  chmod -R a+rX /srv/site
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  cmp -s /home/player/firmware.bin /srv/site/firmware.bin
+cleanup: |
+  pkill -f '[h]ttp.server 8080' 2>/dev/null || true
+  rm -rf /srv/site
+solution: |
+  curl -s -o firmware.bin http://127.0.0.1:8080/firmware.bin

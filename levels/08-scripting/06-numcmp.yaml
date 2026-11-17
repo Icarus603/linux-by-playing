@@ -1,0 +1,22 @@
+id: "8-06"
+title: 數字比較
+kind: practice
+story: "數字比較用 -eq -ne -lt -le -gt -ge（不是 < >，那在 [ ] 裡是字串重導向的意思）。(( )) 裡可以直接用 < >。"
+goal: "寫 grade.sh N：N ≥ 90 印 A，N ≥ 60 印 pass，其餘印 fail。"
+teaches: [test, bash]
+xp: 30
+hints:
+  - "if [ \"$1\" -ge 90 ]; then echo A; elif [ \"$1\" -ge 60 ]; then echo pass; else echo fail; fi"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/grade.sh ]] || { echo "還沒有 grade.sh。"; exit 1; }
+  [[ "$(P 'bash grade.sh 95')" == A && "$(P 'bash grade.sh 60')" == pass && "$(P 'bash grade.sh 59')" == fail ]]
+solution: |
+  cat > grade.sh <<'EOS'
+  #!/bin/bash
+  if [ "$1" -ge 90 ]; then echo A
+  elif [ "$1" -ge 60 ]; then echo pass
+  else echo fail
+  fi
+  EOS

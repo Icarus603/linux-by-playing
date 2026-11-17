@@ -1,0 +1,25 @@
+id: "10-11"
+title: git：建立第一筆提交
+kind: learn
+story: "git 記錄檔案的每一次變化。git init 建立版本庫、git add 把變更放進暫存區、git commit -m 訊息 正式留下一筆紀錄。git 的使用者名稱與信箱已經替你設定好了。"
+goal: "把 ~/station 目錄變成 git 版本庫，將裡面的 core.conf 加入，提交一筆訊息為 initial commit 的紀錄。"
+teaches: [git]
+xp: 40
+hints:
+  - "cd station && git init"
+  - "git add core.conf"
+  - "git commit -m \"initial commit\""
+setup: |
+  P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
+  P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'
+  rm -rf /home/player/station
+  P 'mkdir -p /home/player/station && echo "reactor=on" > /home/player/station/core.conf'
+check: |
+  GT() { git -c safe.directory='*' -C /home/player/station "$@"; }
+  [[ "$(GT log --format=%s 2>/dev/null | head -1)" == "initial commit" && "$(GT log --oneline 2>/dev/null | wc -l)" == "1" ]]
+reveal: "版本庫的第一筆提交寫著：「初始化 Kernel-7 設定。願它比我更可靠。」作者是 vega。"
+solution: |
+  cd station
+  git init -q
+  git add core.conf
+  git commit -qm "initial commit"

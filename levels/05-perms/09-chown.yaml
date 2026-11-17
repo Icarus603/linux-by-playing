@@ -1,0 +1,20 @@
+id: "5-09"
+title: chown：換擁有者
+kind: practice
+story: "檔案被 root 建立後，你自己也改不了。chown 擁有者:群組 檔案 可以更換擁有者與群組，但需要 root 權限。"
+goal: "/srv/engine/engine.log 屬於 root，你無法寫入。用 sudo chown 把它的擁有者與群組都改成 player。"
+teaches: [chown, chgrp, sudo]
+xp: 20
+hints:
+  - "sudo chown player:player /srv/engine/engine.log"
+setup: |
+  rm -rf /srv/engine
+  mkdir -p /srv/engine
+  echo "boot ok" > /srv/engine/engine.log
+  chown root:root /srv/engine/engine.log
+check: |
+  [[ "$(stat -c %U:%G /srv/engine/engine.log)" == "player:player" ]]
+cleanup: |
+  rm -rf /srv/engine
+solution: |
+  sudo chown player:player /srv/engine/engine.log

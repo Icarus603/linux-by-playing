@@ -1,0 +1,21 @@
+id: "5-07"
+title: 一次調整多組
+kind: practice
+story: "符號模式可以用逗號一次寫多個調整：g+w,o-rwx 代表群組加寫入、其他人拿掉全部權限。"
+goal: "shared.txt 現在人人可讀寫（666）。調整成：擁有者與群組可讀寫，其他人沒有任何權限（660）。"
+teaches: [chmod]
+xp: 20
+hints:
+  - "chmod o-rw shared.txt"
+  - "或直接 chmod 660 shared.txt"
+setup: |
+  cd /home/player
+  echo data > shared.txt
+  chmod 666 shared.txt
+check: |
+  [[ "$(stat -c %a /home/player/shared.txt)" == "660" ]]
+solution: |
+  chmod o-rw shared.txt
+golf: 20
+golf_solution: |
+  chmod 660 shared.txt

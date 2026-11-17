@@ -1,0 +1,38 @@
+id: "5-18"
+title: "Boss：團隊共用目錄"
+kind: boss
+story: "開發團隊需要共用目錄 /srv/project：alice 和 bob（群組 dev）可以讀寫，新檔案要自動屬於 dev，彼此不能刪對方的檔案，外人 carol 完全不能進入。把這學期學到的權限技巧組合起來。"
+goal: "建立 /srv/project：群組設為 dev、權限 3770（setgid + sticky + 群組完全控制、其他人零權限）。"
+teaches: [mkdir, chgrp, chmod, sudo]
+xp: 70
+hints:
+  - "sudo mkdir /srv/project"
+  - "sudo chgrp dev /srv/project"
+  - "sudo chmod 3770 /srv/project：3 = setgid(2) + sticky(1)。"
+setup: |
+  getent group dev >/dev/null || groupadd dev
+  for u in alice bob carol; do id $u >/dev/null 2>&1 || useradd -m -s /bin/bash $u; done
+  usermod -aG dev alice
+  usermod -aG dev bob
+  rm -rf /srv/project
+check: |
+  [[ -d /srv/project ]] || { echo "還沒有建立 /srv/project。"; exit 1; }
+  [[ "$(stat -c %G /srv/project)" == dev ]] || { echo "目錄的群組要是 dev。"; exit 1; }
+  [[ "$(stat -c %a /srv/project)" == 3770 ]] || { echo "權限要同時有 setgid 與 sticky，且其他人零權限：3770。"; exit 1; }
+  rm -f /srv/project/t-alice /srv/project/t-bob
+  runuser -u alice -- touch /srv/project/t-alice || { echo "alice 應該能在目錄裡建立檔案。"; exit 1; }
+  [[ "$(stat -c %G /srv/project/t-alice)" == dev ]] || { echo "新檔案應該繼承 dev 群組。"; exit 1; }
+  runuser -u bob -- touch /srv/project/t-bob || { echo "bob 應該能建立檔案。"; exit 1; }
+  runuser -u bob -- rm /srv/project/t-alice 2>/dev/null && { echo "bob 不應該能刪除 alice 的檔案。"; exit 1; }
+  runuser -u carol -- ls /srv/project >/dev/null 2>&1 && { echo "carol 不屬於 dev，不應該能進入。"; exit 1; }
+  rm -f /srv/project/t-alice /srv/project/t-bob
+  exit 0
+cleanup: |
+  rm -rf /srv/project
+  for u in alice bob carol; do userdel -r $u 2>/dev/null || true; done
+  groupdel dev 2>/dev/null || true
+solution: |
+  sudo mkdir /srv/project
+  sudo chgrp dev /srv/project
+  sudo chmod 3770 /srv/project
+reveal: "共用目錄上鎖了。Warden 再也不能悄悄改別人的檔案。你守住了第一道門。"

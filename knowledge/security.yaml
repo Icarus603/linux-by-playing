@@ -1,0 +1,209 @@
+# 專業知識：安全與權限
+- q: setuid、setgid、sticky bit 是什麼？
+  keys: setuid setgid sticky suid sgid 特殊權限 4755 2755 1777 chmod u+s
+  a: |-
+    setuid 讓程式以「擁有者」身分執行，setgid 以「群組」身分執行（目錄上則讓新檔案繼承群組），sticky 讓目錄內的檔案只有擁有者能刪。
+  d: |-
+    八進位前綴：4 = setuid、2 = setgid、1 = sticky。`chmod 4755 f`（ls 顯示 rwsr-xr-x）、`chmod 2775 dir`、`chmod 1777 /tmp`。
+    顯示 S 或 T（大寫）代表特殊位元存在但對應的執行位沒開。setuid 程式是提權風險的核心：`find / -xdev -perm -4000 -type f 2>/dev/null` 定期稽核。
+    setuid 對腳本（shebang）無效，現代 Linux 出於安全忽略。
+- q: 怎麼稽核系統上有哪些 setuid 程式與可疑檔案？
+  keys: 稽核 find perm 4000 world writable 無擁有者 nouser nogroup 可疑檔案
+  a: |-
+    find / -xdev -perm -4000 找 setuid；-perm -o+w 找人人可寫；-nouser -o -nogroup 找孤兒檔案。
+  d: |-
+    `find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -ls`、`find / -xdev -type f -perm -o+w -ls 2>/dev/null`、`find / -xdev \( -nouser -o -nogroup \) -ls`。
+    把結果與已知基準比對（`rpm -Va`、`debsums -c`）。找近期被改動：`find /etc /usr/bin -mtime -2 -type f`。
+- q: Linux capabilities 是什麼？
+  keys: capabilities getcap setcap cap_net_bind_service cap_net_raw 能力 最小權限 提權
+  a: |-
+    把 root 的全能拆成細項能力（例如綁定低位埠 CAP_NET_BIND_SERVICE），程式只拿需要的，不必整個 setuid root。
+  d: |-
+    `getcap -r / 2>/dev/null` 稽核、`setcap cap_net_bind_service=+ep /usr/local/bin/app` 讓非 root 程式綁 80 埠、`capsh --print` 看目前能力。
+    systemd 服務：`AmbientCapabilities=CAP_NET_BIND_SERVICE`、`CapabilityBoundingSet=`。容器 `--cap-drop ALL --cap-add NET_BIND_SERVICE` 是常見的加固做法。
+- q: sudo 設定有哪些最佳實務？
+  keys: sudoers visudo sudo nopasswd sudo -l 最小權限 日誌 sudoers.d
+  a: |-
+    用 visudo 編輯並放在 /etc/sudoers.d/ 分檔；只授權必要指令的完整路徑；盡量避免 NOPASSWD: ALL。
+  d: |-
+    語法：`使用者 主機=(執行身分) [NOPASSWD:] 指令`，群組前加 `%`。檢查：`visudo -c`、`sudo -l -U 使用者`。檔案權限必須 440。
+    注意：允許 vi、less、find 等能「跳出 shell」的指令等於給了 root（GTFOBins）。日誌在 /var/log/auth.log 或 journal；`Defaults log_output` 可錄製會話。
+    `sudo -i` 開 root 登入 shell，`sudo -s` 保留環境，`sudo -u 使用者 指令` 切換身分。
+- q: su、sudo、sudo -i 有什麼不同？
+  keys: su sudo -i sudo -s 切換使用者 root shell 環境變數 login shell
+  a: |-
+    su 需要目標使用者的密碼；sudo 用自己的密碼並受 sudoers 規範；sudo -i 模擬 root 的 login shell（載入其環境）。
+  d: |-
+    `su - 使用者`（有減號會載入登入環境）、`sudo -u www-data whoami`。稽核上 sudo 會留下誰做了什麼，較佳。
+    可禁止 root 直接 ssh 登入，改成個人帳號加 sudo，才有個人可追溯性。
+- q: PAM 是什麼？設定檔在哪？
+  keys: pam /etc/pam.d faillock pam_limits pam_tally2 認證 模組 登入失敗鎖定
+  a: |-
+    PAM（可插拔認證模組）統一處理登入、sudo、ssh 等的認證、帳號、密碼、工作階段規則，設定在 /etc/pam.d/。
+  d: |-
+    每行：型別（auth、account、password、session）、控制旗標（required、requisite、sufficient、optional）、模組與參數。
+    登入失敗鎖定用 `pam_faillock`；資源限制由 `pam_limits` 讀 /etc/security/limits.conf。改 PAM 前務必保留一個已登入的 root 會話，改壞會把自己鎖在外面。
+- q: SELinux 基礎怎麼看與排查？
+  keys: selinux getenforce setenforce ls -Z restorecon audit2allow semanage 安全上下文 selinux denied
+  a: |-
+    getenforce 看模式；ls -Z 看安全上下文；被擋時查 ausearch -m avc，修正標籤用 restorecon，不要直接關閉 SELinux。
+  d: |-
+    模式：Enforcing、Permissive（只記錄不阻擋，排查用）、Disabled。臨時切換 `setenforce 0|1`。
+    流程：`ausearch -m avc -ts recent`、`sealert -a /var/log/audit/audit.log`；檔案標籤錯：`restorecon -Rv /path`；自訂路徑：`semanage fcontext -a -t httpd_sys_content_t "/srv/web(/.*)?"` 再 restorecon；
+    布林值：`getsebool -a | grep httpd`、`setsebool -P httpd_can_network_connect on`。最後才用 `audit2allow` 產生自訂政策。
+- q: AppArmor 怎麼看與調整？
+  keys: apparmor aa-status aa-complain aa-enforce 強制存取控制 ubuntu profile
+  a: |-
+    aa-status 看已載入的 profile；被擋時改成 complain 模式觀察，再調整 profile。
+  d: |-
+    `aa-status`、`aa-complain /usr/sbin/某服務`、`aa-enforce ...`、`aa-logprof` 依日誌互動產生規則。拒絕記錄在 `journalctl | grep apparmor=\"DENIED\"` 或 /var/log/audit。
+    profile 放在 /etc/apparmor.d/，改完 `apparmor_parser -r 檔案` 重新載入。
+- q: auditd 能做什麼？
+  keys: auditd auditctl ausearch aureport 稽核 audit 檔案監控 系統呼叫稽核
+  a: |-
+    auditd 記錄安全相關事件。用 auditctl -w 監控檔案變動，ausearch 查詢、aureport 產生摘要。
+  d: |-
+    監控設定檔被改：`auditctl -w /etc/passwd -p wa -k passwd_changes`；查詢 `ausearch -k passwd_changes -i`；永久規則放 /etc/audit/rules.d/。
+    也可稽核系統呼叫：`auditctl -a always,exit -F arch=b64 -S execve -k exec`。事件量大要留意磁碟與效能。
+- q: sshd 加固有哪些重點？
+  keys: sshd_config 加固 hardening permitrootlogin passwordauthentication allowusers 加固 ssh安全
+  a: |-
+    停用 root 與密碼登入、只用金鑰、限制可登入使用者、改用較新的演算法並啟用 fail2ban 或 MaxAuthTries。
+  d: |-
+    建議設定：`PermitRootLogin no`、`PasswordAuthentication no`、`KbdInteractiveAuthentication no`、`AllowUsers alice bob`（或 AllowGroups）、`MaxAuthTries 3`、`LoginGraceTime 30`、`X11Forwarding no`、`ClientAliveInterval 300`。
+    改完 `sshd -t` 驗證再 `systemctl reload sshd`，並保持原本連線不要關，另開視窗測試新連線。更改埠只能擋掃描機器人，不是真正的安全措施。
+- q: fail2ban 怎麼運作？
+  keys: fail2ban 封鎖 暴力破解 jail fail2ban-client ban 登入失敗
+  a: |-
+    fail2ban 監看日誌，偵測到同一 IP 多次失敗就用防火牆暫時封鎖。fail2ban-client status sshd 看狀態。
+  d: |-
+    設定放 /etc/fail2ban/jail.local（不要改 jail.conf）：`[sshd] enabled=true maxretry=5 findtime=10m bantime=1h`。
+    `fail2ban-client set sshd unbanip IP` 解除；`fail2ban-regex 日誌 過濾器` 測試規則。自己被擋時加到 ignoreip。
+- q: /etc/passwd、/etc/shadow、/etc/group 的格式？
+  keys: /etc/passwd /etc/shadow /etc/group 格式 密碼雜湊 欄位 帳號資料庫 getent
+  a: |-
+    passwd 七欄：名稱:x:uid:gid:說明:家目錄:shell；shadow 存密碼雜湊與到期資訊，只有 root 能讀。
+  d: |-
+    shadow 欄位：名稱:雜湊:最後變更日:最小:最大:警告:停用:到期。雜湊前綴 `$6$` 是 SHA-512、`$y$` 是 yescrypt、`!` 或 `*` 開頭代表鎖定或無密碼。
+    查詢用 `getent passwd 名稱`（涵蓋 LDAP 等來源）。直接編輯用 `vipw` / `vigr` 才有鎖保護。
+- q: 帳號與密碼政策怎麼管理（chage、passwd）？
+  keys: chage passwd usermod -L 密碼到期 密碼政策 鎖定 帳號到期 強制修改
+  a: |-
+    chage -l 看密碼期限，chage -M 90 設最長天數，passwd -l 鎖定，usermod -L 也可鎖。
+  d: |-
+    `chage -l user`、`chage -d 0 user`（下次登入強制改密碼）、`chage -E 2026-12-31 user`（帳號到期）。
+    鎖定密碼不會阻止金鑰登入；要完全禁止登入用 `usermod -s /usr/sbin/nologin` 並鎖密碼，或 `usermod -e 1`。
+- q: 怎麼查誰登入過、有沒有可疑登入？
+  keys: last lastb who w lastlog 登入紀錄 可疑登入 auth.log secure 入侵調查
+  a: |-
+    last 看成功登入、lastb 看失敗登入、who 與 w 看目前在線者，日誌在 /var/log/auth.log 或 /var/log/secure。
+  d: |-
+    `last -F -n 20`、`lastb | head`、`lastlog`、`w`。ssh 暴力破解統計：`grep "Failed password" /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr | head`。
+    journald 系統：`journalctl -u sshd --since today | grep -i "accepted\|failed"`。
+- q: 懷疑伺服器被入侵，第一步該做什麼？
+  keys: 入侵 被駭 事件回應 incident 可疑程序 後門 調查 取證 隔離
+  a: |-
+    先保留證據再處理：記錄現況（程序、連線、登入）、必要時網路隔離，不要急著重開機或刪除檔案。
+  d: |-
+    快照式檢查清單：`ps auxf`、`ss -tulpn`、`lsof -i`、`last -F`、`crontab -l` 與 /etc/cron*、`systemctl list-unit-files --state=enabled`、
+    `find / -xdev -mtime -3 -type f`、`~/.ssh/authorized_keys`、/etc/rc.local、`ld.so.preload`、可疑的 setuid 檔案、`rpm -Va`/`debsums`。
+    記憶體與網路連線屬於揮發性證據，先收集。確認後以乾淨映像重建並更換所有金鑰與密碼，單純清理很難確保乾淨。
+- q: umask 是什麼？022 和 077 差在哪？
+  keys: umask 022 077 預設權限 遮罩 新檔案權限
+  a: |-
+    umask 是要從預設權限拿掉的位元。檔案預設 666、目錄預設 777，umask 022 得到 644/755，077 得到 600/700。
+  d: |-
+    `umask` 查看，`umask 077` 設定（只對目前 shell）。永久寫入 ~/.bashrc 或 /etc/profile；systemd 服務用 `UMask=0077`。
+    私有資料目錄建議 077；共用協作目錄用 002 搭配 setgid。
+- q: ACL 的進階用法（預設 ACL、遞迴）？
+  keys: acl setfacl getfacl default acl 預設ACL mask 遞迴 細粒度權限
+  a: |-
+    setfacl -m u:名字:rwx 檔案 授權；對目錄加 -d 設預設 ACL，之後新檔案自動繼承。
+  d: |-
+    `setfacl -R -m g:dev:rwX /srv/proj`、`setfacl -d -m g:dev:rwX /srv/proj`（預設）、`getfacl /srv/proj`、`setfacl -b file` 清除全部。
+    ls -l 權限尾端的 `+` 代表有 ACL。mask 項會限制群組類別的有效權限，chmod 會改動 mask，常讓人困惑。檔案系統需支援（ext4、xfs 預設支援）。
+- q: noexec、nosuid、nodev 掛載選項有什麼用？
+  keys: noexec nosuid nodev 掛載選項 /tmp 加固 mount options
+  a: |-
+    nosuid 忽略 setuid 位元、noexec 禁止執行、nodev 忽略裝置檔。常用於 /tmp、/var/tmp、使用者上傳目錄的加固。
+  d: |-
+    fstab：`tmpfs /tmp tmpfs defaults,noexec,nosuid,nodev,size=2g 0 0`。注意 noexec 擋不住 `ld.so 程式` 或解譯器直接跑腳本，只是增加門檻。
+    某些安裝程式需要在 /tmp 執行，需調整 TMPDIR。
+- q: 有哪些重要的安全相關核心參數？
+  keys: sysctl 安全 randomize_va_space rp_filter syncookies kptr_restrict dmesg_restrict ptrace_scope
+  a: |-
+    例如 kernel.randomize_va_space=2（ASLR）、net.ipv4.tcp_syncookies=1、net.ipv4.conf.all.rp_filter=1、kernel.kptr_restrict=2。
+  d: |-
+    其他：`kernel.dmesg_restrict=1`、`kernel.yama.ptrace_scope=1`（限制 ptrace）、`fs.protected_hardlinks/symlinks=1`、`net.ipv4.conf.all.accept_redirects=0`、`net.ipv4.icmp_echo_ignore_broadcasts=1`。
+    套用 CIS Benchmark 時逐項評估，不要盲目全開；可用 lynis 做自動稽核：`lynis audit system`。
+- q: systemd 服務怎麼加固？
+  keys: systemd 加固 hardening protectsystem nonewprivileges privatetmp systemd-analyze security 沙箱
+  a: |-
+    在 unit 加 NoNewPrivileges、ProtectSystem、PrivateTmp 等沙箱選項，用 systemd-analyze security 服務名 評分。
+  d: |-
+    範例：`NoNewPrivileges=yes`、`ProtectSystem=strict`、`ProtectHome=yes`、`PrivateTmp=yes`、`PrivateDevices=yes`、`ReadWritePaths=/var/lib/app`、
+    `CapabilityBoundingSet=`、`RestrictAddressFamilies=AF_INET AF_UNIX`、`SystemCallFilter=@system-service`、`User=` / `DynamicUser=yes`。
+    `systemd-analyze security` 會列出每項暴露程度，逐項收緊並測試服務是否仍正常。
+- q: GPG 怎麼加密、簽章與驗證？
+  keys: gpg 加密 簽章 驗證 金鑰 公鑰 私鑰 gnupg 檔案加密 signature
+  a: |-
+    gpg --gen-key 產生金鑰；gpg -e -r 收件者 檔案 加密；gpg --sign 簽章；gpg --verify 驗證。
+  d: |-
+    `gpg --list-keys`、`gpg --export -a KEYID > pub.asc`、`gpg --import pub.asc`、`gpg -c file`（對稱加密，用密碼）、`gpg -d file.gpg`、
+    驗證下載檔：`gpg --verify file.sig file`（先匯入發布者公鑰並確認指紋）。`gpg --edit-key` 設定信任與到期。私鑰務必備份並保護。
+- q: 怎麼驗證檔案完整性與雜湊？
+  keys: sha256sum md5sum 校驗 雜湊 完整性 checksum -c aide 檔案被改
+  a: |-
+    sha256sum 檔案 算雜湊，sha256sum -c SHA256SUMS 批次驗證。雜湊要由可信管道取得才有意義。
+  d: |-
+    `sha256sum -c --ignore-missing SHA256SUMS`。md5/sha1 已不適合防竄改。整機基準用 AIDE：`aide --init` 建資料庫、`aide --check` 比對。
+    套件層面：`debsums -c`、`rpm -Va`。
+- q: 敏感資料（密碼、金鑰）在指令列與環境變數有什麼風險？
+  keys: 密碼 命令列 ps 洩漏 history ignorespace 環境變數 secrets proc environ 敏感資料
+  a: |-
+    指令列參數任何人都能用 ps 看到、環境變數可被同使用者或 root 讀取，還會留在 shell 歷史。
+  d: |-
+    避免 `mysql -pSECRET`；改用設定檔（權限 600）、`--password-file`、標準輸入或 secrets 管理系統。
+    `HISTCONTROL=ignorespace` 讓以空白開頭的指令不入歷史。`/proc/PID/environ` 與 `/proc/PID/cmdline` 同使用者可讀，容器的 `docker inspect` 會顯示環境變數。
+- q: 怎麼做自動安全更新與補丁管理？
+  keys: unattended-upgrades dnf-automatic 自動更新 補丁 patch livepatch 安全更新 needrestart
+  a: |-
+    Debian 系用 unattended-upgrades，RHEL 系用 dnf-automatic；更新後核心與函式庫要重啟才完全生效，可用 needrestart 檢查。
+  d: |-
+    `apt list --upgradable`、`apt-get -s upgrade`（模擬）、`needrestart`、`checkrestart`。核心修補可用 livepatch 減少重啟。
+    正式環境流程：先在預備環境驗證、分批滾動更新、保留回復方案，並訂閱發行版安全公告。
+- q: 怎麼找出系統暴露了哪些服務與開放埠？
+  keys: 開放埠 暴露 攻擊面 服務最小化 nmap ss systemctl list-units 掃描
+  a: |-
+    用 ss -tulpn 看本機監聽，systemctl list-unit-files --state=enabled 看啟用的服務，用 nmap 從外部驗證，並關掉不需要的。
+  d: |-
+    `ss -tulpn | grep -v 127.0.0.1`（排除只綁定本機的）。外部掃描 `nmap -sS -p- 主機`（只掃描你有權限的主機）。
+    攻擊面縮小原則：不用的服務停用並 mask（`systemctl mask`）、對外只開必要埠、內部服務綁 127.0.0.1 或內網介面並由防火牆限制來源。
+- q: Let's Encrypt 憑證怎麼申請與續期？
+  keys: letsencrypt certbot acme 憑證 https 續期 renew 證書 自動
+  a: |-
+    用 certbot 取得免費憑證：certbot --nginx -d 網域；它會建立定時續期，certbot renew --dry-run 測試。
+  d: |-
+    驗證方式：HTTP-01（80 埠需可從外部連到）、DNS-01（可申請萬用字元）。憑證在 /etc/letsencrypt/live/網域/。
+    續期後要重新載入服務：`--deploy-hook "systemctl reload nginx"`。用 acme.sh 或 Caddy 也是常見選擇。憑證有效期短（約 90 天），務必確認自動續期真的在運作。
+- q: chroot、namespace 與容器隔離的關係？
+  keys: chroot namespace 隔離 容器 unshare nsenter 沙箱 jail
+  a: |-
+    chroot 只改根目錄，不是安全邊界；容器靠 namespace（隔離視野）加 cgroup（限制資源）加 capability/seccomp（限制權限）組合。
+  d: |-
+    namespace 種類：mnt、pid、net、uts、ipc、user、cgroup。`unshare -fp --mount-proc bash` 建立新 PID 命名空間，`lsns` 列出，`nsenter -t PID -a` 進入。
+    user namespace 讓容器內 root 對應主機上的普通使用者，降低逃逸風險。特權容器（--privileged）幾乎等於沒有隔離。
+- q: 怎麼讓服務帳號不能登入？
+  keys: nologin 服務帳號 system user useradd -r 不可登入 shell false
+  a: |-
+    建立系統帳號：useradd -r -s /usr/sbin/nologin 名稱，沒有家目錄與可登入 shell。
+  d: |-
+    `useradd --system --no-create-home --shell /usr/sbin/nologin app`。以該身分除錯：`sudo -u app -s /bin/bash` 或 `runuser -u app -- cmd`。
+    systemd 可用 `DynamicUser=yes` 動態建立臨時帳號，更省維護。
+- q: 防止誤刪重要檔案有哪些手段？
+  keys: 防止誤刪 rm -i trash 不可變 chattr alias 保護 備份 safe-rm
+  a: |-
+    不要依賴 alias；改用 chattr +i 保護關鍵檔案、定期備份與快照，並養成先 ls 同樣的萬用字元再 rm 的習慣。
+  d: |-
+    `rm -I`（刪多個前問一次）、`trash-cli`（`trash-put`）、`find ... -print` 預覽再改成 `-delete`。
+    設定檔管理放進版本控制（etckeeper）。最可靠的保護是已驗證可還原的備份，快照不等於備份。

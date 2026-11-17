@@ -1,0 +1,18 @@
+id: "1-03"
+title: 走進艙門
+kind: learn
+story: "cd 讓你在目錄之間移動。右邊的走廊有一間叫 logbook（航行日誌室）的艙房，進去看看。"
+goal: 用 cd 進入 logbook 目錄。
+teaches: [cd]
+xp: 10
+hints:
+  - "cd 後面接目錄名稱：cd 目錄"
+  - "你現在在家目錄，logbook 就在這裡，直接 cd logbook。"
+setup: |
+  mkdir -p /home/player/logbook
+  echo "今日無異常。" > /home/player/logbook/entry-000.txt
+check: |
+  [[ "$LBP_CWD" == /home/player/logbook ]]
+solution: |
+  cd logbook
+golf: 10

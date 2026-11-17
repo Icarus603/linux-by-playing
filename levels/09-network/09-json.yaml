@@ -1,0 +1,32 @@
+id: "9-09"
+title: curl 配 jq：處理 API 回應
+kind: practice
+story: "現代 API 都回傳 JSON。curl -s 取回、jq 解析，是工程師每天都在用的組合。jq length 可以數陣列長度。"
+goal: "http://127.0.0.1:8080/crew.json 是船員名單（JSON 陣列）。取回它，數出總共有幾位船員，answer 提交。"
+teaches: [curl, jq]
+xp: 35
+hints:
+  - "curl -s http://127.0.0.1:8080/crew.json | jq"
+  - "jq length"
+setup: |
+  rm -rf /srv/site; mkdir -p /srv/site
+  n=$((RANDOM % 9 + 4))
+  python3 - "$n" <<'PY'
+  import json, sys
+  n = int(sys.argv[1])
+  json.dump([{"name": f"crew{i}", "deck": i % 3 + 1} for i in range(n)], open("/srv/site/crew.json", "w"))
+  PY
+  chmod -R a+rX /srv/site
+  mkdir -p /var/lib/lbp && echo "$n" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對。"
+  exit 1
+cleanup: |
+  pkill -f '[h]ttp.server 8080' 2>/dev/null || true
+  rm -rf /srv/site
+solution: |
+  curl -s http://127.0.0.1:8080/crew.json | jq length
+  answer "$(curl -s http://127.0.0.1:8080/crew.json | jq length)"

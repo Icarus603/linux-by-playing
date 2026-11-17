@@ -1,0 +1,23 @@
+id: "6-05"
+title: SIGKILL：強制終止
+kind: practice
+story: "有些程序會攔截 SIGTERM 假裝沒聽到。這時要用 kill -9（SIGKILL），它無法被攔截，核心直接收掉程序。這是最後手段，因為程序沒機會做清理。"
+goal: "stubborn.sh 不理會一般的 kill。想辦法把它結束。"
+teaches: [kill, pkill]
+xp: 25
+hints:
+  - "先試 pkill -f stubborn.sh，看看它還在不在。"
+  - "pkill -9 -f stubborn.sh，或 kill -9 <PID>"
+setup: |
+  mkdir -p /usr/local/lib/lbp
+  printf '#!/bin/bash\ntrap "" TERM\nwhile :; do sleep 1; done\n' > /usr/local/lib/lbp/stubborn.sh
+  chmod 755 /usr/local/lib/lbp/stubborn.sh
+  setsid setpriv --reuid=player --regid=player --init-groups -- /usr/local/lib/lbp/stubborn.sh >/dev/null 2>&1 </dev/null &
+  sleep 0.4
+check: |
+  ! pgrep -f '[s]tubborn.sh' >/dev/null
+cleanup: |
+  pkill -9 -f '[s]tubborn.sh' || true
+  rm -f /usr/local/lib/lbp/stubborn.sh
+solution: |
+  kill -9 "$(pgrep -f '^/bin/bash /usr/local/lib/lbp/stubborn.sh')"

@@ -1,0 +1,32 @@
+id: "8-16"
+title: getopts 解析選項
+kind: practice
+story: "像 ls -la 這種 -x 選項怎麼解析？用 getopts：getopts \"n:v\" opt 表示 -n 需要值、-v 是旗標，在 while 迴圈裡用 case 處理，值在 $OPTARG。"
+goal: "寫 opts.sh：-n NAME 必填、-v 選填。印 Hello, NAME；有 -v 時再多印一行 (verbose mode)。沒給 -n 就印 Usage: opts.sh -n NAME [-v] 並以結束碼 1 結束。"
+teaches: [getopts, shift, bash]
+xp: 50
+hints:
+  - "while getopts \"n:v\" opt; do case $opt in n) name=$OPTARG;; v) verbose=1;; *) exit 1;; esac; done"
+setup: ""
+check: |
+  PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }
+  [[ -f /home/player/opts.sh ]] || { echo "還沒有 opts.sh。"; exit 1; }
+  [[ "$(PR 'bash opts.sh -n Ada')" == $'Hello, Ada\nRC=0' ]] || { echo "只有 -n 時印 Hello, NAME。"; exit 1; }
+  [[ "$(PR 'bash opts.sh -v -n Ada')" == $'Hello, Ada\n(verbose mode)\nRC=0' ]] || { echo "加 -v 時要多印 (verbose mode)。"; exit 1; }
+  [[ "$(PR 'bash opts.sh -v')" == $'Usage: opts.sh -n NAME [-v]\nRC=1' ]]
+solution: |
+  cat > opts.sh <<'EOS'
+  #!/bin/bash
+  name=""; verbose=0
+  while getopts "n:v" opt; do
+    case $opt in
+      n) name=$OPTARG ;;
+      v) verbose=1 ;;
+      *) echo "Usage: opts.sh -n NAME [-v]"; exit 1 ;;
+    esac
+  done
+  if [ -z "$name" ]; then echo "Usage: opts.sh -n NAME [-v]"; exit 1; fi
+  echo "Hello, $name"
+  [ "$verbose" -eq 1 ] && echo "(verbose mode)"
+  exit 0
+  EOS

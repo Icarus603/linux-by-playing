@@ -1,0 +1,19 @@
+id: "10-21"
+title: 套用修補檔
+kind: practice
+story: "收到別人給的修補檔？patch 檔案 < 修補檔 就會依內容修改該檔案。先用 --dry-run 預覽會不會成功，是個好習慣。"
+goal: "fix.patch 是針對 app.conf 的修補檔。把它套用上去，讓 app.conf 變成修補後的樣子。"
+teaches: [patch]
+xp: 40
+hints:
+  - "patch --dry-run app.conf < fix.patch 先預覽。"
+  - "patch app.conf < fix.patch"
+setup: |
+  cd /home/player
+  printf 'host=a\nport=80\nmode=safe\n' > app.conf
+  printf 'host=a\nport=9090\nmode=safe\nlog=on\n' > /tmp/app.expected
+  diff -u app.conf /tmp/app.expected > fix.patch || true
+check: |
+  cmp -s /home/player/app.conf /tmp/app.expected
+solution: |
+  patch -s app.conf < fix.patch

@@ -1,0 +1,27 @@
+id: "8-11"
+title: 結束碼與錯誤處理
+kind: practice
+story: "每個指令都有結束碼，0 是成功。&& 在前一個成功時才繼續，|| 在失敗時才執行。好腳本會把錯誤訊息送到 stderr（>&2）並回傳非 0。"
+goal: "寫 safe-copy.sh SRC DST：SRC 存在就複製到 DST 並印 copied；不存在就在 stderr 印 missing: SRC，並以結束碼 1 結束。"
+teaches: [cp, test, bash]
+xp: 40
+hints:
+  - "if [ ! -f \"$1\" ]; then echo \"missing: $1\" >&2; exit 1; fi"
+setup: |
+  echo data > /home/player/src.txt
+check: |
+  PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }
+  [[ -f /home/player/safe-copy.sh ]] || { echo "還沒有 safe-copy.sh。"; exit 1; }
+  rm -f /tmp/dst-check.txt
+  [[ "$(PR 'bash safe-copy.sh src.txt /tmp/dst-check.txt')" == $'copied\nRC=0' && -f /tmp/dst-check.txt ]] || { echo "來源存在時要複製並印 copied。"; exit 1; }
+  rm -f /tmp/dst-check.txt
+  [[ "$(PR 'bash safe-copy.sh nofile /tmp/dst-check.txt')" == $'missing: nofile\nRC=1' ]]
+solution: |
+  cat > safe-copy.sh <<'EOS'
+  #!/bin/bash
+  if [ ! -f "$1" ]; then
+    echo "missing: $1" >&2
+    exit 1
+  fi
+  cp "$1" "$2" && echo copied
+  EOS

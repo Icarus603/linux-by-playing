@@ -1,0 +1,29 @@
+id: "9-11"
+title: nc：網路瑞士刀
+kind: practice
+story: "nc（netcat）能直接對任何 TCP 連接埠說話：連上去送文字、或自己當伺服器等人連。測試服務通不通、手動送協定，都靠它。9100 埠有個收信站在等暗號。"
+goal: "用 nc 連到 127.0.0.1 的 9100 埠，送出一行文字 OPEN SESAME（-w1 讓它送完 1 秒後離開）。"
+teaches: [nc]
+xp: 35
+hints:
+  - "echo 'OPEN SESAME' | nc -w1 127.0.0.1 9100"
+setup: |
+  mkdir -p /usr/local/lib/lbp; rm -f /tmp/nc-in.txt; touch /tmp/nc-in.txt; chmod 666 /tmp/nc-in.txt
+  cat > /usr/local/lib/lbp/ncbox.py <<'PY'
+  import socket
+  s = socket.socket(); s.setsockopt(1, 2, 1); s.bind(("127.0.0.1", 9100)); s.listen()
+  while True:
+      c, _ = s.accept()
+      data = c.makefile().readline().strip()
+      open("/tmp/nc-in.txt", "a").write(data + "\n")
+      c.close()
+  PY
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/ncbox.py >/dev/null 2>&1 </dev/null &
+  sleep 0.6
+check: |
+  grep -qx 'OPEN SESAME' /tmp/nc-in.txt 2>/dev/null
+cleanup: |
+  pkill -f '[n]cbox.py' 2>/dev/null || true
+  rm -f /usr/local/lib/lbp/ncbox.py /tmp/nc-in.txt
+solution: |
+  echo 'OPEN SESAME' | nc -w1 127.0.0.1 9100

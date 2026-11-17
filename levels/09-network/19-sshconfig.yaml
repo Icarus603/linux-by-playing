@@ -1,0 +1,42 @@
+id: "9-19"
+title: ~/.ssh/config：幫連線取小名
+kind: practice
+story: "每次都打一長串 -p 2222 -o ... 太累。~/.ssh/config 讓你替每台主機取別名並預設選項，之後 ssh 別名 就能連。每個 Host 區塊裡寫 HostName、Port、User、StrictHostKeyChecking 等。"
+goal: "在 ~/.ssh/config 定義一個叫 vault 的主機（HostName 127.0.0.1、Port 2222、User vaultkeeper、StrictHostKeyChecking accept-new），然後用 ssh vault cat note.txt 讀出紙條內容，answer 提交。"
+teaches: [ssh, nano]
+xp: 55
+hints:
+  - "設定檔格式：Host vault 換行 縮排 HostName 127.0.0.1 …，每個選項一行。"
+  - "chmod 600 ~/.ssh/config（權限不能太寬鬆）。"
+setup: |
+  # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
+  id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper
+  usermod -p "*" vaultkeeper
+  mkdir -p /run/sshd; ssh-keygen -A >/dev/null 2>&1
+  rm -rf /home/player/.ssh; install -d -m 700 -o player -g player /home/player/.ssh
+  runuser -u player -- ssh-keygen -q -t ed25519 -N "" -f /home/player/.ssh/id_ed25519
+  install -d -m 700 -o vaultkeeper -g vaultkeeper /home/vaultkeeper/.ssh
+  install -m 600 -o vaultkeeper -g vaultkeeper /home/player/.ssh/id_ed25519.pub /home/vaultkeeper/.ssh/authorized_keys
+  /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o UsePAM=no -o PidFile=/run/lbp-sshd.pid
+  sleep 0.6
+  c="NOTE-$((RANDOM % 9000 + 1000))"
+  echo "$c" > /home/vaultkeeper/note.txt; chown vaultkeeper:vaultkeeper /home/vaultkeeper/note.txt
+  mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] || { [[ -n "$LBP_ANSWER" ]] && echo "內容不對。"; exit 1; }
+  grep -q '^Host vault' /home/player/.ssh/config 2>/dev/null || { echo "~/.ssh/config 裡要有 Host vault 區塊。"; exit 1; }
+cleanup: |
+  pkill -f "[s]shd -p 2222" 2>/dev/null || true
+  pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true
+  userdel -r vaultkeeper 2>/dev/null || true
+  rm -rf /home/player/.ssh
+solution: |
+  cat > ~/.ssh/config <<'EOS'
+  Host vault
+    HostName 127.0.0.1
+    Port 2222
+    User vaultkeeper
+    StrictHostKeyChecking accept-new
+  EOS
+  chmod 600 ~/.ssh/config
+  answer "$(ssh vault cat note.txt)"

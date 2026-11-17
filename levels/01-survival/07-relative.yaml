@@ -1,0 +1,18 @@
+id: "1-07"
+title: 相對路徑與 ..
+kind: practice
+cwd: /home/player/station/deck-2/engine/core
+story: "相對路徑從「目前位置」出發。.. 代表上一層，. 代表這裡。你現在深入引擎核心，要往上退。"
+goal: 只用相對路徑，從 core 退回上兩層，到 deck-2 目錄。
+teaches: [cd]
+xp: 15
+hints:
+  - ".. 是上一層，../.. 是上兩層。"
+  - "cd ../.."
+setup: |
+  mkdir -p /home/player/station/deck-2/engine/core
+check: |
+  [[ "$LBP_CWD" == /home/player/station/deck-2 ]]
+solution: |
+  cd ../..
+golf: 8

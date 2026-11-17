@@ -1,0 +1,20 @@
+id: "7-26"
+title: logrotate：日誌輪替
+kind: practice
+story: "日誌會一直長大，終究塞爆磁碟。logrotate 依設定輪替：app.log 變 app.log.1，舊的依序往後推，超過份數就丟掉。-f 強制立刻執行，-s 指定狀態檔。"
+goal: "rotate.conf 已經寫好設定。強制執行一次輪替，讓 app.log 變成 app.log.1，並產生新的空 app.log。（提示：用 -s 指定你自己有權限寫的狀態檔。）"
+teaches: [logrotate]
+xp: 35
+hints:
+  - "logrotate -s ~/logrotate.state -f rotate.conf"
+  - "沒有 -s 的話，logrotate 會想寫系統的狀態檔而失敗。"
+setup: |
+  cd /home/player
+  rm -f app.log* logrotate.state
+  for i in $(seq 1 100); do echo "request $i"; done > app.log
+  printf '/home/player/app.log {\n    rotate 3\n    size 1\n    missingok\n    notifempty\n    nocompress\n}\n' > rotate.conf
+check: |
+  cd /home/player
+  [[ -f app.log.1 && $(wc -l < app.log.1) -eq 100 && ( ! -s app.log ) ]]
+solution: |
+  logrotate -s ~/logrotate.state -f rotate.conf

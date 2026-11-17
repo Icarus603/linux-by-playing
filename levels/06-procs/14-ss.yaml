@@ -1,0 +1,34 @@
+id: "6-14"
+title: 誰佔了這個 port
+kind: practice
+story: "新服務啟動失敗：「Address already in use」。有人佔了 9000 埠。ss -tlnp 列出所有正在監聽的 TCP 連接埠以及它們的程序（-t TCP、-l 監聽、-n 數字、-p 顯示程序）。"
+goal: "找出正在監聽 9000 埠的程序 PID，answer 提交。"
+teaches: [ss, netstat]
+xp: 30
+hints:
+  - "ss -tlnp"
+  - "ss -tlnp | grep 9000，看 users:((... pid=數字 ..."
+setup: |
+  mkdir -p /usr/local/lib/lbp
+  cat > /usr/local/lib/lbp/portd.py <<'PY'
+  import socket, time
+  s = socket.socket()
+  s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  s.bind(("127.0.0.1", 9000))
+  s.listen()
+  time.sleep(10**6)
+  PY
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/portd.py >/dev/null 2>&1 </dev/null &
+  sleep 0.6
+check: |
+  exp=$(pgrep -f '[p]ortd.py' | head -1)
+  [[ -n "$exp" && "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "PID 不對，看 ss 輸出裡 pid= 後面的數字。"
+  exit 1
+cleanup: |
+  pkill -f '[p]ortd.py' || true
+  rm -f /usr/local/lib/lbp/portd.py
+solution: |
+  ss -tlnp | grep 9000
+  answer "$(pgrep -f portd.py | head -1)"
+reveal: "9000 埠上的「診斷服務」是假的，其實是 Warden 的對外頻道。它不是在攻擊，是在求救。"

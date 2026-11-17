@@ -1,0 +1,208 @@
+# 專業知識：疑難排解手冊（情境與錯誤訊息）
+- q: 網站或服務連不上，要怎麼逐層排查？
+  keys: 連不上 排查 逐層 網路排錯 無法連線 curl timeout refused 排查順序 網站打不開
+  a: |-
+    由下往上逐層檢查：連線能力 → 名稱解析 → 路由 → 埠與服務有沒有在聽 → 防火牆 → 應用層。每一層通過再往上。
+  d: |-
+    1) `ping IP` 測三層；2) `getent hosts 名稱` 測解析；3) `ip route get IP`；4) 在伺服器上 `ss -tlnp | grep 埠`；5) `nc -zv 主機 埠`、`curl -v`；6) `iptables -S` / `nft list ruleset`、雲端安全群組；7) 看服務日誌與 `curl -I`。
+    判讀：逾時 = 被丟棄或路由問題；Connection refused = 沒有程式在聽或被 REJECT；No route to host = ARP/路由失敗；Name or service not known = DNS。
+    同時在兩端 `tcpdump` 能判斷封包是在哪一段消失。
+- q: 系統變慢了，60 秒內該看哪些指標？
+  keys: 系統慢 變慢 60秒 清單 效能排查 uptime vmstat iostat top 診斷 slow 系統突然變慢 突然很慢 系統變很慢 很慢 卡頓 效能問題 為什麼這麼慢 怎麼查慢
+  a: |-
+    依序跑：uptime、dmesg -T | tail、vmstat 1、mpstat -P ALL 1、pidstat 1、iostat -xz 1、free -m、sar -n DEV 1、top。
+  d: |-
+    先判斷瓶頸類型：CPU（us/sy 高、r > 核心數）、記憶體（si/so、可用不足、OOM）、磁碟（wa 高、iostat await/%util 高）、網路（sar -n DEV、ss -s、重傳 `nstat -az | grep -i retrans`）、鎖或外部依賴（CPU 低但慢，看 strace、連線池、DB）。
+    再往下追單一程序：`pidstat -p PID 1`、`perf top -p PID`、`strace -c -p PID`。記錄基準值，才能判斷「慢」是相對什麼。
+- q: CPU 使用率 100% 怎麼找原因？
+  keys: cpu 100% 高 占用 top perf 熱點 單核 迴圈 找原因 cpu飆高
+  a: |-
+    用 top 或 pidstat 找出是哪個程序、user 還是 sys 高，再用 perf top 或 strace -c 找熱點。
+  d: |-
+    `top -H -p PID`（看執行緒）→ 把執行緒 ID 轉十六進位對照 Java 的 jstack。us 高是應用程式計算；sy 高是系統呼叫/中斷多（`strace -c`、`perf top`）；si 高是網路中斷（檢查網卡佇列與 RPS）。
+    是否為多核心中單一核心滿載（mpstat -P ALL）？單執行緒瓶頸加核心無用。確認不是被 `stress`、挖礦程式或失控的迴圈佔用：`ps aux --sort=-%cpu | head`、檢查啟動來源與父程序。
+- q: 磁碟滿了，系統行為異常，處理步驟？
+  keys: 磁碟滿 空間不足 df 清理 步驟 日誌 暫存 100% disk full 救急
+  a: |-
+    先 df -h 與 df -i 確認是空間還是 inode，再 du 逐層找大目錄，優先清理日誌、暫存、快取；若已刪除仍未釋放，查 lsof +L1。
+  d: |-
+    救急：`journalctl --vacuum-size=200M`、`apt clean`、`docker system prune`、清空（不是刪除）過大的日誌 `: > /var/log/big.log`（不會讓持有 fd 的程序繼續寫到已刪除檔案）。
+    找兇手：`du -xh / --max-depth=2 2>/dev/null | sort -h | tail -20`。根分區 100% 時資料庫、服務可能損壞，優先恢復空間再重啟服務。長期解法：獨立分割區、日誌輪替與保留策略、監控告警。
+- q: 記憶體不足、OOM 或 swap 暴增怎麼辦？
+  keys: 記憶體不足 oom swap 暴增 記憶體洩漏 free 記憶體耗盡 killed process
+  a: |-
+    用 free -h 與 ps --sort=-rss 找出吃記憶體的程序，dmesg 確認是否有 OOM kill；治本是修洩漏、限制記憶體或擴充。
+  d: |-
+    `ps -eo pid,rss,cmd --sort=-rss | head`、`smem -tk -P 程序名`、`vmstat 1`（si/so 非零）、`slabtop`（核心記憶體）、`cat /proc/meminfo`（看 Slab、Shmem、PageTables）。
+    page cache 不算洩漏。臨時緩解：重啟洩漏的服務、關閉不必要的程序、增加 swap。預防：cgroup 限制（`MemoryMax=`）、監控 RSS 趨勢、調 `vm.overcommit_memory` 與 oom_score_adj 保護關鍵服務。
+- q: ssh 連不上或連線很慢，怎麼排查？
+  keys: ssh 連不上 慢 卡住 timeout refused 排查 ssh -vvv usedns gssapi 登入慢
+  a: |-
+    先 ssh -vvv 看卡在哪一步：TCP 連線（網路/防火牆）、金鑰交換、認證，還是登入後；登入慢常是 DNS 反查或 GSSAPI。
+  d: |-
+    連不上：`nc -zv 主機 22`、雲端安全群組、`ss -tlnp | grep sshd`。認證失敗：看伺服器 `journalctl -u sshd`。慢：伺服器設 `UseDNS no`、客戶端 `GSSAPIAuthentication no`。
+    連線一段時間後斷線：`ServerAliveInterval 30`、NAT 閒置逾時。權限：`~/.ssh` 700、`authorized_keys` 600、家目錄不可 group-writable。
+- q: DNS 解析失敗怎麼排查？
+  keys: dns 解析失敗 temporary failure in name resolution name or service not known resolv.conf dig 排查
+  a: |-
+    先確認 /etc/resolv.conf 與 resolvectl status，用 dig @伺服器 網域 測試各個 DNS 伺服器，再用 getent hosts 確認系統實際解析結果。
+  d: |-
+    `Temporary failure in name resolution` 是連不到 DNS 伺服器（網路或防火牆）；`Name or service not known` 是伺服器回覆不存在。
+    步驟：`cat /etc/resolv.conf`、`dig @8.8.8.8 example.com`（繞過本機設定，能解析代表本機 DNS 設定有問題）、`ss -ulnp | grep :53`、`resolvectl query`。
+    容器內檢查 `/etc/resolv.conf` 是否被正確注入；Kubernetes 看 CoreDNS 與 ndots。
+- q: 系統進入 emergency mode 或開不了機怎麼辦？
+  keys: emergency mode 開不了機 開機失敗 fstab 錯誤 initramfs 救援 journalctl -xb dracut
+  a: |-
+    emergency mode 多半是 /etc/fstab 設定錯誤或檔案系統損壞。進入後看 journalctl -xb，修正 fstab 或 fsck，再 reboot。
+  d: |-
+    在 emergency shell：`mount -o remount,rw /`、`journalctl -xb | tail -50`、`systemctl --failed`、編輯 `/etc/fstab`（暫時加 nofail 或註解有問題的行）、`fsck -f /dev/...`。
+    GRUB 無法開機：用 live USB 掛載後 chroot 並 `grub-install` + `update-grub`。initramfs 缺驅動：`update-initramfs -u`（Debian）或 `dracut -f`（RHEL）。
+- q: 忘記 root 密碼怎麼重設？
+  keys: 忘記密碼 root 密碼 重設 rd.break init=/bin/bash 救援 單人模式 passwd
+  a: |-
+    開機時在 GRUB 編輯核心參數進入救援環境（例如 init=/bin/bash 或 rd.break），重新掛載根為可寫後執行 passwd。
+  d: |-
+    Debian 系：核心行尾加 `init=/bin/bash` → `mount -o remount,rw /` → `passwd` → `exec /sbin/init` 或強制重開。RHEL 系：`rd.break` → `mount -o remount,rw /sysroot; chroot /sysroot; passwd; touch /.autorelabel`（SELinux）。
+    這代表「有實體或主控台存取」就能重設，所以要用磁碟加密、GRUB 密碼與雲端平台權限保護。
+- q: 把自己鎖在 sudo 外面或弄壞 sudoers 怎麼辦？
+  keys: sudoers 壞掉 sudo 不能用 visudo 語法錯誤 pkexec 鎖死 救援 root
+  a: |-
+    用還有的 root 管道修復：su、主控台、救援模式，或 pkexec visudo。以後一律用 visudo 並保留一個已登入的 root 會話。
+  d: |-
+    症狀：`>>> /etc/sudoers: syntax error`。修復後 `visudo -c` 驗證。放在 /etc/sudoers.d/ 的檔案語法錯誤同樣會讓整個 sudo 失效。
+    雲端主機可用平台的主控台或掛載磁碟到另一台機器修復。預防：改 sudoers 前另開一個 root 終端保持不關。
+- q: 檔案刪不掉或移不走（Operation not permitted、busy）？
+  keys: 刪不掉 operation not permitted device or resource busy text file busy immutable 無法刪除 權限
+  a: |-
+    依訊息判斷：Operation not permitted 常是 chattr +i 或唯讀掛載；Device or resource busy 是被佔用或是掛載點；Text file busy 是執行檔正在執行。
+  d: |-
+    `lsattr 檔案`、`chattr -i 檔案`、`findmnt -T 檔案`（是否唯讀）、`lsof 檔案`/`fuser -v 檔案`（誰在用）、`ls -ld 目錄`（目錄需要 w 與 x 權限才能刪裡面的檔案，且 sticky 目錄只有擁有者能刪）。
+    Text file busy 時改用「換名後再覆蓋」：`mv new app; ` 而不是直接 cp 覆蓋執行中的檔案。
+- q: 網路時斷時續、延遲忽高忽低怎麼找原因？
+  keys: 網路不穩 時斷時續 丟包 延遲 抖動 mtr ethtool 重傳 nstat 網路抖動
+  a: |-
+    用 mtr 看哪一跳開始遺失、ip -s link 與 ethtool -S 看網卡錯誤、nstat 看 TCP 重傳，並對照兩端 tcpdump。
+  d: |-
+    `mtr -rwzc 200 目標`、`ping -i 0.2 -c 300 目標 | tail`、`ip -s link show`（errors/dropped）、`ethtool eth0`（是否協商成 100M 或半雙工）、`nstat -az | grep -i -E "retrans|loss"`、`ss -ti`（rtt、retrans）。
+    排除 MTU 問題、Wi-Fi 訊號、NIC 驅動/韌體、交換器埠錯誤、CPU 中斷集中。雲端環境看是否超出網路頻寬或封包速率上限。
+- q: 憑證錯誤或 TLS 握手失敗怎麼排查？
+  keys: ssl 憑證 錯誤 tls 握手失敗 certificate verify failed 過期 鏈不完整 sni 時間錯誤
+  a: |-
+    用 openssl s_client -connect 主機:443 -servername 主機 檢查憑證鏈與有效期；同時確認兩端系統時間正確。
+  d: |-
+    常見：憑證過期（`-dates`）、中繼憑證沒附上（鏈不完整，瀏覽器可能不報錯但 curl 會）、網域與 SAN 不符、SNI 缺失、系統 CA 資料庫過舊（`update-ca-certificates`）、系統時間錯誤。
+    `curl -v https://...` 會顯示驗證結果；測試不驗證 `-k` 只用於判斷是否為憑證問題。
+- q: cron 排程沒有執行怎麼辦？
+  keys: cron 沒執行 排程失敗 crontab 不跑 日誌 環境變數 權限 排程不工作
+  a: |-
+    先確認 cron 服務在跑與日誌（grep CRON /var/log/syslog 或 journalctl -u cron），再檢查路徑、權限、環境變數與腳本是否可執行。
+  d: |-
+    清單：`systemctl status cron`；指令用絕對路徑；腳本有執行權限與 shebang；crontab 最後一行要有換行；`%` 要跳脫；PATH 與環境不同（cron 環境很簡單）；輸出重導向到日誌；時區；
+    使用者 crontab 與 /etc/cron.d 格式不同（後者多一欄使用者）。手動模擬：`env -i HOME=$HOME PATH=/usr/bin:/bin sh -c '你的指令'`。
+- q: dpkg 或 apt 出現鎖定或損壞錯誤怎麼處理？
+  keys: dpkg lock apt 鎖定 損壞 broken 依賴 套件安裝失敗 could not get lock dpkg --configure
+  a: |-
+    Could not get lock 表示另一個 apt/dpkg 正在跑，先確認（ps、lsof /var/lib/dpkg/lock-frontend）；中斷後用 dpkg --configure -a 和 apt -f install 修復。
+  d: |-
+    不要隨便刪鎖檔，先確認沒有程序在用。空間不足也會導致失敗（`df -h`）。簽章/雜湊錯誤：`apt clean && rm -rf /var/lib/apt/lists/* && apt update`，並檢查系統時間與鏡像來源。
+    損壞套件：`apt install --reinstall 套件`、`dpkg -l | grep -v ^ii`。
+- q: 容器一直重啟或立刻退出，怎麼排查？
+  keys: 容器 重啟 crashloop exited restarting docker logs exitcode 137 143 排查 立刻退出
+  a: |-
+    看 docker logs 與 ExitCode：137 是被 SIGKILL（常為 OOM），143 是 SIGTERM，1/2 是應用程式錯誤，126/127 是指令不可執行或找不到。
+  d: |-
+    `docker logs 容器`、`docker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}} {{.State.Error}}' 容器`、`docker run --rm -it --entrypoint sh 映像` 手動進去重現。
+    常見：前景程序結束（容器需要一個前景程序）、設定檔或環境變數缺失、權限（非 root 使用者寫不進掛載目錄）、健康檢查失敗被殺、記憶體限制太低。
+- q: 去哪裡找錯誤日誌？
+  keys: 日誌 在哪 log 位置 /var/log journalctl 錯誤 排查 找日誌 應用日誌
+  a: |-
+    系統與 systemd 服務看 journalctl；傳統日誌在 /var/log（syslog、auth.log、messages、secure、dmesg）；應用程式常有自己的目錄。
+  d: |-
+    `journalctl -u 服務 -e`、`journalctl -p err -b`、`dmesg -T`、`/var/log/nginx/error.log`、`/var/log/mysql/`。不知道在哪：`lsof -p PID | grep log`、`strace -e openat -p PID`，或最近被修改的檔案：`find /var/log -mmin -5`。
+    對照時間軸：把問題發生的時間點前後的各種日誌放在一起看，因果常在幾秒前。
+- q: tail -f 追蹤的日誌突然沒有新內容？
+  keys: tail -f tail -F 日誌輪替 logrotate 沒新輸出 追蹤 檔案被替換
+  a: |-
+    多半是日誌被輪替，tail -f 還在追蹤舊的檔案。改用 tail -F，它會依檔名重新開啟。
+  d: |-
+    `tail -F /var/log/app.log`。確認方式：`ls -li` 看 inode 是否改變。另外也要確認應用程式沒有因為輪替而繼續寫到已刪除的檔案（需 reload 或 copytruncate）。
+- q: Argument list too long 是什麼？
+  keys: argument list too long arg_max 參數太長 xargs 萬用字元 太多檔案 e2big
+  a: |-
+    萬用字元展開後超過命令列長度上限（ARG_MAX）。改用 find 搭配 xargs 或 -exec {} +。
+  d: |-
+    `getconf ARG_MAX` 看上限。`find . -name '*.log' -print0 | xargs -0 rm`、`find . -name '*.log' -delete`。`xargs --show-limits` 可看實際限制。
+- q: bad interpreter 或 ^M 錯誤是什麼意思？
+  keys: bad interpreter ^M crlf shebang 腳本無法執行 no such file or directory 腳本 換行
+  a: |-
+    腳本存成了 Windows 換行（CRLF），shebang 變成 /bin/bash^M，找不到。用 dos2unix 或 sed -i 's/\r$//' 轉換。
+  d: |-
+    另一種造成 `No such file or directory` 的情況是 shebang 指向不存在的直譯器（例如 /usr/bin/python 但系統只有 python3）。用 `#!/usr/bin/env python3` 較可攜。
+    檢查：`file 腳本`、`head -1 腳本 | od -c`。
+- q: Cannot assign requested address 或連線埠耗盡？
+  keys: cannot assign requested address ephemeral port 暫時埠 耗盡 time_wait 大量連線 ip_local_port_range
+  a: |-
+    短時間建立大量對外連線，暫時埠（ephemeral port）被 TIME_WAIT 佔滿。調整 ip_local_port_range、使用連線池或 keep-alive。
+  d: |-
+    `sysctl net.ipv4.ip_local_port_range`（預設約 32768–60999）、`ss -tan state time-wait | wc -l`。擴大範圍 `sysctl -w net.ipv4.ip_local_port_range="10240 65535"`，
+    用戶端可啟用 `net.ipv4.tcp_tw_reuse=1`。根本解法是重用連線；對同一目標 IP:埠 的連線數最多約等於埠範圍大小。
+- q: 同一時間點很多服務一起失敗，怎麼找共同原因？
+  keys: 多服務同時失敗 共同原因 時間軸 dmesg 依賴 磁碟 網路 記憶體 根因分析 rca
+  a: |-
+    找「共同依賴」與「同一個時間點」：磁碟滿、記憶體 OOM、網路或 DNS 故障、時間跳動、憑證過期、上游依賴（資料庫、儲存）。
+  d: |-
+    `journalctl --since "10:00" --until "10:05"` 把所有單元放在同一個時間窗；`dmesg -T`；`last -x`（有沒有重開機）。
+    問自己：什麼東西「在那一刻改變了」？部署、設定變更、排程工作、憑證、流量、雲端維護事件。先止血再找根因，並把時間軸記錄下來寫事後檢討。
+- q: 怎麼找出是誰修改了某個檔案？
+  keys: 誰改了檔案 inotifywait auditd 檔案監控 stat 修改時間 追蹤 變更來源
+  a: |-
+    用 stat 看修改時間對照日誌；要主動監控用 inotifywait，要記錄是誰改的用 auditd 的 -w 規則。
+  d: |-
+    `inotifywait -m -r -e modify,create,delete /etc/app`、`auditctl -w /etc/app/config.yml -p wa -k cfgchange` 後 `ausearch -k cfgchange -i`（會顯示執行的程序與使用者）。
+    設定檔建議放版本控制（etckeeper），改動一目瞭然。
+- q: scp 或 rsync 傳輸很慢怎麼優化？
+  keys: scp rsync 慢 傳輸 優化 小檔案 加密 壓縮 tar pipe 頻寬 傳檔
+  a: |-
+    大量小檔案時逐檔握手慢，改用 tar 管線一次傳；網路慢加壓縮；CPU 慢可換輕量 cipher；也可先確認頻寬瓶頸在哪。
+  d: |-
+    `tar -cf - dir | ssh host 'tar -xf - -C /dst'`；`rsync -azP --partial`；`-e "ssh -c aes128-gcm@openssh.com"`。先 `iperf3` 測純網路頻寬，`pv` 看實際速度。
+    磁碟 I/O 與單一加密執行緒也可能是瓶頸；多條平行 rsync 或 parallel 可提高總吞吐。
+- q: 服務間歇性出錯、難以重現，怎麼調查？
+  keys: 間歇性 難重現 偶發 race condition 排查 監控 日誌 關聯 抓取證據
+  a: |-
+    先加上能抓證據的監控與日誌，在問題發生時自動保存現場（連線、程序、堆疊、封包），再比對時間點的系統事件。
+  d: |-
+    持續記錄：`while sleep 5; do date; ss -s; vmstat 1 2 | tail -1; done >> metrics.log`、背景 `tcpdump -C 100 -W 5 -w cap.pcap`（循環檔案）。
+    偶發逾時常見根因：DNS 抖動、連線池耗盡、GC 暫停、突發 I/O、定時工作（cron、備份）重疊、conntrack 表滿。對照時間分布是否整點或固定間隔出現。
+- q: 事件處理（Incident）的基本順序是什麼？
+  keys: 事件處理 incident 止血 根因 事後檢討 postmortem 順序 on-call 緊急
+  a: |-
+    先止血與恢復服務，再保留證據、找根因、修正，最後寫無責備的事後檢討並追蹤改善項目。
+  d: |-
+    流程：確認影響範圍 → 通知與分工 → 先用最安全的方式恢復（回滾、切流量、重啟、擴容）→ 記錄時間軸與指令 → 蒐集日誌與現場 → 根因分析（5 Whys）→ 修復與驗證 → 事後檢討（流程與系統層面，不究責個人）。
+    在生產機操作盡量做「可逆」的動作，並記下做過什麼。
+- q: sudo 提示 unable to resolve host 是什麼？
+  keys: sudo unable to resolve host 主機名稱 etc/hosts hostname 警告
+  a: |-
+    本機主機名稱沒有出現在 /etc/hosts，解析失敗只是警告。在 /etc/hosts 加一行 127.0.1.1 主機名稱 即可。
+  d: |-
+    `hostname` 查名稱，`getent hosts $(hostname)` 驗證。容器若使用 `--network none` 且 Docker 未寫入 hosts，也會出現。
+- q: Broken pipe 與 SIGPIPE 是怎麼來的？
+  keys: broken pipe sigpipe 管線 head 提早結束 yes 寫入錯誤 pipefail
+  a: |-
+    管線後段（如 head）提早結束，前段繼續寫入就收到 SIGPIPE 或 EPIPE，這通常是正常現象。
+  d: |-
+    `yes | head -1`、`cmd | head` 都會讓前段結束。在 `set -o pipefail` 下，前段因 SIGPIPE 結束（結束碼 141）會讓整條管線被視為失敗，需要時用 `|| true` 容忍。
+- q: 變數在 cron、systemd、sudo 裡找不到怎麼辦？
+  keys: 環境變數 找不到 cron systemd sudo env_reset PATH 繼承 非互動 環境差異
+  a: |-
+    這些情境不會載入你的 shell 設定檔，環境變數很少。在 unit 用 Environment=/EnvironmentFile=，cron 內明確設定，sudo 預設會重置環境（env_reset）。
+  d: |-
+    sudo 保留變數：`sudo -E` 或在 sudoers 用 `Defaults env_keep += "VAR"`；一次性：`sudo VAR=值 指令`。排查實際環境：在該情境執行 `env > /tmp/env.txt`，與互動 shell 比較。
+- q: 日期與時間相關的指令與常見坑？
+  keys: date 時間 時區 epoch timestamp utc 格式化 date -d 時間戳 計算
+  a: |-
+    date +%s 取 epoch 秒；date -d @秒數 轉回；date -d "yesterday" 做相對時間；用 UTC 記錄日誌避免時區問題。
+  d: |-
+    `date -u +%FT%TZ`（ISO 8601）、`date -d "2026-01-01 +30 days" +%F`、`date -d @1700000000`、`TZ=Asia/Taipei date`。BSD/macOS 的 date 語法不同（`-v`）。
+    排程與日誌關聯時注意夏令時間與伺服器時區是否一致。

@@ -1,0 +1,16 @@
+id: "1-16"
+title: 系統身分證
+kind: practice
+story: "uname 顯示系統資訊。-s 是作業系統名稱，-r 是核心版本，-a 是全部。date 則顯示現在時間。"
+goal: "用 uname -s 查出作業系統名稱，answer 提交。"
+teaches: [uname, date]
+xp: 10
+hints:
+  - "uname -s"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "Linux" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，試試 uname -s。"
+  exit 1
+solution: |
+  answer "$(uname -s)"

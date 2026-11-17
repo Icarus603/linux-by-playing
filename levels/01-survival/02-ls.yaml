@@ -1,0 +1,17 @@
+id: "1-02"
+title: 看看四周
+kind: learn
+story: 知道位置後，要看看這間艙房有什麼。ls 會列出目錄內容。我在這裡留了幾個東西。
+goal: 用 ls 列出目前目錄的內容。
+teaches: [ls]
+xp: 10
+hints:
+  - 輸入 ls，不需要任何參數。
+setup: |
+  cd /home/player
+  mkdir -p logbook tools
+  echo "歡迎來到 Kernel-7" > welcome.txt
+check: |
+  [[ "$LBP_LAST" == "ls" ]]
+solution: |
+  ls

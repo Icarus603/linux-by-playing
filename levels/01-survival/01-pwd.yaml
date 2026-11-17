@@ -1,0 +1,15 @@
+id: "1-01"
+title: 我在哪裡？
+kind: learn
+story: 歡迎登艙，我是 Pip！終端機就像站內走廊，你永遠站在某個目錄裡。先弄清楚你的位置。
+goal: 輸入 pwd，印出你目前所在的目錄。
+teaches: [pwd]
+xp: 10
+hints:
+  - pwd 是 print working directory 的縮寫。
+  - 直接輸入 pwd 然後按 Enter。
+setup: ""
+check: |
+  [[ "$LBP_LAST" == "pwd" ]]
+solution: |
+  pwd

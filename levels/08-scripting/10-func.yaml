@@ -1,0 +1,23 @@
+id: "8-10"
+title: 函式與 local
+kind: practice
+story: "函式把重複的邏輯包起來。函式裡用 local 宣告的變數只在函式內有效，避免污染全域。函式用 return 回傳狀態碼，用 echo 回傳資料。"
+goal: "寫 stats.sh 數字…：印出 max=最大值 min=最小值（用函式實作至少其中一個）。例如 ./stats.sh 3 9 2 7 印 max=9 min=2。"
+teaches: [function, local, bash]
+xp: 40
+hints:
+  - "max() { local m=$1; shift; for x in \"$@\"; do [ \"$x\" -gt \"$m\" ] && m=$x; done; echo \"$m\"; }"
+  - "呼叫：echo \"max=$(max \"$@\")\""
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/stats.sh ]] || { echo "還沒有 stats.sh。"; exit 1; }
+  [[ "$(P 'bash stats.sh 3 9 2 7')" == "max=9 min=2" && "$(P 'bash stats.sh 5')" == "max=5 min=5" ]] || { echo "輸出格式要是 max=9 min=2。"; exit 1; }
+  grep -qE '\(\)[[:space:]]*\{|^function ' /home/player/stats.sh || { echo "請用函式實作。"; exit 1; }
+solution: |
+  cat > stats.sh <<'EOS'
+  #!/bin/bash
+  maxv() { local m=$1; shift; for x in "$@"; do [ "$x" -gt "$m" ] && m=$x; done; echo "$m"; }
+  minv() { local m=$1; shift; for x in "$@"; do [ "$x" -lt "$m" ] && m=$x; done; echo "$m"; }
+  echo "max=$(maxv "$@") min=$(minv "$@")"
+  EOS

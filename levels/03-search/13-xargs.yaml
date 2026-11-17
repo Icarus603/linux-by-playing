@@ -1,0 +1,19 @@
+id: "3-13"
+title: xargs：把結果接給別人
+kind: practice
+story: "管線把「輸出」接到「輸入」，但有些指令（如 rm）不讀標準輸入，要用 xargs 把輸入轉成參數。"
+goal: "刪除 work 底下所有 .bak 檔案，其他檔案要保留。用 find 配 xargs 完成。"
+teaches: [xargs, find]
+xp: 25
+hints:
+  - "find work -name '*.bak' | xargs rm"
+  - "檔名可能含空白時，用 find -print0 | xargs -0 比較安全。"
+setup: |
+  cd /home/player
+  mkdir -p work/a work/b
+  touch work/a/one.bak work/b/two.bak work/a/keep.txt work/b/keep.cfg work/three.bak
+check: |
+  cd /home/player/work
+  [[ $(find . -name '*.bak' | wc -l) -eq 0 && -f a/keep.txt && -f b/keep.cfg && "$LBP_LAST" == *xargs* ]]
+solution: |
+  find work -name '*.bak' | xargs rm

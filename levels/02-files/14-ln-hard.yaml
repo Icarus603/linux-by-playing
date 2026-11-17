@@ -1,0 +1,17 @@
+id: "2-14"
+title: 硬連結
+kind: practice
+story: "硬連結是同一份資料的第二個名字：兩個名字共用同一個 inode，刪掉其中一個，資料還在。不加 -s 就是硬連結。"
+goal: 為 data.txt 建立硬連結 data-link.txt。
+teaches: [ln, stat]
+xp: 20
+hints:
+  - "ln data.txt data-link.txt（不加 -s）"
+  - "用 ls -li 可以看到兩者 inode 相同。"
+setup: |
+  echo "telemetry" > /home/player/data.txt
+check: |
+  cd /home/player
+  [[ -f data.txt && -f data-link.txt && ! -L data-link.txt && "$(stat -c %i data.txt)" == "$(stat -c %i data-link.txt)" ]]
+solution: |
+  ln data.txt data-link.txt

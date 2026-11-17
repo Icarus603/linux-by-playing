@@ -1,0 +1,25 @@
+id: "6-09"
+title: 誰在吃 CPU
+kind: practice
+story: "引擎過熱了，有個程序吃光 CPU。top 會即時顯示（按 q 離開，按 P 依 CPU 排序）；ps aux --sort=-%cpu 則是一次性的排行榜。"
+goal: "找出 CPU 使用率最高的程序名稱，answer 提交。"
+teaches: [top, htop, ps]
+xp: 25
+hints:
+  - "top，然後看最上面的程序，按 q 離開。"
+  - "ps aux --sort=-%cpu | head -5"
+setup: |
+  cp -f /usr/bin/yes /usr/local/bin/cpu-hog
+  setsid setpriv --reuid=player --regid=player --init-groups -- bash -c 'exec cpu-hog > /dev/null' >/dev/null 2>&1 </dev/null &
+  sleep 0.5
+check: |
+  [[ "$LBP_ANSWER" == "cpu-hog" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不是最吃 CPU 的那個。"
+  exit 1
+cleanup: |
+  pkill -x cpu-hog || true
+  rm -f /usr/local/bin/cpu-hog
+solution: |
+  ps aux --sort=-%cpu | head -3
+  answer cpu-hog
+reveal: "吃光 CPU 的程序 cpu-hog，行為簽章和 Warden 一模一樣。它在『練習』，為了撐住整座站。"

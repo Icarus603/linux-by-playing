@@ -1,0 +1,115 @@
+#!/bin/bash
+# lbp-systemctl — 學習用的「模擬 init」。
+# 容器內沒有真的 systemd，所以這支腳本用最小實作模擬 systemctl 的常用介面，
+# 讓你練習指令與排錯流程。它「不是」真的 systemd。
+# 單元檔位置：/etc/lbp-systemd/*.service（INI 格式，只讀 Description 與 ExecStart）
+
+UNITDIR=/etc/lbp-systemd
+RUNDIR=/run/lbp-systemd
+LOGDIR=/var/log/lbp-journal
+ENABLED=$UNITDIR/enabled
+mkdir -p "$RUNDIR" "$LOGDIR" "$ENABLED" 2>/dev/null
+
+norm() { [[ $1 == *.service ]] && echo "$1" || echo "$1.service"; }
+prop() { awk -F= -v k="$2" '$1==k{sub(/^[^=]*=/,""); print; exit}' "$UNITDIR/$1"; }
+pidof_unit() { cat "$RUNDIR/$1.pid" 2>/dev/null; }
+alive() { local p; p=$(pidof_unit "$1"); [[ -n $p ]] && kill -0 "$p" 2>/dev/null; }
+need_root() {
+  if [[ $(id -u) -ne 0 ]]; then
+    echo "Failed to $1 $2: Interactive authentication required." >&2
+    echo "See system logs and 'systemctl status $2' for details." >&2
+    exit 1
+  fi
+}
+need_unit() {
+  [[ -f $UNITDIR/$1 ]] || { echo "Failed to $2 $1: Unit $1 not found." >&2; exit 5; }
+}
+jlog() { echo "$(date '+%b %d %H:%M:%S') $(hostname) $2: $3" >> "$LOGDIR/$1.log"; }
+
+do_start() {
+  local u=$1 exec p
+  need_root start "$u"; need_unit "$u" start
+  alive "$u" && return 0
+  exec=$(prop "$u" ExecStart)
+  rm -f "$RUNDIR/$u.failed"
+  jlog "$u" systemd "Starting $(prop "$u" Description)..."
+  nohup bash -c "exec $exec" > >(while IFS= read -r l; do jlog "$u" "${u%.service}[$$]" "$l"; done) 2>&1 < /dev/null &
+  p=$!
+  echo "$p" > "$RUNDIR/$u.pid"
+  sleep 0.5
+  if kill -0 "$p" 2>/dev/null; then
+    date +%s > "$RUNDIR/$u.since"
+    jlog "$u" systemd "Started $(prop "$u" Description)."
+  else
+    touch "$RUNDIR/$u.failed"; rm -f "$RUNDIR/$u.pid"
+    jlog "$u" systemd "$u: Main process exited, code=exited, status=203/EXEC"
+    jlog "$u" systemd "Failed to start $(prop "$u" Description)."
+    echo "Job for $u failed because the control process exited with error code." >&2
+    echo "See \"systemctl status $u\" and \"journalctl -xeu $u\" for details." >&2
+    exit 1
+  fi
+}
+do_stop() {
+  local u=$1 p
+  need_root stop "$u"; need_unit "$u" stop
+  p=$(pidof_unit "$u")
+  [[ -n $p ]] && kill "$p" 2>/dev/null && jlog "$u" systemd "Stopped $(prop "$u" Description)."
+  rm -f "$RUNDIR/$u.pid" "$RUNDIR/$u.since"
+}
+state() {
+  local u=$1
+  if alive "$u"; then echo active
+  elif [[ -f $RUNDIR/$u.failed ]]; then echo failed
+  else echo inactive; fi
+}
+is_enabled() { [[ -e $ENABLED/$1 ]] && echo enabled || echo disabled; }
+
+do_status() {
+  local u=$1 st en
+  need_unit "$u" "get status of"
+  st=$(state "$u"); en=$(is_enabled "$u")
+  case $st in
+    active)
+      local since ago; since=$(cat "$RUNDIR/$u.since" 2>/dev/null || date +%s); ago=$(( $(date +%s) - since ))
+      echo "● $u - $(prop "$u" Description)"
+      echo "     Loaded: loaded ($UNITDIR/$u; $en; preset: enabled)"
+      echo "     Active: active (running) since $(date -d "@$since" '+%a %Y-%m-%d %H:%M:%S %Z'); ${ago}s ago"
+      echo "   Main PID: $(pidof_unit "$u")" ;;
+    failed)
+      echo "× $u - $(prop "$u" Description)"
+      echo "     Loaded: loaded ($UNITDIR/$u; $en; preset: enabled)"
+      echo "     Active: failed (Result: exit-code)" ;;
+    *)
+      echo "○ $u - $(prop "$u" Description)"
+      echo "     Loaded: loaded ($UNITDIR/$u; $en; preset: enabled)"
+      echo "     Active: inactive (dead)" ;;
+  esac
+  echo
+  tail -n 5 "$LOGDIR/$u.log" 2>/dev/null
+  [[ $st == active ]]
+}
+
+cmd=$1; shift
+case $cmd in
+  --version|version)
+    echo "lbp-systemctl (simulated init for learning — not real systemd)"; exit 0 ;;
+  start)   for x in "$@"; do do_start "$(norm "$x")"; done ;;
+  stop)    for x in "$@"; do do_stop "$(norm "$x")"; done ;;
+  restart) for x in "$@"; do u=$(norm "$x"); do_stop "$u"; do_start "$u"; done ;;
+  status)  rc=0; for x in "$@"; do do_status "$(norm "$x")" || rc=3; done; exit $rc ;;
+  enable)
+    for x in "$@"; do u=$(norm "$x"); need_root enable "$u"; need_unit "$u" enable
+      touch "$ENABLED/$u"; echo "Created symlink /etc/systemd/system/multi-user.target.wants/$u → $UNITDIR/$u."; done ;;
+  disable)
+    for x in "$@"; do u=$(norm "$x"); need_root disable "$u"; need_unit "$u" disable
+      rm -f "$ENABLED/$u"; echo "Removed /etc/systemd/system/multi-user.target.wants/$u."; done ;;
+  is-active)  s=$(state "$(norm "$1")"); echo "$s"; [[ $s == active ]] ;;
+  is-enabled) s=$(is_enabled "$(norm "$1")"); echo "$s"; [[ $s == enabled ]] ;;
+  is-failed)  s=$(state "$(norm "$1")"); echo "$s"; [[ $s == failed ]] ;;
+  daemon-reload) need_root reload daemon ;;
+  list-units|list-unit-files)
+    printf '%-24s %-10s %s\n' UNIT ACTIVE DESCRIPTION
+    for f in "$UNITDIR"/*.service; do [[ -e $f ]] || continue; u=$(basename "$f")
+      printf '%-24s %-10s %s\n' "$u" "$(state "$u")" "$(prop "$u" Description)"; done ;;
+  *) echo "Unknown command verb '$cmd'." >&2; exit 1 ;;
+esac

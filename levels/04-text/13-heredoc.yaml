@@ -1,0 +1,19 @@
+id: "4-13"
+title: Here Document
+kind: practice
+story: "<< 結束標記 讓你直接在終端機輸入多行文字，直到遇到結束標記為止。寫設定檔、腳本時超方便。"
+goal: "用 cat > motd.txt << EOF 建立三行的檔案，內容依序為 Welcome、aboard、Kernel-7，最後輸入 EOF 結束。"
+teaches: ["<<"]
+xp: 25
+hints:
+  - "輸入 cat > motd.txt << EOF，Enter 後逐行輸入內容，最後一行打 EOF。"
+setup: ""
+check: |
+  cd /home/player
+  diff <(printf '%s\n' Welcome aboard Kernel-7) motd.txt >/dev/null
+solution: |
+  cat > motd.txt << EOF
+  Welcome
+  aboard
+  Kernel-7
+  EOF

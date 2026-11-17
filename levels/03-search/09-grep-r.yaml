@@ -1,0 +1,22 @@
+id: "3-09"
+title: grep -r 遞迴搜尋
+kind: practice
+story: "-r 讓 grep 遞迴搜尋整個目錄。有人把金鑰寫死在專案某個檔案裡，找出它。"
+goal: "在 project 目錄底下搜尋 api_key=，answer 提交 = 後面的值。"
+teaches: [grep]
+xp: 20
+hints:
+  - "grep -r api_key= project"
+setup: |
+  cd /home/player
+  mkdir -p project/{src,lib,docs,config}
+  for f in project/src/main.py project/lib/util.py project/docs/guide.md; do echo "nothing here" > $f; done
+  echo "api_key=k3y-8812-zz" > project/config/prod.env
+check: |
+  [[ "$LBP_ANSWER" == "k3y-8812-zz" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "金鑰不對。"
+  exit 1
+solution: |
+  grep -r api_key= project
+  answer k3y-8812-zz
+reveal: "金鑰 k3y-8812-zz 出現在 prod.env，而不是它該在的地方。有東西在把機密抄來抄去。"

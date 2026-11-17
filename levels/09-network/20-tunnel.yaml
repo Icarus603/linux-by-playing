@@ -1,0 +1,37 @@
+id: "9-20"
+title: SSH 隧道
+kind: practice
+story: "ssh -L 本機埠:目標主機:目標埠 會在本機開一個埠，把流量經由 SSH 轉送到遠端那一側能連到的地方。-N 不執行遠端指令、-f 放到背景。這是穿越防火牆與安全存取內部服務的經典招式。內部服務只聽 127.0.0.1:9500。"
+goal: "建立一條 SSH 隧道，讓本機的 9600 埠轉送到 127.0.0.1:9500（透過 vaultkeeper@127.0.0.1 的 2222 埠）。完成後 curl http://127.0.0.1:9600/secret.txt 要能取得內容。"
+teaches: [ssh]
+xp: 65
+hints:
+  - "ssh -fN -L 9600:127.0.0.1:9500 -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1"
+  - "-fN 讓它在背景持續運作。"
+setup: |
+  # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
+  id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper
+  usermod -p "*" vaultkeeper
+  mkdir -p /run/sshd; ssh-keygen -A >/dev/null 2>&1
+  rm -rf /home/player/.ssh; install -d -m 700 -o player -g player /home/player/.ssh
+  runuser -u player -- ssh-keygen -q -t ed25519 -N "" -f /home/player/.ssh/id_ed25519
+  install -d -m 700 -o vaultkeeper -g vaultkeeper /home/vaultkeeper/.ssh
+  install -m 600 -o vaultkeeper -g vaultkeeper /home/player/.ssh/id_ed25519.pub /home/vaultkeeper/.ssh/authorized_keys
+  /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o UsePAM=no -o PidFile=/run/lbp-sshd.pid
+  sleep 0.6
+  rm -rf /srv/inner; mkdir -p /srv/inner
+  echo "INNER-$((RANDOM % 9000 + 1000))" > /srv/inner/secret.txt; chmod -R a+rX /srv/inner
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 9500 --bind 127.0.0.1 --directory /srv/inner >/dev/null 2>&1 </dev/null &
+  sleep 0.7
+check: |
+  [[ "$(curl -s --max-time 2 http://127.0.0.1:9600/secret.txt)" == "$(cat /srv/inner/secret.txt)" ]]
+cleanup: |
+  pkill -f "[s]shd -p 2222" 2>/dev/null || true
+  pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true
+  userdel -r vaultkeeper 2>/dev/null || true
+  rm -rf /home/player/.ssh
+  pkill -f '[h]ttp.server 9500' 2>/dev/null || true
+  rm -rf /srv/inner
+solution: |
+  ssh -fN -L 9600:127.0.0.1:9500 -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1
+  sleep 1

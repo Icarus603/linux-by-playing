@@ -1,0 +1,19 @@
+id: "9-01"
+title: ip：我的位址
+kind: learn
+story: "後日談第二幕。Kernel-7 要接上星網。學習容器只有本機迴路（loopback），不過位址、連接埠、請求的觀念完全一樣。ip addr（簡寫 ip a）列出每個網路介面與它的 IP。"
+goal: "用 ip 指令查出 lo（本機迴路）介面的 IPv4 位址，answer 提交（只要數字，不含 /8）。"
+teaches: [ip]
+xp: 20
+hints:
+  - "ip addr show lo"
+  - "ip -br addr 會把每個介面濃縮成一行。"
+setup: ""
+check: |
+  exp=$(ip -4 -o addr show lo | awk '{print $4}' | cut -d/ -f1 | head -1)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "位址不對，找 inet 那一行，不含斜線和後面的數字。"
+  exit 1
+solution: |
+  ip addr show lo
+  answer "$(ip -4 -o addr show lo | awk '{print $4}' | cut -d/ -f1 | head -1)"

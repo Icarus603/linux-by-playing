@@ -1,0 +1,18 @@
+id: "5-10"
+title: 新增使用者
+kind: practice
+story: "新船員報到了！useradd -m 建立使用者並一併建立家目錄。系統帳號操作都需要 root，所以前面要加 sudo。"
+goal: "建立一個叫 cadet 的使用者，並確保他有家目錄 /home/cadet。"
+teaches: [useradd, id]
+xp: 20
+hints:
+  - "sudo useradd -m cadet"
+  - "加 -s /bin/bash 可以指定登入 shell。"
+setup: |
+  id cadet >/dev/null 2>&1 && userdel -r cadet 2>/dev/null || true
+check: |
+  id cadet >/dev/null 2>&1 && [[ -d /home/cadet ]]
+cleanup: |
+  userdel -r cadet 2>/dev/null || true
+solution: |
+  sudo useradd -m cadet

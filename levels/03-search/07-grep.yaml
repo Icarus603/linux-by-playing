@@ -1,0 +1,19 @@
+id: "3-07"
+title: grep：搜尋內容
+kind: learn
+story: "find 找檔名，grep 找「檔案內容」。grep 關鍵字 檔案 會印出含有關鍵字的行。"
+goal: "app.log 裡只有一行含 FATAL。用 grep 找到它，answer 提交行尾的錯誤代碼（E 開頭）。"
+teaches: [grep]
+xp: 15
+hints:
+  - "grep FATAL app.log"
+setup: |
+  cd /home/player
+  { for i in $(seq 1 400); do echo "[INFO] heartbeat $i"; done; echo "[FATAL] core meltdown code=E4096"; for i in $(seq 401 600); do echo "[INFO] heartbeat $i"; done; } > app.log
+check: |
+  [[ "$LBP_ANSWER" == "E4096" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "代碼不對。"
+  exit 1
+solution: |
+  grep FATAL app.log
+  answer E4096

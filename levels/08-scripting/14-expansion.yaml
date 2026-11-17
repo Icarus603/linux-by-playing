@@ -1,0 +1,25 @@
+id: "8-14"
+title: 參數展開
+kind: practice
+story: "${var%模式} 從結尾去掉最短符合的部分，${var#模式} 從開頭去掉，${var/舊/新} 取代，${var:-預設} 在空值時給預設值。批次改檔名超好用。"
+goal: "寫 to-md.sh：把「目前目錄」裡所有 .txt 檔改名為 .md（a.txt 變 a.md）。notes/ 目錄有些檔案可以讓你測試。"
+teaches: [mv, bash]
+xp: 40
+hints:
+  - "for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done"
+setup: |
+  cd /home/player
+  rm -rf notes; mkdir notes
+  touch notes/a.txt notes/b.txt notes/c.txt notes/keep.log
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/to-md.sh ]] || { echo "還沒有 to-md.sh。"; exit 1; }
+  out=$(P 'd=$(mktemp -d); touch $d/a.txt $d/b.txt $d/keep.log; cd $d && bash /home/player/to-md.sh; ls $d; rm -rf $d')
+  [[ "$out" == $'a.md\nb.md\nkeep.log' ]]
+solution: |
+  cat > to-md.sh <<'EOS'
+  #!/bin/bash
+  for f in *.txt; do
+    [ -e "$f" ] && mv "$f" "${f%.txt}.md"
+  done
+  EOS

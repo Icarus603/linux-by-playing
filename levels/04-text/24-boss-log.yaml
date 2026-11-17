@@ -1,0 +1,50 @@
+id: "4-24"
+title: "Boss：伺服器日誌分析"
+kind: boss
+story: "網站被打爆了！主管要三個數字：最常訪問的 IP、5xx 錯誤的總數、流量最大的小時。這需要你把 sort、uniq、awk、cut 全部串起來。"
+goal: "分析 access.log，answer 提交三個值，用空白隔開：最常出現的 IP、狀態碼 5xx 的請求總數、請求數最多的小時（兩位數，例如 14）。範例：answer 10.0.0.1 12 09"
+teaches: [awk, sort, uniq, cut]
+xp: 80
+hints:
+  - "每行格式：IP - - [日期:時:分:秒 +0000] \"GET 路徑 HTTP/1.1\" 狀態碼 大小"
+  - "IP 是第 1 欄、時間是第 4 欄、狀態碼是第 9 欄。"
+  - "awk '{print $1}' access.log | sort | uniq -c | sort -nr | head -1"
+  - "小時：awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | head -1"
+  - "5xx：awk '$9 ~ /^5/' access.log | wc -l"
+setup: |
+  cd /home/player
+  python3 - <<'PY'
+  import random
+  random.seed(20261117)
+  ips = ["10.0.0.1","10.0.0.2","10.0.0.3","10.0.0.4","10.0.0.5","10.0.0.6"]
+  ipw = [3,5,9,4,2,22]
+  hours = list(range(24))
+  hw = [1]*24
+  hw[14] = 12
+  hw[9] = 5
+  st = [200,200,200,200,301,404,500,502,503]
+  paths = ["/","/index.html","/api/v1/items","/login","/static/app.js"]
+  out = []
+  for i in range(2000):
+      ip = random.choices(ips, ipw)[0]
+      h = random.choices(hours, hw)[0]
+      m, s = random.randint(0,59), random.randint(0,59)
+      code = random.choice(st)
+      p = random.choice(paths)
+      out.append(f'{ip} - - [17/Nov/2026:{h:02d}:{m:02d}:{s:02d} +0000] "GET {p} HTTP/1.1" {code} {random.randint(100,9000)}')
+  open("access.log","w").write("\n".join(out)+"\n")
+  PY
+check: |
+  cd /home/player
+  ip=$(awk '{print $1}' access.log | sort | uniq -c | sort -nr | awk 'NR==1{print $2}')
+  err=$(awk '$9 ~ /^5/' access.log | wc -l)
+  hr=$(awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | awk 'NR==1{print $2}')
+  [[ "$LBP_ANSWER" == "$ip $err $hr" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "三個值要用空白隔開，順序是：IP 5xx數量 小時。"
+  exit 1
+solution: |
+  ip=$(awk '{print $1}' access.log | sort | uniq -c | sort -nr | awk 'NR==1{print $2}')
+  err=$(awk '$9 ~ /^5/' access.log | wc -l)
+  hr=$(awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | awk 'NR==1{print $2}')
+  answer "$ip $err $hr"
+reveal: "流量尖峰集中在 14 點。那正是 Vega 失蹤的時間。"

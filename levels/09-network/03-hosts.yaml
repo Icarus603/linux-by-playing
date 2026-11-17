@@ -1,0 +1,19 @@
+id: "9-03"
+title: 名稱解析與 /etc/hosts
+kind: practice
+story: "電腦只認得 IP，名字要靠解析。最先查的是 /etc/hosts：每行「IP 名稱」。getent hosts 名稱 能模擬系統解析名字的結果。"
+goal: "讓名稱 hub 解析到 127.0.0.1：在 /etc/hosts 加一行（需要 root）。用 getent hosts hub 確認。"
+teaches: [getent, tee, sudo]
+xp: 30
+hints:
+  - "先試 getent hosts hub，目前應該沒有結果。"
+  - "echo '127.0.0.1 hub' | sudo tee -a /etc/hosts"
+  - "tee -a 是追加；不加 -a 會把整個檔案覆蓋掉！"
+setup: |
+  grep -v ' hub$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
+check: |
+  [[ "$(getent hosts hub | awk '{print $1}' | head -1)" == "127.0.0.1" ]]
+cleanup: |
+  grep -v ' hub$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
+solution: |
+  echo '127.0.0.1 hub' | sudo tee -a /etc/hosts

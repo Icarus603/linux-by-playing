@@ -1,0 +1,18 @@
+id: "2-08"
+title: 清理垃圾
+kind: learn
+story: "rm 刪除檔案，而且沒有垃圾桶，刪了就是沒了。所以打 rm 之前務必看清楚。"
+goal: 刪除 junk.tmp，但保留 keep.txt。
+teaches: [rm]
+xp: 10
+hints:
+  - "rm junk.tmp"
+setup: |
+  cd /home/player
+  echo trash > junk.tmp
+  echo important > keep.txt
+check: |
+  [[ ! -e /home/player/junk.tmp && -f /home/player/keep.txt ]]
+solution: |
+  rm junk.tmp
+golf: 11

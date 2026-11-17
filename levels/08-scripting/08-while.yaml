@@ -1,0 +1,24 @@
+id: "8-08"
+title: while read 逐行處理
+kind: practice
+story: "while read line; do ...; done < 檔案 是逐行處理檔案的標準寫法。記得用 IFS= read -r 避免吃掉空白與反斜線。"
+goal: "寫 numbered.sh FILE：把檔案每一行前面加上行號和冒號與空格，例如 1: 第一行。"
+teaches: [read, bash]
+xp: 35
+hints:
+  - "n=0; while IFS= read -r line; do n=$((n+1)); echo \"$n: $line\"; done < \"$1\""
+setup: |
+  printf 'alpha\nbeta  gamma\n\ndelta\n' > /home/player/sample.txt
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -f /home/player/numbered.sh ]] || { echo "還沒有 numbered.sh。"; exit 1; }
+  [[ "$(P 'bash numbered.sh sample.txt')" == "$(awk '{print NR": "$0}' /home/player/sample.txt)" ]]
+solution: |
+  cat > numbered.sh <<'EOS'
+  #!/bin/bash
+  n=0
+  while IFS= read -r line; do
+    n=$((n+1))
+    echo "$n: $line"
+  done < "$1"
+  EOS

@@ -1,0 +1,17 @@
+id: "4-19"
+title: awk 條件篩選
+kind: practice
+story: "awk 可以在動作前加條件：只有符合條件的行才會執行。-F 指定欄位分隔符號。"
+goal: "crew.csv 格式是 名字,職位,分數。把「分數大於 80」的人的名字，存成 elite.txt（每行一個）。"
+teaches: [awk]
+xp: 30
+hints:
+  - "awk -F, '$3>80{print $1}' crew.csv > elite.txt"
+setup: |
+  cd /home/player
+  printf 'ann,pilot,88\nbob,medic,92\ncat,cook,75\ndan,engineer,97\neve,gunner,60\n' > crew.csv
+check: |
+  cd /home/player
+  diff <(awk -F, '$3>80{print $1}' crew.csv) elite.txt >/dev/null
+solution: |
+  awk -F, '$3>80{print $1}' crew.csv > elite.txt

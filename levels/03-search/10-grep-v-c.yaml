@@ -1,0 +1,20 @@
+id: "3-10"
+title: grep -v 與 -c
+kind: practice
+story: "-v 反向篩選（不含關鍵字的行），-c 只印出符合的行數。想知道設定檔有幾條「真正生效」的設定嗎？排除註解就行。"
+goal: "app.conf 裡以 # 開頭的是註解。算出「非註解」的行數，answer 提交。"
+teaches: [grep]
+xp: 20
+hints:
+  - "grep -v '^#' app.conf"
+  - "加上 -c 直接得到數字。"
+setup: |
+  cd /home/player
+  { for i in $(seq 1 14); do echo "# comment $i"; done; for i in $(seq 1 7); do echo "setting$i=value"; done; } > app.conf
+check: |
+  [[ "$LBP_ANSWER" == "7" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "數量不對，註解行要排除。"
+  exit 1
+solution: |
+  grep -vc '^#' app.conf
+  answer 7

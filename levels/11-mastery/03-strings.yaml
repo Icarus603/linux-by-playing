@@ -1,0 +1,21 @@
+id: "11-03"
+title: strings：從二進位檔裡撈文字
+kind: practice
+story: "不能 cat 的二進位檔裡，常夾著可讀的文字（錯誤訊息、版本、路徑、有時還有忘記清掉的金鑰）。strings 會把連續的可印字元撈出來，-n 設定最短長度。"
+goal: "blob.bin 是一段隨機資料，裡面藏著一組以 STRKEY- 開頭的金鑰。把它撈出來，answer 提交完整金鑰。"
+teaches: [strings]
+xp: 40
+hints:
+  - "strings blob.bin | grep STRKEY"
+setup: |
+  cd /home/player
+  k="STRKEY-$((RANDOM % 9000 + 1000))"
+  { head -c 400 /dev/urandom; printf '%s' "$k"; head -c 400 /dev/urandom; } > blob.bin
+  mkdir -p /var/lib/lbp && echo "$k" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "金鑰不對。"
+  exit 1
+solution: |
+  strings blob.bin | grep STRKEY
+  answer "$(strings blob.bin | grep -oE 'STRKEY-[0-9]+' | head -1)"

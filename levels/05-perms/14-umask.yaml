@@ -1,0 +1,20 @@
+id: "5-14"
+title: umask：預設權限
+kind: practice
+story: "新建檔案的預設權限由 umask 決定：它是「要拿掉的權限」。檔案預設 666、目錄預設 777，減去 umask 就是結果。umask 022 → 檔案 644。"
+goal: "在這個 shell 執行 umask 077，然後 touch 一個新檔案，用 ls -l 或 stat -c %a 看它的權限，answer 提交那個數字。"
+teaches: [umask]
+xp: 25
+hints:
+  - "umask 077"
+  - "touch test.txt && stat -c %a test.txt"
+setup: ""
+check: |
+  [[ "$LBP_ANSWER" == "600" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，先設定 umask 077 再建立新檔案。"
+  exit 1
+solution: |
+  umask 077
+  touch test.txt
+  stat -c %a test.txt
+  answer 600

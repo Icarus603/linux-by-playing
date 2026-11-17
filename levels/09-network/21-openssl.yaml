@@ -1,0 +1,20 @@
+id: "9-21"
+title: openssl：雜湊與驗證
+kind: practice
+story: "下載的檔案到底有沒有被動過手腳？比對雜湊值。openssl dgst -sha256 檔案 算出 SHA-256 摘要，內容只要差一個位元，雜湊就完全不同。openssl rand -hex 16 則產生隨機金鑰。"
+goal: "用 openssl dgst -sha256 算出 firmware.bin 的雜湊，answer 提交前 8 個字元。"
+teaches: [openssl]
+xp: 35
+hints:
+  - "openssl dgst -sha256 firmware.bin"
+  - "雜湊值是等號後面那一長串十六進位，取前 8 碼。"
+setup: |
+  head -c 2048 /dev/urandom > /home/player/firmware.bin
+check: |
+  exp=$(sha256sum /home/player/firmware.bin | cut -c1-8)
+  [[ "$LBP_ANSWER" == "$exp" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "不對，只要前 8 個字元。"
+  exit 1
+solution: |
+  openssl dgst -sha256 firmware.bin
+  answer "$(openssl dgst -sha256 firmware.bin | awk '{print $NF}' | cut -c1-8)"

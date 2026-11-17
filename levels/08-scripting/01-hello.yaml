@@ -1,0 +1,23 @@
+id: "8-01"
+title: 第一支腳本
+kind: learn
+story: "後日談開始了。Warden 想學自己寫腳本，不再事事問你。腳本就是把指令存進檔案：第一行 shebang（#!/bin/bash）告訴系統用誰來執行，再用 chmod +x 讓它可執行。"
+goal: "寫一支 hello.sh：第一行是 #!/bin/bash，執行後印出 Hello, Kernel-7。記得讓它可執行。"
+teaches: [bash, chmod, echo]
+xp: 25
+hints:
+  - "可以用 nano hello.sh 或 vim 編輯，也可以 cat > hello.sh << 'EOF' 一次寫完。"
+  - "寫好後 chmod +x hello.sh，用 ./hello.sh 執行。"
+setup: ""
+check: |
+  P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }
+  [[ -x /home/player/hello.sh ]] || { echo "hello.sh 還不能執行（chmod +x）。"; exit 1; }
+  head -n1 /home/player/hello.sh | grep -q '^#!' || { echo "第一行要有 shebang，例如 #!/bin/bash。"; exit 1; }
+  [[ "$(P ./hello.sh)" == "Hello, Kernel-7" ]]
+reveal: "Warden 第一次執行你寫的腳本，終端機上跳出一行字，它安靜了很久，然後說：「原來這就是『自己動手』的感覺。」"
+solution: |
+  cat > hello.sh <<'EOS'
+  #!/bin/bash
+  echo "Hello, Kernel-7"
+  EOS
+  chmod +x hello.sh

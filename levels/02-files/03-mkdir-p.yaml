@@ -1,0 +1,15 @@
+id: "2-03"
+title: 一次蓋好整層樓
+kind: practice
+story: "直接 mkdir a/b/c 會失敗，因為上層目錄不存在。加上 -p 就能一次建立整條路徑。"
+goal: 用一個指令建立 ship/deck/engine/core 這條四層的目錄路徑。
+teaches: [mkdir]
+xp: 15
+hints:
+  - "mkdir 的 -p 選項代表 parents（連同上層一起建立）。"
+  - "mkdir -p ship/deck/engine/core"
+setup: ""
+check: |
+  [[ -d /home/player/ship/deck/engine/core ]]
+solution: |
+  mkdir -p ship/deck/engine/core

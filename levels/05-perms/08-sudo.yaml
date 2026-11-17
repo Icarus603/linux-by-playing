@@ -1,0 +1,23 @@
+id: "5-08"
+title: sudo：借用 root 的力量
+kind: learn
+story: "root 是系統的超級管理員，什麼都能做，所以平常不要用 root 登入。需要時用 sudo 指令 臨時以 root 身分執行單一指令。"
+goal: "/root/mission.txt 只有 root 能讀。用 sudo cat 讀出內容，answer 提交 MISSION: 後面的代號。"
+teaches: [sudo]
+xp: 20
+hints:
+  - "先試 cat /root/mission.txt，會被拒絕。"
+  - "sudo cat /root/mission.txt"
+setup: |
+  echo "MISSION: AURORA-5" > /root/mission.txt
+  chmod 600 /root/mission.txt
+check: |
+  [[ "$LBP_ANSWER" == "AURORA-5" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "代號不對。"
+  exit 1
+cleanup: |
+  rm -f /root/mission.txt
+solution: |
+  sudo cat /root/mission.txt
+  answer AURORA-5
+reveal: "AURORA-5 計畫的內容是：把 Warden 設計成能「自我修復」的守護程序，永遠不讓站台掛掉，不計代價。"

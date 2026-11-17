@@ -1,0 +1,18 @@
+id: "2-05"
+title: 連資料夾一起備份
+kind: practice
+story: "cp 預設只能複製檔案。要複製整個目錄（含內容），要加 -r（recursive 遞迴）。"
+goal: 把 config 目錄整個複製成 config-backup。
+teaches: [cp]
+xp: 15
+hints:
+  - "cp -r config config-backup"
+setup: |
+  cd /home/player
+  mkdir -p config/net
+  echo "mode=safe" > config/main.conf
+  echo "dns=10.0.0.1" > config/net/dns.conf
+check: |
+  [[ -d /home/player/config-backup ]] && diff -r /home/player/config /home/player/config-backup >/dev/null
+solution: |
+  cp -r config config-backup

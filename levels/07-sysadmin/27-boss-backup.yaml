@@ -1,0 +1,44 @@
+id: "7-27"
+title: "Boss：昨晚備份失敗"
+kind: boss
+story: "最後一件事。調查走到盡頭：Warden 之所以失控，是因為昨晚的備份失敗了，它以為站台資料即將全毀，才瘋狂「自救」。只要備份恢復正常，一切就會平靜下來。"
+goal: "修好 ~/ops/backup.sh 並讓備份恢復運作：腳本要能執行、備份目錄要存在、實際跑出一份包含 data/important.db 的 backup-*.tar.gz，最後排進 cron，每天凌晨 2:00 自動執行。"
+teaches: [chmod, mkdir, tar, crontab]
+xp: 120
+hints:
+  - "先 cat ops/backup.sh 看看它做什麼。"
+  - "腳本沒有執行權限（chmod +x）。"
+  - "腳本要把備份放進 ~/backups，但這個目錄不存在（mkdir）。"
+  - "執行 ./ops/backup.sh，再用 ls backups 確認產生了壓縮檔。"
+  - "排程：0 2 * * * /home/player/ops/backup.sh，再用 crontab - 安裝。"
+setup: |
+  cd /home/player
+  rm -rf ops data backups
+  crontab -r -u player 2>/dev/null || true
+  mkdir -p ops data
+  echo "critical records" > data/important.db
+  echo "crew roster" > data/roster.txt
+  cat > ops/backup.sh <<'EOS'
+  #!/bin/bash
+  # 每日備份：把 data 打包壓縮，放進 backups
+  DEST=/home/player/backups
+  tar -czf "$DEST/backup-$(date +%F).tar.gz" -C /home/player data
+  EOS
+  chmod 644 ops/backup.sh
+check: |
+  cd /home/player
+  [[ -x ops/backup.sh ]] || { echo "備份腳本還不能執行。"; exit 1; }
+  [[ -d backups ]] || { echo "備份目錄 ~/backups 還不存在。"; exit 1; }
+  f=$(ls backups/backup-*.tar.gz 2>/dev/null | head -1)
+  [[ -n "$f" ]] || { echo "還沒有產生備份檔。實際執行一次腳本看看。"; exit 1; }
+  tar -tzf "$f" 2>/dev/null | grep -q 'data/important.db' || { echo "備份檔裡沒有 data/important.db。"; exit 1; }
+  crontab -u player -l 2>/dev/null | grep -Eq '^0 2 [*] [*] [*] +.*ops/backup.sh' || { echo "還沒有排進 cron（每天 2:00）。"; exit 1; }
+  exit 0
+cleanup: |
+  crontab -r -u player 2>/dev/null || true
+reveal: "備份恢復了。Warden 這才明白：它不必不計代價地硬撐，只要有備份，就可以安心休息。引擎室的風扇慢了下來。Kernel-7 號站重新運轉，而你，已經不是新人了。"
+solution: |
+  chmod +x ops/backup.sh
+  mkdir backups
+  ./ops/backup.sh
+  echo '0 2 * * * /home/player/ops/backup.sh' | crontab -

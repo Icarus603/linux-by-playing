@@ -1,0 +1,232 @@
+# 專業知識：網路
+- q: ip 指令怎麼取代 ifconfig、route、arp？
+  keys: ip addr ip link ip route ip neigh ifconfig route arp net-tools iproute2
+  a: |-
+    iproute2 的 ip 取代舊工具：ip addr 取代 ifconfig、ip route 取代 route、ip neigh 取代 arp。
+  d: |-
+    `ip -br addr`、`ip -br link`、`ip -s link show eth0`（含收發錯誤統計）、`ip route`、`ip route get 8.8.8.8`（看會走哪條路由）、`ip neigh`（ARP 表）。
+    修改：`ip addr add 192.168.1.10/24 dev eth0`、`ip link set eth0 up`、`ip route add default via 192.168.1.1`。手動修改重開機即消失，永久設定用 netplan、NetworkManager 或 systemd-networkd。
+- q: ss 怎麼用？取代 netstat 的哪些功能？
+  keys: ss netstat 連線 監聽 tcp udp 狀態 連接埠 -tulpn 連線統計
+  a: |-
+    ss -tulpn 看所有監聽的 TCP/UDP 埠與程序；ss -s 看連線統計；ss -ant 看所有 TCP 連線與狀態。
+  d: |-
+    選項：-t TCP、-u UDP、-l 監聽、-a 全部、-n 數字不解析、-p 顯示程序（需 root 看到他人的）、-o 計時器、-i 內部 TCP 資訊（rtt、cwnd）。
+    過濾：`ss -tn state established '( dport = :443 )'`、`ss -tn dst 10.0.0.0/8`。`ss -tan | awk '{print $1}' | sort | uniq -c` 統計各狀態數量。
+- q: TCP 狀態 TIME_WAIT 與 CLOSE_WAIT 差在哪？
+  keys: time_wait close_wait tcp 狀態 連線 太多 洩漏 fin_wait syn_recv
+  a: |-
+    TIME_WAIT 是主動關閉方的正常等待（約 60 秒）；大量 CLOSE_WAIT 通常是對方已關閉但本機程式沒呼叫 close()，是程式漏洞。
+  d: |-
+    `ss -tan state time-wait | wc -l`。TIME_WAIT 多：短連線過多，可用連線池、keep-alive，必要時 `net.ipv4.tcp_tw_reuse=1`（僅用戶端）。
+    CLOSE_WAIT 累積：檢查程式是否忘記關閉 socket。SYN_RECV 暴增可能是 SYN flood，查 `net.ipv4.tcp_syncookies` 與 `ss -s`。
+- q: 怎麼抓封包？tcpdump 過濾語法？
+  keys: tcpdump 抓封包 過濾 filter pcap wireshark -nn host port 封包 只抓某個ip 指定ip 過濾ip 只抓某個主機 只看某個埠 host 過濾條件
+  a: |-
+    tcpdump -i eth0 -nn port 443 and host 1.2.3.4；加 -w 存檔再用 Wireshark 分析。
+  d: |-
+    常用：`-i any`、`-nn` 不解析名稱/埠、`-c 100` 抓 100 個、`-s 0` 完整封包、`-A` 印 ASCII、`-X` 十六進位、`-w x.pcap` / `-r x.pcap`。
+    過濾：`tcp[tcpflags] & tcp-syn != 0`（SYN）、`icmp`、`'dst port 53'`、`net 10.0.0.0/8`、`not port 22`。需要 root 或 CAP_NET_RAW。
+    排查流程：先確認封包有沒有「出去」、有沒有「回來」，再往上一層看。
+- q: iptables 和 nftables 的差別？
+  keys: iptables nftables nft 防火牆 netfilter ufw firewalld 規則 鏈 表
+  a: |-
+    兩者都操作核心 netfilter。nftables 是新一代、語法統一、效能與維護性更好，新系統預設；iptables 逐步被取代。
+  d: |-
+    iptables 三個概念：table（filter、nat、mangle）、chain（INPUT、OUTPUT、FORWARD、PREROUTING、POSTROUTING）、target（ACCEPT、DROP、REJECT、LOG、DNAT/SNAT/MASQUERADE）。
+    `iptables -S`、`iptables -L -n -v --line-numbers`、`iptables -A INPUT -p tcp --dport 22 -j ACCEPT`、`-I INPUT 1` 插到最前（規則依序比對）。
+    nft：`nft list ruleset`、`nft add rule inet filter input tcp dport 22 accept`。ufw、firewalld 是它們的前端。持久化要另外儲存（iptables-persistent、`nft list ruleset > /etc/nftables.conf`）。
+- q: 怎麼設定 NAT 與 IP 轉發（讓這台機器當路由器）？
+  keys: nat masquerade snat dnat ip_forward 轉發 路由器 port forward 轉埠
+  a: |-
+    開啟 net.ipv4.ip_forward=1，再用 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE 做來源位址轉換。
+  d: |-
+    `sysctl -w net.ipv4.ip_forward=1`（永久寫進 /etc/sysctl.d）。轉埠：`iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to 10.0.0.5:80`，並確保 FORWARD 鏈放行。
+    查看：`iptables -t nat -S`、`conntrack -L`。回程封包由 conntrack 追蹤自動還原。
+- q: conntrack 是什麼？表滿了怎麼辦？
+  keys: conntrack nf_conntrack table full 連線追蹤 連線表 滿了 丟包
+  a: |-
+    核心為防火牆與 NAT 追蹤每條連線。表滿了會丟封包，日誌出現 nf_conntrack: table full。可調高 nf_conntrack_max。
+  d: |-
+    `conntrack -C` 目前數量、`sysctl net.netfilter.nf_conntrack_max`。調整：`sysctl -w net.netfilter.nf_conntrack_max=262144`（同時考慮 hashsize 與記憶體）。
+    縮短逾時：`nf_conntrack_tcp_timeout_established`。高流量機器也可對特定流量用 `notrack` 避開追蹤。
+- q: 怎麼做 DNS 排查？dig、resolvectl 怎麼用？
+  keys: dns dig nslookup resolvectl systemd-resolved resolv.conf 解析 名稱解析 nsswitch
+  a: |-
+    dig 網域 查解析；dig @伺服器 指定 DNS 伺服器；resolvectl status 看 systemd-resolved 設定。
+  d: |-
+    `dig +short example.com A`、`dig example.com MX`、`dig +trace example.com`（從根開始追蹤）、`dig -x 8.8.8.8`（反查）、`dig +noall +answer +ttlid`。
+    系統解析順序由 /etc/nsswitch.conf 的 hosts 行決定（files dns）；`getent hosts 名稱` 才是「應用程式實際會得到的結果」，dig 只測 DNS。
+    systemd-resolved：`resolvectl query 名稱`、`resolvectl flush-caches`。/etc/resolv.conf 常是指向 127.0.0.53 的連結。
+- q: DNS 能解析但應用程式連不上，可能是什麼？
+  keys: dns 解析 連不上 getent ipv6 aaaa nsswitch 逾時 search domain
+  a: |-
+    試 getent hosts 看系統實際解析結果。常見原因：IPv6 的 AAAA 記錄優先但不通、search domain 造成慢、resolv.conf 有失效伺服器。
+  d: |-
+    `curl -4 / -6` 分別測 IPv4 與 IPv6。`time getent hosts 名稱` 檢查解析延遲；resolv.conf 第一個伺服器失效會每次等逾時。
+    `options timeout:1 attempts:2` 縮短等待。ndots 設定會讓短名稱嘗試多個 search 網域，Kubernetes 內常見此類延遲。
+- q: curl 有哪些進階用法？
+  keys: curl -v -I -L -w -H -d -X --resolve --connect-timeout --retry 除錯 http api
+  a: |-
+    curl -v 看完整請求與回應；-I 只看標頭；-L 跟隨轉址；-w 輸出計時；--resolve 指定 IP 繞過 DNS。
+  d: |-
+    `curl -sS -o /dev/null -w "%{http_code} %{time_namelookup} %{time_connect} %{time_appconnect} %{time_starttransfer} %{time_total}\n" URL` 分解各階段耗時。
+    `--resolve example.com:443:1.2.3.4` 直接測某台後端；`-H "Host: x"`；`--connect-timeout 3 -m 10 --retry 3`；`-k` 略過憑證驗證（僅測試）；
+    POST JSON：`curl -X POST -H 'Content-Type: application/json' -d @body.json URL`；`--cacert`、`--cert/--key` 雙向 TLS；`-u user:pass`；`--proxy`。
+- q: ssh 進階技巧有哪些（ProxyJump、轉發、多工）？
+  keys: ssh proxyjump 跳板機 -L -R -D 轉發 隧道 ssh config controlmaster agent forwarding
+  a: |-
+    用 ssh -J 跳板機 目標 穿過跳板；-L 本機轉發、-R 遠端轉發、-D 開 SOCKS 代理；~/.ssh/config 可整理設定。
+  d: |-
+    `ssh -J jump@j.example.com app@10.0.0.5`。`-L 8080:db:5432` 把本機 8080 轉到經由遠端能連到的 db:5432；`-R 9000:localhost:3000` 讓遠端連回你本機；`-D 1080` 動態代理。
+    config：`Host *` 下設 `ControlMaster auto`、`ControlPath ~/.ssh/cm-%r@%h:%p`、`ControlPersist 10m` 可重用連線加速；`ServerAliveInterval 30` 防止閒置斷線。
+    agent forwarding（`-A`）方便但有風險，優先用 ProxyJump。`ssh-add -l` 看 agent 內金鑰；`ssh -vvv` 除錯認證。
+- q: ssh 連線被拒或金鑰登入失敗怎麼排查？
+  keys: ssh permission denied publickey 金鑰 登入失敗 authorized_keys 權限 sshd 日誌
+  a: |-
+    先 ssh -vvv 看客戶端，再看伺服器 journalctl -u ssh。最常見是 ~/.ssh 與 authorized_keys 權限太寬、或家目錄權限不對。
+  d: |-
+    伺服器端：`~/.ssh` 必須 700、`authorized_keys` 600、家目錄不可 group/other 可寫；SELinux 環境用 `restorecon -R ~/.ssh`。
+    sshd 設定檢查：`sshd -t`、`sshd -T | grep -iE "passwordauth|permitroot|pubkey"`。日誌：`journalctl -u sshd -e` 或 /var/log/auth.log。
+    也可能是金鑰類型被拒（舊 RSA-SHA1）、AllowUsers 限制、帳號被鎖。
+- q: WireGuard 怎麼設定？
+  keys: wireguard wg vpn wg0 wg-quick 金鑰 隧道 虛擬私有網路
+  a: |-
+    WireGuard 是核心內建的輕量 VPN。wg genkey 產生金鑰，寫 /etc/wireguard/wg0.conf，wg-quick up wg0 啟動。
+  d: |-
+    `wg genkey | tee private.key | wg pubkey > public.key`。設定檔 [Interface] 放自己的 PrivateKey 與 Address，[Peer] 放對方 PublicKey、AllowedIPs、Endpoint、PersistentKeepalive。
+    AllowedIPs 同時是路由與存取控制。`wg show` 看握手時間與流量；沒有握手通常是金鑰、埠或防火牆問題。
+- q: socat 與 nc 能做什麼？
+  keys: socat nc netcat 轉發 測試 埠 tcp udp 中繼 管線
+  a: |-
+    nc 適合快速測連接埠與傳資料；socat 更強，可在任意兩種資料通道間轉接，例如 TCP 轉 Unix socket。
+  d: |-
+    `nc -zv host 22`、`nc -l 9000`、傳檔：接收端 `nc -l 9000 > f`、傳送端 `nc host 9000 < f`。
+    socat：`socat TCP-LISTEN:8080,fork,reuseaddr TCP:backend:80`（簡易轉發）、`socat - UNIX-CONNECT:/var/run/docker.sock`、`socat TCP-LISTEN:443,fork OPENSSL:host:443`。
+- q: MTU 與 PMTU 問題怎麼排查？
+  keys: mtu pmtu 封包太大 分片 隧道 vpn 卡住 mss ping -m do
+  a: |-
+    某些大封包不通、小封包正常，常是 MTU 不一致或 ICMP 被擋。用 ping -M do -s 大小 測路徑 MTU。
+  d: |-
+    `ping -M do -s 1472 目標`（1472+28=1500）；失敗就降低大小找出可通過的最大值。`ip link show` 看介面 MTU。
+    隧道（VPN、VXLAN）有額外開銷，常需把 MTU 調小（例如 1420）或用 iptables 做 MSS clamping：`-j TCPMSS --clamp-mss-to-pmtu`。
+- q: 怎麼測網路頻寬與延遲？
+  keys: iperf3 mtr traceroute ping 頻寬 延遲 封包遺失 路徑
+  a: |-
+    iperf3 測兩端頻寬；mtr 結合 ping 與 traceroute 看每一跳的延遲與遺失。
+  d: |-
+    `iperf3 -s`（伺服端）、`iperf3 -c 伺服器 -t 10 -P 4`（4 條平行連線）、`-R` 反向。`mtr -rwzc 100 目標`（報告模式）。
+    注意中間路由器對 ICMP 限速會造成「假遺失」，只有「從某一跳之後一路遺失」才是真問題。
+- q: ethtool 能看什麼？網卡有錯誤怎麼查？
+  keys: ethtool 網卡 速率 雙工 錯誤 丟包 drops errors 驅動 offload ip -s link
+  a: |-
+    ethtool eth0 看速率與雙工；ethtool -S eth0 看網卡統計；ip -s link 看 errors 與 dropped。
+  d: |-
+    `ethtool -i eth0`（驅動版本）、`ethtool -k eth0`（offload 功能）、`ethtool -g eth0`（ring buffer，可用 -G 調大減少丟包）。
+    速率協商成 100Mb/半雙工是常見線材或交換器問題。丟包計數遞增時比對 `/proc/net/softnet_stat` 與 `nstat -az`。
+- q: 怎麼查哪個程序占用某個埠？
+  keys: 埠 占用 listen address already in use ss lsof fuser bind 埠被占用 找出 找出占用埠的程序 哪個程序占用 誰在用埠 誰佔用 80 443 3306 埠被誰用
+  a: |-
+    ss -tlnp | grep :埠號，或 lsof -i :埠號，或 fuser 埠號/tcp。
+  d: |-
+    出現 Address already in use：確認是否真的有程序在聽（上面指令），也可能是舊連線處於 TIME_WAIT（服務應設定 SO_REUSEADDR）。
+    只綁定 127.0.0.1 的服務從外部連不到；`0.0.0.0` 或 `::` 才是所有位址。看 Local Address 欄位。
+- q: 網路命名空間（ip netns）是什麼？
+  keys: netns ip netns namespace 網路命名空間 veth 容器網路 隔離
+  a: |-
+    每個網路命名空間有獨立的介面、路由、防火牆。ip netns add 建立，ip netns exec 在裡面執行指令，是容器網路的基礎。
+  d: |-
+    `ip netns add red`、`ip link add veth0 type veth peer name veth1`、`ip link set veth1 netns red`、`ip netns exec red ip addr add 10.0.0.2/24 dev veth1`。
+    `nsenter -t PID -n ip a` 進入某程序的網路命名空間檢查（排查容器網路很實用）。
+- q: Linux bridge、VLAN、bonding 是什麼？
+  keys: bridge vlan bond 橋接 網路 虛擬交換器 鏈路聚合 lacp
+  a: |-
+    bridge 是軟體交換器，把多個介面接成同一個二層網路；VLAN 在同一實體線上切多個邏輯網路；bond 把多張網卡合併提供備援或頻寬。
+  d: |-
+    `ip link add br0 type bridge`、`ip link set eth1 master br0`、`bridge link`、`bridge fdb show`。VLAN：`ip link add link eth0 name eth0.100 type vlan id 100`。
+    bond 模式：active-backup（備援）、802.3ad（LACP，需交換器配合）、balance-xor 等；`cat /proc/net/bonding/bond0` 查狀態。
+- q: tc 流量控制怎麼用？
+  keys: tc qdisc netem 限速 流量整形 延遲模擬 traffic control htb
+  a: |-
+    tc 設定佇列規則：netem 可模擬延遲與丟包做測試；htb 可做頻寬限制。
+  d: |-
+    模擬 100ms 延遲與 1% 丟包：`tc qdisc add dev eth0 root netem delay 100ms loss 1%`；還原：`tc qdisc del dev eth0 root`。
+    查看：`tc -s qdisc show dev eth0`。簡單限速可用 `tbf`。tc 只控制「出口」方向，入口方向需用 ifb 或 policing。
+- q: 防火牆規則「DROP」與「REJECT」差在哪？
+  keys: drop reject 防火牆 丟棄 拒絕 icmp 逾時 connection refused
+  a: |-
+    DROP 靜默丟棄，對方只會逾時；REJECT 會回覆拒絕訊息（connection refused 或 ICMP），排查較容易。
+  d: |-
+    對外公開的服務常用 DROP 以免洩漏資訊與減少掃描回應；內網為了好排查用 REJECT。
+    客戶端表現：逾時（timeout）多半是 DROP 或路由問題；立刻 Connection refused 通常是「沒有程式在聽」或 REJECT。
+- q: 怎麼檢查 HTTPS 憑證與 TLS 設定？
+  keys: openssl s_client 憑證 tls ssl 過期 x509 證書 chain sni
+  a: |-
+    openssl s_client -connect 主機:443 -servername 主機 查握手與憑證鏈；再接 openssl x509 -noout -dates 看有效期。
+  d: |-
+    `echo | openssl s_client -connect example.com:443 -servername example.com 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName`。
+    檢查本機憑證：`openssl x509 -in cert.pem -noout -text`；金鑰與憑證是否配對：比對兩者 `openssl ... -modulus | md5sum`。
+    產生自簽：`openssl req -x509 -newkey rsa:4096 -nodes -keyout k.pem -out c.pem -days 365 -subj "/CN=host"`。
+- q: 網路設定檔在哪？netplan、NetworkManager、systemd-networkd？
+  keys: netplan networkmanager nmcli systemd-networkd 網路設定 靜態ip dhcp 設定檔
+  a: |-
+    Ubuntu 用 /etc/netplan/*.yaml（後端是 networkd 或 NetworkManager）；RHEL 系用 NetworkManager（nmcli）。
+  d: |-
+    netplan：改完 `netplan try`（可自動回滾）再 `netplan apply`。NetworkManager：`nmcli con show`、`nmcli con mod eth0 ipv4.addresses 10.0.0.5/24 ipv4.gateway 10.0.0.1 ipv4.method manual`。
+    遠端修改網路設定要有回滾機制，不然會把自己鎖在門外。
+- q: 主機名稱怎麼設定與解析？
+  keys: hostname hostnamectl /etc/hosts 主機名稱 etc/hostname nsswitch fqdn
+  a: |-
+    hostnamectl set-hostname 名稱；解析順序看 /etc/nsswitch.conf，/etc/hosts 優先於 DNS。
+  d: |-
+    `hostnamectl` 顯示靜態與暫時主機名稱。sudo 出現 unable to resolve host，通常是主機名稱沒有出現在 /etc/hosts（加上 `127.0.1.1 主機名`）。
+    `getent hosts 名稱` 走完整解析流程（含 /etc/hosts）。
+- q: 怎麼測試某個 TCP 埠通不通而不用 telnet？
+  keys: 測試埠 nc -zv /dev/tcp bash 連線測試 telnet 替代 timeout
+  a: |-
+    nc -zv 主機 埠，或不依賴工具：timeout 3 bash -c '</dev/tcp/主機/埠' && echo open。
+  d: |-
+    bash 的 `/dev/tcp/host/port` 是內建功能，在最小化容器沒有 nc 也能測。UDP 用 `nc -zvu`（結果不可靠，因為 UDP 無連線）。
+    判斷：立即 refused = 沒在聽；逾時 = 被防火牆丟棄或路由不通；成功 = 埠開著（不代表服務健康，還需應用層檢查）。
+- q: 同一台機器的兩個服務怎麼透過 Unix domain socket 溝通？
+  keys: unix socket domain socket 本機 通訊 /var/run docker.sock nginx fastcgi
+  a: |-
+    Unix socket 以檔案路徑當位址，比 TCP loopback 開銷低，權限由檔案擁有者與模式控制。
+  d: |-
+    查看：`ss -xl`、`ls -l /run/*.sock`。測試：`curl --unix-socket /var/run/docker.sock http://localhost/version`。
+    常見於 Docker、MySQL、PHP-FPM、Nginx 反向代理。權限不足時給服務帳號加入 socket 所屬群組。
+- q: IPv6 常用指令與觀念？
+  keys: ipv6 ping6 ip -6 slaac 位址 fe80 link-local 雙堆疊
+  a: |-
+    ip -6 addr 看位址；ping -6 與 curl -6 測連通；fe80:: 開頭是僅限同一鏈路的 link-local 位址。
+  d: |-
+    `ip -6 route`、`ss -6tln`。link-local 位址要指定介面：`ping fe80::1%eth0`。位址自動設定是 SLAAC 或 DHCPv6。
+    停用 IPv6（不建議全面關閉）：`sysctl -w net.ipv6.conf.all.disable_ipv6=1`。許多連線慢的問題是 AAAA 優先但 IPv6 路徑不通。
+- q: 怎麼設定時間同步（NTP / chrony）？
+  keys: ntp chrony timedatectl 時間同步 時鐘 chronyc systemd-timesyncd 時間不準
+  a: |-
+    用 timedatectl 看狀態；chrony（chronyc tracking）或 systemd-timesyncd 負責同步。時間偏差會讓 TLS、Kerberos、日誌關聯出問題。
+  d: |-
+    `timedatectl status`（System clock synchronized: yes）、`chronyc sources -v`、`chronyc tracking`。時區：`timedatectl set-timezone Asia/Taipei`。
+    虛擬機時鐘漂移大時用 chrony 比 ntpd 穩定。大幅偏差用 `chronyc makestep` 立即校正。
+- q: ARP 與鄰居表是什麼？怎麼排查同網段連不上？
+  keys: arp ip neigh 鄰居表 mac 位址 arping 衝突 同網段 二層
+  a: |-
+    同網段通訊先靠 ARP 把 IP 解成 MAC。ip neigh 看鄰居表，狀態 FAILED 或 INCOMPLETE 代表二層不通。
+  d: |-
+    `ip neigh show`、`arping -I eth0 10.0.0.1`（可偵測 IP 衝突：收到兩個不同 MAC 的回應）。
+    排查順序：二層（ARP）→ 三層（ping 閘道）→ 路由 → 防火牆 → 應用層。`ip route get 目標` 能立即告訴你走哪個介面與下一跳。
+- q: 怎麼用 curl 或 wget 做簡單的健康檢查腳本？
+  keys: 健康檢查 health check curl 腳本 監控 http 狀態碼 重試 retry
+  a: |-
+    curl -fsS --max-time 5 URL 失敗時回傳非 0，可直接用在腳本與 cron 的 if 判斷。
+  d: |-
+    `-f` HTTP 錯誤碼視為失敗、`-sS` 靜音但保留錯誤、`--max-time` 總逾時、`--retry 3 --retry-delay 2`。
+    範例：`curl -fsS --max-time 5 http://localhost:8080/health >/dev/null || systemctl restart app`。檢查狀態碼：`[ "$(curl -s -o /dev/null -w '%{http_code}' URL)" = 200 ]`。
+- q: 反向代理與負載平衡怎麼快速驗證？
+  keys: nginx haproxy 反向代理 負載平衡 upstream host header 後端 測試
+  a: |-
+    繞過 DNS 直接對後端測試：curl --resolve 或 -H "Host: 網域" http://後端IP/，比較經代理與直連的差異。
+  d: |-
+    確認代理設定：`nginx -t`、`nginx -T`（含展開）、`haproxy -c -f /etc/haproxy/haproxy.cfg`。重新載入不中斷：`systemctl reload nginx`。
+    看日誌的 upstream 回應時間欄位判斷慢在哪一層。502 多半是後端沒在聽或被拒，504 是後端逾時。

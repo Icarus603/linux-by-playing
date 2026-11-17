@@ -1,0 +1,25 @@
+id: "9-10"
+title: ss：誰在聽哪個埠
+kind: practice
+story: "ss 取代了老舊的 netstat，列出連線與監聽中的連接埠。-t TCP、-l 監聽中、-n 不解析名稱、-p 顯示程序。有個神祕的服務躲在高位連接埠上。"
+goal: "找出在 127.0.0.1 上監聽、且埠號 ≥ 20000 的那個連接埠，answer 提交埠號。"
+teaches: [ss, netstat]
+xp: 30
+hints:
+  - "ss -tln"
+  - "看 Local Address:Port 欄，找 2 開頭的五位數。"
+setup: |
+  p=$((RANDOM % 9000 + 20000))
+  mkdir -p /var/lib/lbp && echo "$p" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
+  setsid setpriv --reuid=player --regid=player --init-groups -- python3 -c 'import socket,time,sys; s=socket.socket(); s.setsockopt(1,2,1); s.bind(("127.0.0.1",int(sys.argv[1]))); s.listen(); time.sleep(10**6)' "$p" >/dev/null 2>&1 </dev/null &
+  sleep 0.6
+check: |
+  [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0
+  [[ -n "$LBP_ANSWER" ]] && echo "埠號不對。"
+  exit 1
+cleanup: |
+  pkill -f '[s]ocket.socket' 2>/dev/null || true
+reveal: "那個藏起來的連接埠，每隔十分鐘就會收到一則訊號：「Warden 還好嗎？」有人一直在關心它。"
+solution: |
+  ss -tln
+  answer "$(ss -tln | awk '{print $4}' | grep -oE '[0-9]{5}$' | head -1)"

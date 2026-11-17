@@ -1,0 +1,31 @@
+id: "11-16"
+title: sudoers：最小權限授權
+kind: practice
+story: "不要把完整的 root 給所有人。sudoers 能精確規定「誰、在哪、以誰的身分、能執行哪些指令」。格式：使用者或 %群組 主機=(身分) NOPASSWD: 指令。放在 /etc/sudoers.d/ 底下，權限必須是 440，並用 visudo -c 檢查語法，改壞 sudoers 可能讓你鎖死自己。"
+goal: "給群組 ops 一個最小授權：成員可以免密碼、以 root 身分只執行 /usr/bin/apt，其他指令一概不行。寫進 /etc/sudoers.d/ops，權限 440。"
+teaches: [visudo, sudo, tee]
+xp: 80
+hints:
+  - "規則：%ops ALL=(root) NOPASSWD: /usr/bin/apt"
+  - "echo '規則' | sudo tee /etc/sudoers.d/ops"
+  - "sudo chmod 440 /etc/sudoers.d/ops，再用 sudo visudo -cf /etc/sudoers.d/ops 檢查。"
+setup: |
+  getent group ops >/dev/null || groupadd ops
+  id opsuser >/dev/null 2>&1 || useradd -m -s /bin/bash -G ops opsuser
+  rm -f /etc/sudoers.d/ops
+check: |
+  f=/etc/sudoers.d/ops
+  [[ -f $f ]] || { echo "還沒有 /etc/sudoers.d/ops。"; exit 1; }
+  [[ "$(stat -c %a $f)" == "440" ]] || { echo "權限要是 440。"; exit 1; }
+  visudo -cf $f >/dev/null 2>&1 || { echo "語法有誤，用 visudo -cf 檢查。"; exit 1; }
+  out=$(sudo -l -U opsuser 2>/dev/null)
+  echo "$out" | grep -q '/usr/bin/apt' || { echo "授權裡要有 /usr/bin/apt。"; exit 1; }
+  ! echo "$out" | grep -qE 'NOPASSWD: ALL|\) ALL$' || { echo "權限太寬了，只能允許 apt。"; exit 1; }
+cleanup: |
+  rm -f /etc/sudoers.d/ops
+  userdel -r opsuser 2>/dev/null || true
+  groupdel ops 2>/dev/null || true
+reveal: "Warden 看著你寫的最小權限規則，輕聲說：「原來『什麼都能做』不是強大，是危險。」它主動把自己的權限，降到只剩必要的那幾條。"
+solution: |
+  echo '%ops ALL=(root) NOPASSWD: /usr/bin/apt' | sudo tee /etc/sudoers.d/ops >/dev/null
+  sudo chmod 440 /etc/sudoers.d/ops

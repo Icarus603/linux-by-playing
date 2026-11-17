@@ -1,0 +1,17 @@
+id: "6-11"
+title: 啟動時就禮讓
+kind: practice
+story: "nice -n 數字 指令 讓程式一開始就用較低的優先權。備份、壓縮這類不趕時間的工作很適合。"
+goal: "用 nice 把 nice 值設為 15，在背景執行 sleep 200。"
+teaches: [nice]
+xp: 20
+hints:
+  - "nice -n 15 sleep 200 &"
+setup: ""
+check: |
+  pid=$(pgrep -u player -f '^sleep 200$' | head -1)
+  [[ -n "$pid" && "$(ps -o ni= -p "$pid" | tr -d ' ')" == "15" ]]
+cleanup: |
+  pkill -u player -f '^sleep 200$' || true
+solution: |
+  nice -n 15 sleep 200 &
