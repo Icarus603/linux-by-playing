@@ -7,6 +7,7 @@ import { SAVE_DIR, loadState, rankOf } from '../engine/state'
 import type { GameEvent, State } from '../engine/types'
 import { setClipboard } from './ink'
 import { type Activity, ask as askPip, resetChat, warmup as warmupLlm } from '../ask/answer'
+import { warmKb } from '../ask/kb'
 import { isNaturalLanguage } from '../ask/route'
 import { OutBuf } from '../shell/outbuf'
 import { PtyShell, type PromptInfo } from '../shell/ptyshell'
@@ -207,6 +208,7 @@ export class Controller {
     if (!this.ready) {
       this.ready = true
       setTimeout(() => void warmupLlm(), 6000).unref?.()
+      setTimeout(() => warmKb(), 2500).unref?.()
       const boot = (): void => {
         this.welcome()
         this.afterCommand('', info)

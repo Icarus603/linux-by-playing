@@ -251,6 +251,9 @@ function storyNote(q: string): string | null {
 
 export async function ask(q: string, sink: Sink, signal: AbortSignal, recent: Activity[] = []): Promise<void> {
   sink.begin(t('讓我想想…'))
+  // 先讓出事件迴圈：使用者的提問與「讓我想想…」要先畫出來，之後才做同步的檢索（載入與比對 3.5 萬個知識塊會佔用主執行緒一陣子）
+  await new Promise((r) => setTimeout(r, 60))
+  if (signal.aborted) return
   // 寒暄與問 Pip 自己不檢索（「你是誰」會誤中 whoami）；很短的追問（「那 -r 呢」）把上一題接上去一起檢索
   const story = storyNote(q)
   const social = chitchat(q) !== null || story !== null

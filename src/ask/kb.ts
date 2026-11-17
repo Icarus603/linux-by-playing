@@ -130,6 +130,13 @@ export function buildIndex(): Index {
 }
 
 /** BM25 檢索；question 裡明確出現的指令名稱會額外加分（讓「grep 怎麼用」一定先找到 grep）。 */
+/** 啟動後在背景先載入知識庫，第一次提問就不會因為解析 20MB 的 JSON 而卡住。 */
+export function warmKb(): void {
+  try {
+    search('warm up', 1)
+  } catch {}
+}
+
 export function search(question: string, k = 4): Hit[] {
   const ix = buildIndex()
   const q = [...new Set(expand(question, tokenize(question)))]
