@@ -29,7 +29,7 @@ export function PipDock({ ctl }: { ctl: Controller }): React.ReactNode {
           : m.pose
   const sway = dancing ? [0, 1, 2, 1][beat % 4]! : 0
   return (
-    <Box paddingX={1} flexShrink={0} height={PIP_HEIGHT}>
+    <Box paddingX={1} marginTop={1} flexShrink={0} height={PIP_HEIGHT}>
       <Box marginLeft={sway}>
         <Pip pose={pose} talking={typing || dancing} />
       </Box>
