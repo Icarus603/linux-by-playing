@@ -131,6 +131,12 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
       return
     }
 
+    // ---- 換行：Shift+Enter（Ctrl-J 也可）----
+    if (key.return && (key.shift || key.meta) && !running) {
+      set([...chars.slice(0, cur), '\n', ...chars.slice(cur)], cur + 1)
+      return
+    }
+
     // ---- 送出 ----
     if (key.return) {
       const text = chars.join('')
