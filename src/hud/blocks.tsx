@@ -1,5 +1,5 @@
 import React from 'react'
-import { Ansi, Box, Text } from './ink'
+import { Ansi, Box, Text, useAnimationFrame } from './ink'
 import { C } from './theme'
 import type { Entry } from './store'
 import { t } from '../i18n'
@@ -72,13 +72,20 @@ export function ListBlock({ e }: { e: Extract<Entry, { kind: 'list' }> }): React
   )
 }
 
+/** Pip 還在回答時，行首的點會閃爍（亮 ↔ 暗），讓人知道它正在工作。 */
+function Dot({ color, blink }: { color: string; blink: boolean }): React.ReactNode {
+  const [, time] = useAnimationFrame(blink ? 450 : null)
+  const dim = blink && Math.floor(time / 450) % 2 === 1
+  return <Text color={dim ? C.track : color}>{'● '}</Text>
+}
+
 /** 自然語言對話：行首一個「●」，和指令前的「$」區分開。使用者是冰藍色，Pip 是天藍色。 */
 export function SayBlock({ e }: { e: Extract<Entry, { kind: 'say' }> }): React.ReactNode {
   const dot = e.who === 'you' ? C.ice : e.tone === 'ok' ? C.ok : C.sky
   return (
     <Box marginTop={1}>
       <Box width={2} flexShrink={0}>
-        <Text color={dot}>{'● '}</Text>
+        <Dot color={dot} blink={e.who === 'pip' && e.streaming} />
       </Box>
       <Box flexGrow={1} flexShrink={1} flexDirection="column">
         {(e.text || '…').split('\n').map((l, i) => (
