@@ -52,6 +52,31 @@ async function main(): Promise<number> {
       console.log(`已匯入 ${r.total} 個知識塊`, r.bySource)
       return 0
     }
+    case 'eval-retrieval': {
+      // 檢索回歸測試：每題的前 3 名結果內容需含任一期望關鍵字
+      const { searchFused } = await import('./ask/kb')
+      const { existsSync, readFileSync } = await import('node:fs')
+      const name = args.find((a) => !a.startsWith('--')) ?? 'retrieval'
+      const withLlm = args.includes('--llm')
+      const file = [`/game/eval/${name}.yaml`, `${import.meta.dir}/../eval/${name}.yaml`].find((f) => existsSync(f))!
+      const items = Bun.YAML.parse(readFileSync(file, 'utf8')) as { q: string; expect: string }[]
+      let ok = 0
+      const bad: string[] = []
+      for (const it of items) {
+        let kw = ''
+        if (withLlm) {
+          const { expandQuery } = await import('./ask/answer')
+          kw = await expandQuery(it.q, new AbortController().signal)
+        }
+        const hits = searchFused(it.q, kw, 3)
+        const blob = hits.map((h) => `${h.title} ${h.text} ${h.detail ?? ''} ${h.cmd ?? ''}`).join('\n').toLowerCase()
+        if (it.expect.toLowerCase().split('/').some((k) => blob.includes(k.trim()))) ok++
+        else bad.push(`✘ ${it.q}  [期望 ${it.expect}] → ${hits[0]?.title ?? '(無)'}`)
+      }
+      console.log(bad.join('\n'))
+      console.log(`\n前 3 名命中 ${ok}/${items.length}（${((ok / items.length) * 100).toFixed(0)}%）`)
+      return bad.length ? 1 : 0
+    }
     case 'ask': {
       // 除錯：看檢索結果與離線答案（不呼叫模型）
       const { search } = await import('./ask/kb')

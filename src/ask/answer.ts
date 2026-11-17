@@ -1,5 +1,5 @@
 import { loadCatalog } from '../engine/levels'
-import { type Hit, search } from './kb'
+import { type Hit, search, searchFused } from './kb'
 import { type ChatMsg, chatStream, ensureServer, llmConfigured } from './llm'
 
 // 把檢索到的資料交給模型（或在沒有模型時直接用知識庫作答），並嚴格限制回答的長度與風格，
@@ -141,6 +141,25 @@ export type Sink = {
   done(text: string, source: 'model' | 'kb' | 'unsure'): void
 }
 
+/**
+ * 查詢改寫：請模型把口語問題轉成英文指令名稱與技術關鍵字（「誰在大量寫磁碟」→ iotop iostat），
+ * 補上 BM25 缺少的語意橋接。沿用同一個系統提示前綴，所以 llama-server 的前綴快取仍然有效。
+ */
+export async function expandQuery(q: string, signal: AbortSignal): Promise<string> {
+  try {
+    if (!llmConfigured() || !(await ensureServer())) return ''
+    const msgs: ChatMsg[] = [
+      ...prefixMessages(),
+      { role: 'user', content: `【改寫任務】請把下面的問題改寫成 3 到 8 個英文指令名稱或技術關鍵字（例如 iotop iostat ulimit nofile），只輸出關鍵字並用空格分隔，不要任何其他文字。\n問題：${q}` },
+    ]
+    let acc = ''
+    for await (const piece of chatStream(msgs, signal, 40)) acc += piece
+    return [...new Set(acc.toLowerCase().match(/[a-z][a-z0-9_.+-]{1,}/g) ?? [])].slice(0, 10).join(' ')
+  } catch {
+    return ''
+  }
+}
+
 /** 最近幾輪對話（只存使用者原話與 Pip 的回答，不含參考資料），讓模型理解上下文與追問。 */
 const history: ChatMsg[] = []
 const MAX_TURNS = 6
@@ -156,7 +175,14 @@ export async function ask(q: string, sink: Sink, signal: AbortSignal): Promise<v
   // 寒暄與問 Pip 自己不檢索（「你是誰」會誤中 whoami）；很短的追問（「那 -r 呢」）把上一題接上去一起檢索
   const social = chitchat(q) !== null
   const searchQ = !social && [...q].length <= 8 && lastUserQ() ? `${lastUserQ()} ${q}` : q
-  const hits = social ? [] : search(searchQ, 5)
+  let hits = social ? [] : search(searchQ, 5)
+  // 第一輪沒有把握（常見於用「現象」而非指令名稱描述的問題）：請模型補上英文關鍵字再檢索一次
+  const strong = hits[0] && hits[0].score >= 60 && hits[0].cov >= 0.6
+  if (!social && !strong && llmConfigured()) {
+    sink.update('查一下資料…')
+    const kw = await expandQuery(q, signal)
+    if (kw && !signal.aborted) hits = searchFused(searchQ, kw, 5)
+  }
   const confident = reliable(hits[0])
   const offline = answerOffline(q, hits)
   // 沒有模型：寒暄用規則回應、有可靠資料用知識庫、否則誠實說明

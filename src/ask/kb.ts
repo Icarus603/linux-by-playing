@@ -23,6 +23,8 @@ export type Chunk = {
 /** score：BM25 分數；cov：問題中「有資訊量的詞」被這份資料命中的比例（0–1），用來判斷是不是離題。 */
 export type Hit = Chunk & { score: number; cov: number }
 
+const W_LATIN = Number(process.env.LBP_W_LATIN ?? 2.2)
+const W_UNI = Number(process.env.LBP_W_UNI ?? 0.5)
 const KNOW_DIRS = [process.env.LBP_KNOWLEDGE, '/game/knowledge', join(import.meta.dir, '../../knowledge')].filter(Boolean) as string[]
 
 /** 讀取所有知識目錄下的 *.yaml（手寫的專業知識與 FAQ），同名檔案只取第一個。 */
@@ -88,6 +90,10 @@ const GLOSSARY: [RegExp, string][] = [
   [/容器/, 'container docker namespace cgroup'], [/虛擬機|虚拟机/, 'virtual machine'], [/套件|软件包|包管理/, 'package apt dpkg'],
   [/檔案|文件/, 'file'], [/目錄|目录|資料夾/, 'directory folder'], [/連結|链接|軟連結|符號連結/, 'link symlink'], [/環境變數|环境变量/, 'environment variable env export'],
   [/撤銷|撤销|復原|还原|回退|回滾|回滚/, 'undo reset revert restore'], [/提交/, 'commit'], [/分支/, 'branch'], [/合併|合并/, 'merge'], [/轉檔|转档|转换|轉換/, 'convert transcode'], [/影片|视频|視頻/, 'video ffmpeg'], [/圖片|图片|圖像/, 'image'], [/映像檔|镜像/, 'image'],
+  [/網路卡|网卡|網卡|网络卡/, 'nic ethernet ethtool link'], [/分割|拆分|切割/, 'split'], [/合併檔案|合并文件|串接/, 'cat merge'],
+  [/寫磁碟|写磁盘|讀寫|读写|磁碟.{0,3}(忙|慢|高)|I\/?O/i, 'io iotop iostat pidstat disk'], [/免密碼|免密码|無密碼|无密码|不用密碼/, 'ssh-copy-id authorized_keys key passwordless'],
+  [/開檔|开档|開啟的檔案|能開的檔案|檔案數量|描述符/, 'ulimit nofile open files descriptor'], [/擋住|被擋|攔截|拦截|拒絕存取/, 'denied blocked avc'],
+  [/開機.{0,3}(多久|時間|速度|慢)|启动.{0,3}(多久|时间|慢)/, 'boot systemd-analyze blame'],
   [/效能|性能/, 'performance'], [/延遲|延迟/, 'latency'], [/頻寬|带宽|帶寬/, 'bandwidth'], [/負載|负载/, 'load'], [/交換|交换/, 'swap'],
   [/快取|缓存/, 'cache'], [/逾時|超时/, 'timeout'], [/備份|备份/, 'backup rsync'], [/同步/, 'sync rsync'], [/下載|下载/, 'download curl wget'],
   [/憑證|证书|證書/, 'certificate tls openssl'], [/加密/, 'encrypt'], [/追蹤|追踪/, 'trace strace'], [/除錯|调试|調試/, 'debug gdb strace'],
@@ -135,14 +141,16 @@ export function search(question: string, k = 4): Hit[] {
   const idfOf = (t: string): number => Math.log(1 + (N - (ix.df.get(t) ?? 0) + 0.5) / ((ix.df.get(t) ?? 0) + 0.5))
   // 純數字與數值單位（500mb、80、3g）不是檢索重點，不計入覆蓋率
   const isQty = (t: string): boolean => /^\d+[a-z%]*$/.test(t)
-  const totalIdf = q.filter((t) => !isQty(t)).reduce((a, t) => a + idfOf(t), 0) || 1
+  // 詞的重要性：英文技術詞（selinux、swappiness、ulimit）資訊量最高；中文單字最容易碰巧命中，權重最低
+  const wOf = (t: string): number => (/^[a-z][a-z0-9_.+-]+$/.test(t) ? W_LATIN : [...t].length === 1 ? W_UNI : 1)
+  const totalIdf = q.filter((t) => !isQty(t)).reduce((a, t) => a + idfOf(t) * wOf(t), 0) || 1
   for (let i = 0; i < N; i++) {
     let s = 0
     let matched = 0
     for (const t of q) {
       const f = ix.tf[i]!.get(t)
       if (!f) continue
-      const idf = idfOf(t)
+      const idf = idfOf(t) * wOf(t)
       if (!isQty(t)) matched += idf
       // 條目標題本身就是問句，標題命中比內文命中更能代表主題
       if (ix.titles[i]!.has(t)) s += idf * 1.1
@@ -162,4 +170,21 @@ export function search(question: string, k = 4): Hit[] {
   const prior = (h: Hit): number => (h.kind === 'level' ? 0.75 : h.kind === 'faq' ? 1 : h.kind === 'tldr' ? 0.9 : h.kind === 'kdoc' || h.kind === 'concept' ? 0.85 : 0.8)
   hits.sort((a, b) => prior(b) * b.score * (0.4 + b.cov) - prior(a) * a.score * (0.4 + a.cov))
   return hits.slice(0, k)
+}
+
+/** 兩次檢索（原問題、原問題＋模型補的關鍵字）用 RRF 融合：兩邊都認為相關的排前面，補關鍵字帶偏時原問題還能把關。 */
+export function searchFused(question: string, extra: string, k = 5): Hit[] {
+  if (!extra) return search(question, k)
+  const a = search(question, 10)
+  const b = search(`${question} ${extra}`, 10)
+  const score = new Map<string, { h: Hit; s: number }>()
+  // 補關鍵字的那一路通常更貼近語意，權重 2；原問題當保險
+  for (const [list, w] of [[a, 1], [b, 2]] as const)
+    list.forEach((h, i) => {
+      const cur = score.get(h.id)
+      const add = w / (60 + i)
+      if (cur) cur.s += add
+      else score.set(h.id, { h, s: add })
+    })
+  return [...score.values()].sort((x, y) => y.s - x.s).slice(0, k).map((x) => x.h)
 }

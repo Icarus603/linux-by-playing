@@ -1,0 +1,92 @@
+# 檢索回歸測試：前 3 名命中的內容（標題、答案、補充、指令）需包含 expect 其中之一（用 / 分隔，不分大小寫）。
+# 執行：lbp eval-retrieval
+- q: 硬碟沒滿卻說沒空間
+  expect: inode
+- q: 伺服器 load average 很高但 CPU 很低
+  expect: D 狀態/不可中斷
+- q: 怎麼查哪個程序佔用 8080 埠
+  expect: lsof/ss/埠
+- q: OOM killer 是什麼
+  expect: oom
+- q: TIME_WAIT 太多怎麼辦
+  expect: time_wait
+- q: 怎麼限制程序記憶體上限
+  expect: cgroup/memorymax/ulimit
+- q: tcpdump 只抓某個 IP
+  expect: tcpdump
+- q: rsync 增量備份選項
+  expect: rsync
+- q: 怎麼找出誰在大量寫磁碟
+  expect: iotop/iostat/pidstat
+- q: selinux 擋住服務
+  expect: selinux
+- q: systemd 服務啟動失敗怎麼查
+  expect: journalctl
+- q: 怎麼設定 NAT 與 IP 轉發
+  expect: nat/masquerade
+- q: ssh 免密碼登入
+  expect: ssh-copy-id
+- q: crontab 沒有執行怎麼排查
+  expect: cron
+- q: awk 怎麼算某欄總和
+  expect: awk
+- q: find 找出大於 100M 的檔案
+  expect: find
+- q: 怎麼看某個程序開了哪些檔案
+  expect: lsof
+- q: strace 怎麼用
+  expect: strace
+- q: LVM 怎麼擴充邏輯卷
+  expect: lvextend
+- q: iptables 怎麼開放某個埠
+  expect: iptables/nft
+- q: ffmpeg 怎麼轉檔成 mp3
+  expect: ffmpeg
+- q: git 怎麼撤銷上一次 commit
+  expect: git reset
+- q: docker 容器怎麼進去執行指令
+  expect: docker exec
+- q: curl 怎麼送 POST JSON
+  expect: curl
+- q: tar 怎麼解壓到指定目錄
+  expect: tar
+- q: 透明大頁要不要關
+  expect: hugepage/大頁
+- q: swap 太多怎麼調整 swappiness
+  expect: swappiness
+- q: 怎麼查 CPU 是哪些程序吃的
+  expect: top/pidstat/perf
+- q: 負載平衡 nginx upstream 設定
+  expect: nginx/upstream
+- q: core dump 怎麼分析
+  expect: gdb/core
+- q: 怎麼把檔案權限改成只有自己能讀寫
+  expect: chmod
+- q: 怎麼看系統開機花了多久
+  expect: systemd-analyze
+- q: 忘記 root 密碼怎麼辦
+  expect: rd.break/init=/single/單人
+- q: 怎麼讓程式在背景一直跑不被登出中斷
+  expect: nohup/tmux/screen/disown/systemd
+- q: 怎麼查網路卡速度與連線狀態
+  expect: ethtool/ip link
+- q: DNS 解析不了怎麼排查
+  expect: dig/resolv/nslookup
+- q: 怎麼查某個檔案是哪個套件裝的
+  expect: dpkg -s/dpkg -S/rpm -qf
+- q: 磁碟 IO 很高怎麼找兇手
+  expect: iotop/iostat/pidstat
+- q: 怎麼設定開機自動啟動服務
+  expect: systemctl enable/enable
+- q: 怎麼把大檔案分割再合併
+  expect: split/cat
+- q: 怎麼比較兩個目錄的差異
+  expect: diff/rsync
+- q: 怎麼同時監看多個日誌檔
+  expect: tail -f/multitail/journalctl
+- q: 記憶體洩漏怎麼查
+  expect: valgrind/smem/pmap/rss
+- q: 怎麼限制使用者能開的檔案數量
+  expect: ulimit/limits.conf/nofile
+- q: fork bomb 是什麼怎麼防
+  expect: fork/nproc/pids

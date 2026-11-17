@@ -1,0 +1,31 @@
+# 驗證集：調整檢索時「不能」針對這些題目調參，只用來量真實水平。
+- {q: 為什麼我的腳本在 cron 裡跑不起來但手動可以, expect: path/環境變數/cron}
+- {q: 怎麼知道某個服務為什麼一直重啟, expect: journalctl/restart/systemctl}
+- {q: 想看哪個資料夾最占空間, expect: du}
+- {q: 伺服器突然變很慢該從哪裡開始查, expect: top/vmstat/load/效能}
+- {q: 怎麼讓某個指令的輸出同時顯示又存到檔案, expect: tee}
+- {q: 怎麼批次改檔名副檔名, expect: rename/for/mv}
+- {q: 想看一個檔案的最後幾行並持續更新, expect: tail -f/tail}
+- {q: 怎麼知道一個指令執行了多久, expect: time}
+- {q: 如何把本機的埠轉發到遠端伺服器, expect: ssh -L/-L/轉發}
+- {q: 怎麼確認某個網站的憑證什麼時候到期, expect: openssl/憑證}
+- {q: 忘記某個指令的參數怎麼快速查, expect: man/--help/tldr}
+- {q: 怎麼找出重複的檔案, expect: fdupes/sort/uniq/md5sum/雜湊}
+- {q: 為什麼刪不掉這個檔案, expect: chattr/權限/lsof/immutable}
+- {q: 怎麼看 CPU 有幾個核心, expect: nproc/lscpu/cpuinfo}
+- {q: 查看系統記憶體使用狀況, expect: free/vmstat/meminfo}
+- {q: 怎麼把兩個檔案內容合併成一個, expect: cat/paste}
+- {q: 怎麼把文字檔每一行前面加上行號, expect: nl/cat -n/awk}
+- {q: 如何在不輸入密碼下執行 sudo, expect: nopasswd/sudoers}
+- {q: 怎麼一次殺掉所有叫某個名字的程序, expect: pkill/killall}
+- {q: 想把輸出的錯誤訊息丟掉, expect: 2>/dev/null/stderr}
+- {q: 怎麼知道這台機器是什麼發行版和核心版本, expect: uname/os-release/lsb_release}
+- {q: 如何備份整個資料夾並壓縮, expect: tar/rsync}
+- {q: 網站打不開但 ping 得通, expect: curl/埠/dns/防火牆/ss}
+- {q: 怎麼讓程式開機自動執行, expect: systemctl enable/enable/cron/@reboot}
+- {q: 如何查看使用者屬於哪些群組, expect: id/groups}
+- {q: 怎麼取得 json 裡某個欄位, expect: jq}
+- {q: 登入後提示 too many authentication failures, expect: identitiesonly/ssh/agent/maxauthtries}
+- {q: 記憶體明明很多卻開始用 swap, expect: swappiness/swap/快取/cache}
+- {q: 怎麼確認某個埠有沒有被防火牆擋住, expect: iptables/nft/nc/ss/防火牆}
+- {q: 怎麼把本機檔案傳到遠端主機, expect: scp/rsync/sftp}

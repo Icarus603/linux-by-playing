@@ -85,6 +85,7 @@ COPY docker/lbp-systemctl /usr/local/bin/systemctl
 COPY docker/lbp-journalctl /usr/local/bin/journalctl
 COPY levels /game/levels
 COPY knowledge /game/knowledge
+COPY eval /game/eval
 # 匯入 man page、tldr 範例與核心文件，作為 RAG 的長尾知識
 RUN --mount=type=bind,from=refs,source=/refs,target=/refs lbp build-knowledge /game/knowledge/ref.json /refs
 RUN printf '#!/bin/sh\nexec lbp answer "$@"\n' > /usr/local/bin/answer \

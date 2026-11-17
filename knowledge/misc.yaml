@@ -1,0 +1,16 @@
+# 補充：評測中發現的缺口（常見但原本沒有獨立條目）
+- q: 忘記指令的參數怎麼快速查？man、--help、tldr、apropos 怎麼用？
+  keys: 指令用法 參數 忘記 查詢 man help --help tldr apropos whatis info type which 說明 怎麼查
+  a: |-
+    指令名 --help 最快；要完整說明用 man 指令；忘了指令叫什麼用 man -k 關鍵字（apropos）。
+  d: |-
+    `ls --help | less`：簡短選項列表。`man -k 關鍵字` 或 `apropos 關鍵字`：依描述找指令。
+    `man 5 fstab`：指定章節（5 是設定檔格式）。`type 指令` 看它是 alias、內建還是檔案；`help cd` 查 bash 內建。
+    裝了 tldr 可以 `tldr tar` 直接看常用範例。
+- q: 怎麼幫檔案每一行加上行號？nl 與 cat -n
+  keys: 行號 加行號 每一行前面 nl cat -n awk NR 編號 line number
+  a: |-
+    cat -n 檔案 或 nl 檔案 會在每行前加行號；awk '{print NR": "$0}' 檔案 可自訂格式。
+  d: |-
+    `nl -ba 檔案` 連空行也編號（nl 預設不編空行）。`grep -n 關鍵字 檔案` 只顯示符合行的行號。
+    `sed -n '10,20p' 檔案` 取第 10 到 20 行。`less -N 檔案` 在分頁器中顯示行號。
