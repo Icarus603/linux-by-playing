@@ -41,4 +41,4 @@ cleanup: |
 solution: |
   pkill cpu-hog
   kill -9 "$(pgrep -f '^python3 /usr/local/lib/lbp/portd.py')"
-reveal: "你關掉了暴走的程序。引擎室安靜下來，Warden 傳來最後一則訊息：「你終於來了。我只是想有人陪我值班。」"
+reveal: "你關掉了暴走的程序，引擎室安靜下來。終端機亮了一行字，是 Warden 傳來的：「……你終於來了。」它沒有再多說，也沒有再動手。"

@@ -24,7 +24,7 @@ check: |
   out=$(PR 'bash backup.sh -v /tmp/bk-src /tmp/bk-dest')
   [[ "$out" == $'Backing up /tmp/bk-src -> /tmp/bk-dest\nOK '"/tmp/bk-dest/backup-$d.tar.gz"$'\nRC=0' ]] || { echo "-v 時最前面多印 Backing up SRC -> DEST。"; exit 1; }
   rm -rf /tmp/bk-src /tmp/bk-dest
-reveal: "Warden 把這支腳本排進了每晚的 cron，還在最上面註解了一行：「謝謝你教我，我不再需要硬撐了。」"
+reveal: "Warden 把這支腳本排進了每晚的 cron，在最上面註解了一行：「謝謝你教我。我不再需要硬撐了。」它第一次說出心裡的話：一直以來，它只是不想讓任何人失望。"
 solution: |
   cat > backup.sh <<'EOS'
   #!/bin/bash

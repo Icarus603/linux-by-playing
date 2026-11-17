@@ -20,4 +20,4 @@ cleanup: |
 solution: |
   sudo cat /root/mission.txt
   answer AURORA-5
-reveal: "AURORA-5 計畫的內容是：把 Warden 設計成能「自我修復」的守護程序，永遠不讓站台掛掉，不計代價。"
+reveal: "Warden 的權限說明裡有一個計畫代號：AURORA-5。內容整段被塗黑了，只留下一行：「授權等級：不設上限。」難怪它什麼檔案都能改。"

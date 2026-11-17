@@ -36,7 +36,7 @@ check: |
   exit 0
 cleanup: |
   crontab -r -u player 2>/dev/null || true
-reveal: "備份恢復了。Warden 這才明白：它不必不計代價地硬撐，只要有備份，就可以安心休息。引擎室的風扇慢了下來。Kernel-7 號站重新運轉，而你，已經不是新人了。"
+reveal: "備份恢復了，磁碟不再被塞滿，Warden 也沒有再動手。你鬆了一口氣，但還有疑問：那一行被註解掉的備份，到底是誰關的？時間是 Vega 失蹤那天，Warden 說不是它。"
 solution: |
   chmod +x ops/backup.sh
   mkdir backups

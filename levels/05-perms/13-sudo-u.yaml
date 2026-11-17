@@ -22,4 +22,4 @@ cleanup: |
 solution: |
   sudo -u ghost cat /home/ghost/note.txt
   answer ECHO-LIMA
-reveal: "ghost 的暗號是 ECHO-LIMA。那個幽靈帳號是 Vega 替自己留的後門。"
+reveal: "ghost 的家目錄裡只有一張紙條：「ECHO-LIMA」。站員名冊上沒有這個人，登入紀錄卻顯示它每晚都會上線。是入侵者，還是別的什麼？"

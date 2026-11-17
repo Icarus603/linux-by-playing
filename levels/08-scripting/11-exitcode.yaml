@@ -2,6 +2,7 @@ id: "8-11"
 title: 結束碼與錯誤處理
 kind: practice
 story: "每個指令都有結束碼，0 是成功。&& 在前一個成功時才繼續，|| 在失敗時才執行。好腳本會把錯誤訊息送到 stderr（>&2）並回傳非 0。"
+reveal: "你在 Warden 的設定裡找到 AURORA-5 的內容：自我修復、永不當機、不計代價。它的程式裡沒有「失敗」這個選項，任何錯誤都被它硬吞下去，難怪越撐越偏。"
 goal: "寫 safe-copy.sh SRC DST：SRC 存在就複製到 DST 並印 copied；不存在就在 stderr 印 missing: SRC，並以結束碼 1 結束。"
 teaches: [cp, test, bash]
 xp: 40
