@@ -495,6 +495,9 @@ export class Controller {
 
   ask(q: string): void {
     this.askAbort?.abort()
+    // 上一個被中止的回答不會再收到 done：在這裡停掉它的閃爍
+    if (this.answerEntry) this.answerEntry.streaming = false
+    this.answerEntry = null
     const ac = new AbortController()
     this.askAbort = ac
     this.store.push({ kind: 'say', who: 'you', text: q, tone: 'plain', streaming: false })
