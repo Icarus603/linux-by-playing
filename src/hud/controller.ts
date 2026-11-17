@@ -22,21 +22,10 @@ const shq = (s: string): string => `'${s.replace(/'/g, `'\\''`)}'`
 
 type CmdEntry = Extract<Entry, { kind: 'cmd' }>
 
-export type Speech = {
-  id: number
-  text: string
-  pose: PipPose
-  tone: 'ok' | 'info' | 'plain'
-  /** 每個 tick 多打幾個字（長文字加速） */
-  step: number
-  tickMs: number
-  /** 說話開始的時間，以及要跳舞多久（毫秒） */
-  startedAt: number
-  danceMs: number
-  /** 模型仍在串流產生文字：即使打字追上了目前的文字也不要當成講完 */
-  streaming?: boolean
-}
-type Msg = { text: string; pose: PipPose; tone: Speech['tone']; level?: string | null; danceMs?: number }
+type Tone = 'ok' | 'info' | 'plain'
+/** Pip 吉祥物的狀態：姿勢、最近一次說話的時間、跳舞時間、是否仍在串流。 */
+export type Mood = { pose: PipPose; at: number; danceMs: number; streaming: boolean }
+type Msg = { text: string; pose: PipPose; tone: Tone; level?: string | null; danceMs?: number }
 
 export class Controller {
   store = new Store()
@@ -47,8 +36,8 @@ export class Controller {
   running: CmdEntry | null = null
   quit = false
   ready = false
-  /** Pip 目前說的話（固定位置、打字機效果） */
-  speech: Speech | null = null
+  /** 輸入框上方吉祥物的狀態 */
+  mood: Mood = { pose: 'wave', at: 0, danceMs: 0, streaming: false }
   /** 關卡選單 */
   pickerOpen = false
   /** 短暫的狀態訊息（例如「已複製 N 字」） */
@@ -58,14 +47,12 @@ export class Controller {
   /** 任務卡目前顯示的關卡 */
   displayLevel: string | null = null
 
-  private queue: Msg[] = []
   private failCount = 0
   private askAbort: AbortController | null = null
   private levelShownAt = Date.now()
   private lastActivity = Date.now()
   private nudged = new Set<string>()
-  private speechTimer: ReturnType<typeof setTimeout> | null = null
-  private speechId = 0
+  private answerEntry: Extract<Entry, { kind: 'say' }> | null = null
   private booting = true
 
   private ob: OutBuf | null = null
@@ -139,7 +126,7 @@ export class Controller {
   /** 卡關偵測：很久沒進展，或連續答錯多次，Pip 主動關心一次。 */
   private checkStuck(): void {
     const id = this.game.current
-    if (!this.ready || this.quit || this.running || !id || this.nudged.has(id) || this.speechTimer) return
+    if (!this.ready || this.quit || this.running || !id || this.nudged.has(id) || Date.now() - this.mood.at < 5000) return
     const idle = Date.now() - Math.max(this.lastActivity, this.levelShownAt)
     if (idle < 100_000 && this.failCount < 3) return
     this.nudged.add(id)
@@ -421,18 +408,16 @@ export class Controller {
   }
 
   // ---- 問 Pip：RAG 檢索 + 本機小模型，答案串流顯示在 Pip 的對話框 ----
-  private showAnswer(text: string, pose: PipPose, tone: Speech['tone'], fresh: boolean, streaming = false): void {
-    if (this.speechTimer) {
-      clearTimeout(this.speechTimer)
-      this.speechTimer = null
-    }
-    this.queue = []
-    const step = [...text].length > 70 ? 2 : 1
-    if (fresh || !this.speech) {
-      this.speech = { id: ++this.speechId, text, pose, tone, step, tickMs: 34, startedAt: Date.now(), danceMs: 0, streaming }
+  private showAnswer(text: string, pose: PipPose, tone: Tone, fresh: boolean, streaming = false): void {
+    if (fresh || !this.answerEntry) {
+      this.answerEntry = this.store.push({ kind: 'say', who: 'pip', text, tone, streaming }) as Extract<Entry, { kind: 'say' }>
     } else {
-      this.speech = { ...this.speech, text, pose, tone, step, streaming } // 同一個 id：不重新打字，持續往後接
+      this.answerEntry.text = text
+      this.answerEntry.tone = tone
+      this.answerEntry.streaming = streaming
+      this.store.touch()
     }
+    this.mood = { pose, at: Date.now(), danceMs: 0, streaming }
     this.changed()
   }
 
@@ -440,7 +425,7 @@ export class Controller {
     this.askAbort?.abort()
     const ac = new AbortController()
     this.askAbort = ac
-    this.store.push({ kind: 'note', text: q, tone: 'dim' })
+    this.store.push({ kind: 'say', who: 'you', text: q, tone: 'plain', streaming: false })
     void askPip(
       q,
       {
@@ -518,73 +503,23 @@ export class Controller {
     this.shell.write(`cd ${shq(path)}\n`)
   }
 
-  // ---- Pip 說話：固定位置、逐字打出，換訊息就原地重打 ----
-  speak(msgs: Msg[], mode: 'replace' | 'append' = 'replace'): void {
-    if (mode === 'replace') {
-      // 被丟掉的佇列裡若有換關訊息，先套用最後一個，避免任務卡停在舊關卡
-      const lastLevel = [...this.queue].reverse().find((m) => m.level !== undefined)
-      if (lastLevel) this.applyLevel(lastLevel.level ?? null)
-      this.queue = []
-      if (this.speechTimer) {
-        clearTimeout(this.speechTimer)
-        this.speechTimer = null
-      }
+  // ---- Pip 說話：直接寫進下方紀錄區（前面一個「●」），會留著、可捲動回看 ----
+  speak(msgs: Msg[], _mode: 'replace' | 'append' = 'replace'): void {
+    for (const m of msgs) {
+      if (m.level !== undefined) this.applyLevel(m.level)
+      this.answerEntry = null
+      this.store.push({ kind: 'say', who: 'pip', text: m.text, tone: m.tone, streaming: false })
+      this.mood = { pose: m.pose, at: Date.now(), danceMs: m.danceMs ?? 0, streaming: false }
     }
-    this.queue.push(...msgs)
-    if (!this.speechTimer) this.pump()
+    this.changed()
   }
 
   private applyLevel(id: string | null): void {
     this.displayLevel = id
     this.failCount = 0
     this.levelShownAt = Date.now()
-    this.store.clear() // 換關：輸出區清空，不往後堆疊
+    // 換關不再清空紀錄：對話與指令都留著，往上捲就能回看
     this.changed()
-  }
-
-  private pump(): void {
-    const m = this.queue.shift()
-    if (!m) {
-      this.speechTimer = null
-      return
-    }
-    if (m.level !== undefined) this.applyLevel(m.level)
-    const len = [...m.text].length
-    const step = len > 110 ? 2 : 1
-    const tickMs = 34
-    this.speech = { id: ++this.speechId, text: m.text, pose: m.pose, tone: m.tone, step, tickMs, startedAt: Date.now(), danceMs: m.danceMs ?? 0 }
-    this.changed()
-    // 先保護這一則的打字時間。打完字「之後」才看有沒有下一則：有的話，依字數留足閱讀時間
-    // （每字約 0.12 秒，至少 2.8 秒、最多 9 秒）再接續；沒有就保持不動。
-    // （不能在這裡就決定，因為下一則常常是稍後才排進佇列的。）使用者可按 Enter 立刻跳到下一則。
-    const typeMs = Math.ceil(len / step) * tickMs
-    const hold = Math.min(9000, Math.max(2800, len * 120))
-    this.speechTimer = setTimeout(() => {
-      if (this.queue.length === 0) {
-        this.speechTimer = null
-        return
-      }
-      this.speechTimer = setTimeout(() => {
-        this.speechTimer = null
-        this.pump()
-      }, hold)
-    }, typeMs)
-  }
-
-  /** 還有幾則 Pip 的話在排隊。 */
-  get pendingSpeech(): number {
-    return this.queue.length
-  }
-
-  /** 跳到下一則訊息（輸入框空白時按 Enter）。回傳是否有跳。 */
-  advanceSpeech(): boolean {
-    if (this.speechTimer && this.queue.length) {
-      clearTimeout(this.speechTimer)
-      this.speechTimer = null
-      this.pump()
-      return true
-    }
-    return false
   }
 
   private levelMsg(id: string | null): Msg | null {

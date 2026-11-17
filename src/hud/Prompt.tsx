@@ -140,8 +140,6 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
     // ---- 送出 ----
     if (key.return) {
       const text = chars.join('')
-      // 輸入框空白時按 Enter：跳到 Pip 的下一則訊息
-      if (!text.trim() && !running && ctl.advanceSpeech()) return
       hist.current = { i: -1, draft: '' }
       setText('')
       if (chat && text.trim() && !text.trim().startsWith('/')) ctl.ask(text.trim())
@@ -305,7 +303,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
           {running ? (
             <Text color={C.accent}>{'› '}</Text>
           ) : chat ? (
-            <Text color={C.sky}>{'Pip › '}</Text>
+            <Text color={C.sky}>{'● '}</Text>
           ) : (
             <>
               <Text color={C.ivory}>player</Text>

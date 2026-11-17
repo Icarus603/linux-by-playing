@@ -1,93 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Box, Text, useAnimationFrame, wrapAnsi } from './ink'
-import { PIP_HEIGHT, PIP_WIDTH, Pip } from './Pip'
+import React from 'react'
+import { Box, Text, useAnimationFrame } from './ink'
+import { PIP_HEIGHT, Pip } from './Pip'
 import type { Controller } from './controller'
 import { C } from './theme'
 import { loadCatalog } from '../engine/levels'
 
 /**
- * 固定位置的 Pip 與對話框。訊息以「打字機」方式逐字出現，換訊息就在原地重新打字，
- * 不會往下堆疊。對話框高度依完整文字預先算好，打字過程版面不會跳動。
+ * 輸入框左上方的 Pip 吉祥物。說的話全部寫進下方紀錄區（前面一個「●」），這裡只負責表情：
+ * 說話或串流時嘴巴會動、閒置時偶爾眨眼、/dance 時搖擺。
  */
-export function SpeechStage({ ctl, columns }: { ctl: Controller; columns: number; rows?: number }): React.ReactNode {
-  const sp = ctl.speech
-  const [n, setN] = useState(0)
+export function PipDock({ ctl }: { ctl: Controller }): React.ReactNode {
   const [, time] = useAnimationFrame(130)
-  const textWidth = Math.max(10, columns - 2 - (PIP_WIDTH + 2) - 4)
-  const text = sp ? sp.text : ''
-  const total = [...text.replace(/\n/g, '')].length // 換行字元不算在打字進度內（排版時它們變成換行）
-
-  // 串流回答會在同一個 id 下不斷更新文字與長度：計時器要讀「最新」的 total / step，
-  // 不能只捕捉第一次的值，否則打字會停在最初那段文字的長度。
-  const live = useRef({ total, step: sp?.step ?? 1 })
-  live.current = { total, step: sp?.step ?? 1 }
-  useEffect(() => {
-    if (!sp) return
-    setN(0)
-    const t = setInterval(() => setN((x) => Math.min(live.current.total, x + live.current.step)), sp.tickMs)
-    return () => clearInterval(t)
-  }, [sp?.id])
-
-  if (!sp) return <Box height={PIP_HEIGHT} />
-
-  const typing = n < total || !!sp.streaming
-  // 先用「最終的完整文字」排好版，再依打字進度逐字揭露：版面從第一個字起就和最後一樣，不會中途換行或跳動。
-  // 寬度預留 1 欄給游標，結尾的「▼ Enter」提示也預先算進去（有下一則時才有）。
-  const hint = ctl.pendingSpeech > 0 ? '  ▼ Enter' : ''
-  const wrapped = wrapAnsi(text + hint, Math.max(8, textWidth - 1), { hard: true, trim: false }).split('\n')
-  const height = Math.max(PIP_HEIGHT, wrapped.length + 2)
-  const done = !typing
-  let left = done ? Infinity : n
-  const rows = wrapped.map((ln) => {
-    const cs = [...ln]
-    const take = Math.max(0, Math.min(cs.length, left))
-    left -= cs.length
-    return cs.slice(0, take).join('')
-  })
-  const cursorRow = Math.max(0, rows.findIndex((r, i) => r.length < [...wrapped[i]!].length || i === rows.length - 1))
-  const border = sp.tone === 'ok' ? C.ice : sp.tone === 'info' ? C.info : C.sky
-
+  const m = ctl.mood
+  const typing = m.streaming || Date.now() - m.at < 1200
   const idleBlink = !typing && Math.floor(time / 130) % 30 === 0
-  const dancing = sp.danceMs > 0 && Date.now() - sp.startedAt < sp.danceMs
+  const dancing = m.danceMs > 0 && Date.now() - m.at < m.danceMs
   const beat = Math.floor(time / 150)
-  // 跳舞：翅膀交替上下、身體在 0~2 欄之間左右搖擺
   const pose = dancing
     ? beat % 2 === 0
       ? 'dance1'
       : 'dance2'
     : typing
-      ? sp.pose
+      ? m.pose
       : idleBlink
         ? 'blink'
-        : sp.pose === 'wave'
+        : m.pose === 'wave'
           ? 'idle'
-          : sp.pose
-  const sway = dancing ? [0, 1, 2, 1][beat % 4]! : 1
-
+          : m.pose
+  const sway = dancing ? [0, 1, 2, 1][beat % 4]! : 0
   return (
-    <Box flexShrink={0}>
-      <Box width={PIP_WIDTH + 2} flexShrink={0}>
-        <Box marginLeft={sway}>
-          <Pip pose={pose} talking={typing || dancing} />
-        </Box>
-      </Box>
-      <Box
-        flexGrow={1}
-        flexShrink={1}
-        height={height}
-        borderStyle="round"
-        borderColor={border}
-        paddingX={1}
-      >
-        <Box flexDirection="column">
-          {rows.map((r, i) => (
-            <Text key={i} color={C.text} wrap="truncate-end">
-              {done && i === rows.length - 1 && hint && r.endsWith(hint) ? r.slice(0, r.length - hint.length) : r}
-              {done && i === rows.length - 1 && hint && r.endsWith(hint) && <Text color={C.dim}>{hint}</Text>}
-              {typing && i === cursorRow && <Text color={C.ice}>▌</Text>}
-            </Text>
-          ))}
-        </Box>
+    <Box paddingX={1} flexShrink={0} height={PIP_HEIGHT}>
+      <Box marginLeft={sway}>
+        <Pip pose={pose} talking={typing || dancing} />
       </Box>
     </Box>
   )

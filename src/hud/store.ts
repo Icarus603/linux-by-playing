@@ -14,6 +14,8 @@ export type Entry =
     }
   | { id: number; kind: 'note'; text: string; tone: 'dim' | 'warn' | 'err' | 'ok' }
   | { id: number; kind: 'list'; text: string }
+  /** 自然語言對話：who = 使用者 / Pip；Pip 的串流回答會就地更新 text */
+  | { id: number; kind: 'say'; who: 'you' | 'pip'; text: string; tone: 'ok' | 'info' | 'plain'; streaming: boolean }
 
 export type NewEntry = Entry extends infer E ? (E extends { id: number } ? Omit<E, 'id'> : never) : never
 

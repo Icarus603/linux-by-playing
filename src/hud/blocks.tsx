@@ -70,3 +70,22 @@ export function ListBlock({ e }: { e: Extract<Entry, { kind: 'list' }> }): React
     </Box>
   )
 }
+
+/** 自然語言對話：行首一個「●」，和指令前的「$」區分開。使用者是冰藍色，Pip 是天藍色。 */
+export function SayBlock({ e }: { e: Extract<Entry, { kind: 'say' }> }): React.ReactNode {
+  const dot = e.who === 'you' ? C.ice : e.tone === 'ok' ? C.ok : C.sky
+  return (
+    <Box marginTop={1}>
+      <Box width={2} flexShrink={0}>
+        <Text color={dot}>{'● '}</Text>
+      </Box>
+      <Box flexGrow={1} flexShrink={1} flexDirection="column">
+        {(e.text || '…').split('\n').map((l, i) => (
+          <Text key={i} color={e.who === 'you' ? C.ice : C.text}>
+            {l === '' ? ' ' : l}
+          </Text>
+        ))}
+      </Box>
+    </Box>
+  )
+}

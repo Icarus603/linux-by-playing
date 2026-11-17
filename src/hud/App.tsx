@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useSyncExternalStore } from 'react'
 import { AlternateScreen, Box, ScrollBox, Text, useSelection, useTerminalSize, type ScrollBoxHandle } from './ink'
-import { CmdBlock, ListBlock, NoteBlock } from './blocks'
+import { CmdBlock, ListBlock, NoteBlock, SayBlock } from './blocks'
 import type { Controller } from './controller'
 import { Gradient, GradientBar } from './Gradient'
 import { Prompt } from './Prompt'
-import { SpeechStage, TaskCard } from './stage'
+import { PipDock, TaskCard } from './stage'
 import { C } from './theme'
 import { loadCatalog, stageOf } from '../engine/levels'
 import { rankOf } from '../engine/state'
@@ -49,6 +49,8 @@ function View({ e }: { e: Entry }): React.ReactNode {
       return <NoteBlock e={e} />
     case 'list':
       return <ListBlock e={e} />
+    case 'say':
+      return <SayBlock e={e} />
   }
 }
 
@@ -88,7 +90,6 @@ export function App({ ctl }: { ctl: Controller }): React.ReactNode {
       <Box flexDirection="column" flexGrow={1}>
         <Header ctl={ctl} width={columns} />
         <Box paddingX={1} marginTop={1} flexDirection="column" flexShrink={0}>
-          <SpeechStage ctl={ctl} columns={columns} rows={rows} />
           <TaskCard ctl={ctl} compact={rows < 28} />
         </Box>
         <ScrollBox ref={scroll} flexGrow={1} flexShrink={1} minHeight={1} flexDirection="column" stickyScroll>
@@ -98,6 +99,7 @@ export function App({ ctl }: { ctl: Controller }): React.ReactNode {
             ))}
           </Box>
         </ScrollBox>
+        {rows >= 26 && <PipDock ctl={ctl} />}
         <Prompt
           ctl={ctl}
           onScroll={(dy) => scroll.current?.scrollBy(dy)}
