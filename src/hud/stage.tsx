@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Box, Text, useAnimationFrame, wrapAnsi } from './ink'
 import { PIP_HEIGHT, PIP_WIDTH, Pip } from './Pip'
 import type { Controller } from './controller'
@@ -17,10 +17,14 @@ export function SpeechStage({ ctl, columns }: { ctl: Controller; columns: number
   const text = sp ? sp.text : ''
   const total = [...text].length
 
+  // 串流回答會在同一個 id 下不斷更新文字與長度：計時器要讀「最新」的 total / step，
+  // 不能只捕捉第一次的值，否則打字會停在最初那段文字的長度。
+  const live = useRef({ total, step: sp?.step ?? 1 })
+  live.current = { total, step: sp?.step ?? 1 }
   useEffect(() => {
     if (!sp) return
     setN(0)
-    const t = setInterval(() => setN((x) => Math.min(total, x + sp.step)), sp.tickMs)
+    const t = setInterval(() => setN((x) => Math.min(live.current.total, x + live.current.step)), sp.tickMs)
     return () => clearInterval(t)
   }, [sp?.id])
 
