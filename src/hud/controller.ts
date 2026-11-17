@@ -33,6 +33,8 @@ export type Speech = {
   /** 說話開始的時間，以及要跳舞多久（毫秒） */
   startedAt: number
   danceMs: number
+  /** 模型仍在串流產生文字：即使打字追上了目前的文字也不要當成講完 */
+  streaming?: boolean
 }
 type Msg = { text: string; pose: PipPose; tone: Speech['tone']; level?: string | null; danceMs?: number }
 
@@ -419,7 +421,7 @@ export class Controller {
   }
 
   // ---- 問 Pip：RAG 檢索 + 本機小模型，答案串流顯示在 Pip 的對話框 ----
-  private showAnswer(text: string, pose: PipPose, tone: Speech['tone'], fresh: boolean): void {
+  private showAnswer(text: string, pose: PipPose, tone: Speech['tone'], fresh: boolean, streaming = false): void {
     if (this.speechTimer) {
       clearTimeout(this.speechTimer)
       this.speechTimer = null
@@ -427,9 +429,9 @@ export class Controller {
     this.queue = []
     const step = [...text].length > 70 ? 2 : 1
     if (fresh || !this.speech) {
-      this.speech = { id: ++this.speechId, text, pose, tone, step, tickMs: 34, startedAt: Date.now(), danceMs: 0 }
+      this.speech = { id: ++this.speechId, text, pose, tone, step, tickMs: 34, startedAt: Date.now(), danceMs: 0, streaming }
     } else {
-      this.speech = { ...this.speech, text, pose, tone, step } // 同一個 id：不重新打字，持續往後接
+      this.speech = { ...this.speech, text, pose, tone, step, streaming } // 同一個 id：不重新打字，持續往後接
     }
     this.changed()
   }
@@ -438,12 +440,12 @@ export class Controller {
     this.askAbort?.abort()
     const ac = new AbortController()
     this.askAbort = ac
-    this.store.push({ kind: 'note', text: `？ ${q}`, tone: 'dim' })
+    this.store.push({ kind: 'note', text: q, tone: 'dim' })
     void askPip(
       q,
       {
-        begin: (t) => this.showAnswer(t, 'think', 'info', true),
-        update: (t) => !ac.signal.aborted && this.showAnswer(t, 'think', 'info', false),
+        begin: (t) => this.showAnswer(t, 'think', 'info', true, true),
+        update: (t) => !ac.signal.aborted && this.showAnswer(t, 'think', 'info', false, true),
         done: (t, src) => {
           if (ac.signal.aborted) return
           this.showAnswer(t, src === 'unsure' ? 'worry' : 'happy', src === 'unsure' ? 'plain' : 'info', false)

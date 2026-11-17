@@ -65,19 +65,16 @@ async function main(): Promise<number> {
     case 'ask-llm': {
       // 端到端測試：完整走一遍 檢索 → 模型 → 簡短回答，並量測延遲
       const { ask } = await import('./ask/answer')
-      const t0 = Date.now()
-      let first = 0
-      await ask(
-        args.join(' '),
-        {
-          begin: () => {},
-          update: () => {
-            if (!first) first = Date.now() - t0
-          },
-          done: (t, src) => console.log(`[${src}] 總計 ${((Date.now() - t0) / 1000).toFixed(1)}s（第一次更新 ${(first / 1000).toFixed(1)}s）\n${t}\n`),
-        },
-        new AbortController().signal,
-      )
+      // 用「|」分隔可在同一個程序裡連續問多題，用來測試多輪對話
+      for (const q of args.join(' ').split('|').map((x) => x.trim()).filter(Boolean)) {
+        const t0 = Date.now()
+        console.log(`Q: ${q}`)
+        await ask(
+          q,
+          { begin: () => {}, update: () => {}, done: (t, src) => console.log(`[${src}] ${((Date.now() - t0) / 1000).toFixed(1)}s  ${t}\n`) },
+          new AbortController().signal,
+        )
+      }
       return 0
     }
     case 'selftest': {

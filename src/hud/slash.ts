@@ -1,3 +1,4 @@
+import { llmConfigured } from '../ask/llm'
 import { BADGES } from '../engine/badges'
 import { toggleHard } from '../engine/game'
 import { loadCatalog, stageOf } from '../engine/levels'
@@ -132,6 +133,11 @@ export function runSlash(ctl: Controller, name: string, args: string): boolean {
         ctl.speak([
           { text: `這關會用到：\n${items.join('\n')}\n\n想深入某一個，輸入 /explain 指令名稱。`, pose: 'think', tone: 'info' },
         ])
+        return true
+      }
+      // 有本機模型就交給 Pip 完整解釋（有上下文、可追問）；沒有模型才用固定說明
+      if (llmConfigured() && /^[A-Za-z0-9_.+-]+$/.test(cmd)) {
+        ctl.ask(`請詳細解釋 ${cmd} 指令：它是做什麼的、最常用的選項與範例、常見的陷阱`)
         return true
       }
       const w = whatis(cmd)

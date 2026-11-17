@@ -15,7 +15,7 @@ export function SpeechStage({ ctl, columns }: { ctl: Controller; columns: number
   const [, time] = useAnimationFrame(130)
   const textWidth = Math.max(10, columns - 2 - (PIP_WIDTH + 2) - 4)
   const text = sp ? sp.text : ''
-  const total = [...text].length
+  const total = [...text.replace(/\n/g, '')].length // 換行字元不算在打字進度內（排版時它們變成換行）
 
   // 串流回答會在同一個 id 下不斷更新文字與長度：計時器要讀「最新」的 total / step，
   // 不能只捕捉第一次的值，否則打字會停在最初那段文字的長度。
@@ -30,10 +30,21 @@ export function SpeechStage({ ctl, columns }: { ctl: Controller; columns: number
 
   if (!sp) return <Box height={PIP_HEIGHT} />
 
-  const typing = n < total
-  const lines = wrapAnsi(text, textWidth, { hard: true, trim: false }).split('\n').length
-  const height = Math.max(PIP_HEIGHT, lines + 2)
-  const shown = [...text].slice(0, n).join('')
+  const typing = n < total || !!sp.streaming
+  // 先用「最終的完整文字」排好版，再依打字進度逐字揭露：版面從第一個字起就和最後一樣，不會中途換行或跳動。
+  // 寬度預留 1 欄給游標，結尾的「▼ Enter」提示也預先算進去（有下一則時才有）。
+  const hint = ctl.pendingSpeech > 0 ? '  ▼ Enter' : ''
+  const wrapped = wrapAnsi(text + hint, Math.max(8, textWidth - 1), { hard: true, trim: false }).split('\n')
+  const height = Math.max(PIP_HEIGHT, wrapped.length + 2)
+  const done = !typing
+  let left = done ? Infinity : n
+  const rows = wrapped.map((ln) => {
+    const cs = [...ln]
+    const take = Math.max(0, Math.min(cs.length, left))
+    left -= cs.length
+    return cs.slice(0, take).join('')
+  })
+  const cursorRow = Math.max(0, rows.findIndex((r, i) => r.length < [...wrapped[i]!].length || i === rows.length - 1))
   const border = sp.tone === 'ok' ? C.ice : sp.tone === 'info' ? C.info : C.sky
 
   const idleBlink = !typing && Math.floor(time / 130) % 30 === 0
@@ -68,11 +79,15 @@ export function SpeechStage({ ctl, columns }: { ctl: Controller; columns: number
         borderColor={border}
         paddingX={1}
       >
-        <Text color={C.text}>
-          {shown}
-          {typing && <Text color={C.ice}>▌</Text>}
-          {!typing && ctl.pendingSpeech > 0 && <Text color={C.dim}>{'  ▼ Enter'}</Text>}
-        </Text>
+        <Box flexDirection="column">
+          {rows.map((r, i) => (
+            <Text key={i} color={C.text} wrap="truncate-end">
+              {done && i === rows.length - 1 && hint && r.endsWith(hint) ? r.slice(0, r.length - hint.length) : r}
+              {done && i === rows.length - 1 && hint && r.endsWith(hint) && <Text color={C.dim}>{hint}</Text>}
+              {typing && i === cursorRow && <Text color={C.ice}>▌</Text>}
+            </Text>
+          ))}
+        </Box>
       </Box>
     </Box>
   )

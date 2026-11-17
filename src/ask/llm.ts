@@ -48,7 +48,7 @@ export function ensureServer(): Promise<boolean> {
     Bun.spawn(
       [
         'nice', '-n', '10', // 低優先權：不要跟玩家正在跑的關卡搶 CPU
-        BIN, '-m', MODEL, '--host', '127.0.0.1', '--port', String(PORT), '-c', '3072', '-np', '1', '-t', String(threads),
+        BIN, '-m', MODEL, '--host', '127.0.0.1', '--port', String(PORT), '-c', '4096', '-np', '1', '-t', String(threads),
         '--no-webui', '--jinja', '--reasoning-budget', '0', '--chat-template-kwargs', '{"enable_thinking":false}',
       ],
       { stdout: 'ignore', stderr: 'ignore', stdin: 'ignore' },
@@ -66,7 +66,7 @@ export function ensureServer(): Promise<boolean> {
 }
 
 /** 以 SSE 串流取得回答的文字片段。 */
-export async function* chatStream(messages: ChatMsg[], signal: AbortSignal, maxTokens = 160): AsyncGenerator<string> {
+export async function* chatStream(messages: ChatMsg[], signal: AbortSignal, maxTokens = 600): AsyncGenerator<string> {
   const res = await fetch(`${BASE}/v1/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
