@@ -73,7 +73,7 @@ export function ListBlock({ e }: { e: Extract<Entry, { kind: 'list' }> }): React
 }
 
 /** Pip 還在回答時，行首的點會閃爍（亮 ↔ 暗），讓人知道它正在工作。 */
-function Dot({ color, blink }: { color: string; blink: boolean }): React.ReactNode {
+function Dot({ color, blink }: { color: (typeof C)[keyof typeof C]; blink: boolean }): React.ReactNode {
   const [, time] = useAnimationFrame(blink ? 450 : null)
   const dim = blink && Math.floor(time / 450) % 2 === 1
   return <Text color={dim ? C.track : color}>{'● '}</Text>
