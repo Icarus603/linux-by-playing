@@ -1,4 +1,5 @@
 import type { Level } from './types'
+import { L } from '../i18n'
 
 const isRoot = (): boolean => process.getuid?.() === 0
 const PLAYER = 'player'
@@ -8,7 +9,7 @@ export type RunResult = { code: number; out: string; err: string }
 
 function run(argv: string[], env: Record<string, string>, timeoutMs: number): RunResult {
   const p = Bun.spawnSync(argv, {
-    env: { ...process.env, ...env },
+    env: { ...process.env, LBP_LANG: L(), ...env },
     stdin: 'ignore',
     timeout: timeoutMs,
     cwd: '/',

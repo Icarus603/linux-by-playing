@@ -1,0 +1,2125 @@
+{
+ "stage:1": {
+  "title": "Survival Basics",
+  "subtitle": "The Lost Newcomer",
+  "intro": "Vega has vanished, and this terminal is all that's left on the station. First learn where you are, what's around you, and how to read data. His first clue is in the logs."
+ },
+ "stage:2": {
+  "title": "Files & Directories",
+  "subtitle": "Tidying the Quarters",
+  "intro": "Vega said the evidence is hidden in the cargo bay, but the station's files are a mess, and something keeps writing into them. Learn to create, move, delete and link, and clear out the quarters."
+ },
+ "stage:3": {
+  "title": "Search & Locate",
+  "subtitle": "Finding What's Lost",
+  "intro": "There's too much data to scan by eye, and the station's outside connection keeps dropping. find and grep are your radar for locating clues in a sea of files."
+ },
+ "stage:4": {
+  "title": "Text Processing & Pipes",
+  "subtitle": "The Soul of Unix",
+  "intro": "The logs hold a timeline. Each command does one thing; chain them with pipes and you can piece together what really happened the day Vega vanished."
+ },
+ "stage:5": {
+  "title": "Permissions & Users",
+  "subtitle": "Who Can Enter Which Cabin",
+  "intro": "Warden has started quietly changing other people's permissions, and a strange account has appeared on the station. Learn to read permissions, switch identities and manage users and groups, so you can tell who the intruder is."
+ },
+ "stage:6": {
+  "title": "Processes & Resources",
+  "subtitle": "The Engine Room",
+  "intro": "A process is running wild in the engine room, and another keeps killing other processes on a schedule. Learn to observe, control and terminate them, and find out who is eating all the resources."
+ },
+ "stage:7": {
+  "title": "System Administration",
+  "subtitle": "On-Call Duty",
+  "intro": "Failed backups, a tangled schedule. Packaging, scheduling, services, logs and environment settings are the daily chores that keep this station running, and they hide the line that was switched off the day Vega vanished."
+ },
+ "stage:8": {
+  "title": "Shell Scripting",
+  "subtitle": "The Apprentice",
+  "intro": "Warden says it wants to learn to write scripts, instead of keeping the station alive by brute force. Before you teach it, you have to write the scripts first: handing repetitive work to scripts is the step from \"operator\" to \"engineer\"."
+ },
+ "stage:9": {
+  "title": "Networking",
+  "subtitle": "The Communications Officer",
+  "intro": "Someone sends a signal every ten minutes to a hidden port. You need to read addresses, check ports, capture requests and log in remotely, and know which layer to start from when \"it can't connect\". (The practice container only has the loopback interface, so every exercise happens on localhost.)"
+ },
+ "stage:10": {
+  "title": "Editors & Dev Tools",
+  "subtitle": "The Craftsman",
+  "intro": "The station's configuration deserves proper management. Editors, tmux, git and make are every engineer's workbench, and the version history Vega left behind hides one last altered commit."
+ },
+ "stage:11": {
+  "title": "Mastery",
+  "subtitle": "The Master's Path",
+  "intro": "The final test. Trace system calls, read binaries, explore /proc, write one-line wizardry, then face a station with several failures at once. Vega's signal is getting closer."
+ },
+ "1-01": {
+  "hints": [
+   "pwd stands for print working directory.",
+   "Just type pwd and press Enter."
+  ],
+  "title": "Where Am I?",
+  "story": "Welcome aboard, I'm Pip! Space Station Kernel-7 has only this one terminal still lit, and the previous administrator, Vega, has vanished. To find him, first learn where you stand: a terminal is like a corridor on the station, and you're always standing in some directory.",
+  "goal": "Type pwd to print the directory you're currently in."
+ },
+ "1-02": {
+  "hints": [
+   "Type ls, no arguments needed."
+  ],
+  "title": "Look Around",
+  "story": "Now that you know where you are, see what's in this cabin. ls lists the contents of a directory. I left a few things here.",
+  "goal": "Use ls to list the contents of the current directory."
+ },
+ "1-03": {
+  "hints": [
+   "cd followed by a directory name: cd directory",
+   "You're in your home directory and logbook is right here, so just cd logbook."
+  ],
+  "title": "Through the Hatch",
+  "story": "cd moves you between directories. Down the corridor on the right there's a cabin called logbook (the flight log room). Go take a look.",
+  "goal": "Use cd to enter the logbook directory."
+ },
+ "1-04": {
+  "hints": [
+   "cat entry-001.txt",
+   "Find the text after the \"Access code:\" line, then type answer followed by that text."
+  ],
+  "title": "Reading the Log",
+  "story": "You're in the log room now. cat prints a file's contents on screen. The previous administrator, Vega, left an access code in the log, and the code changes every time you board.",
+  "goal": "Read entry-001.txt with cat, find the \"access code\", then submit it with answer code (for example answer ABC-123).",
+  "reveal": "Vega's last log entry reads: \"Warden has started disobeying. If anyone reads this, don't trust its status reports.\" Why would anyone need to be wary of the station's own AI?"
+ },
+ "1-05": {
+  "hints": [
+   "An absolute path always starts with /.",
+   "cd /var/log"
+  ],
+  "title": "Absolute Paths",
+  "story": "A path can be written two ways. One that starts from the root / is an \"absolute path\", and it works wherever you are. The system logs live in /var/log.",
+  "goal": "Enter /var/log using an absolute path."
+ },
+ "1-06": {
+  "hints": [
+   "~ is shorthand for the home directory.",
+   "cd ~ or just cd, either takes you home."
+  ],
+  "title": "Going Home",
+  "story": "You've been teleported to /usr/share! Don't panic: ~ stands for your home directory, and you can get back in one step from anywhere.",
+  "goal": "Return to your home directory (/home/player)."
+ },
+ "1-07": {
+  "hints": [
+   ".. is one level up, ../.. is two levels up.",
+   "cd ../.."
+  ],
+  "title": "Relative Paths and ..",
+  "story": "A relative path starts from your current location. .. means one level up and . means here. You're deep in the engine core and need to climb back out.",
+  "goal": "Using only relative paths, go up two levels from core to the deck-2 directory."
+ },
+ "1-08": {
+  "hints": [
+   "Column 5 of ls -l is the file size (bytes).",
+   "ls -l report.dat shows just that one file."
+  ],
+  "title": "The Detailed List",
+  "story": "Adding -l to ls shows details: permissions, owner, size and modification time. The cargo manager asks for the size of report.dat, and the number is different every time.",
+  "goal": "Use ls -l to find the size of report.dat (in bytes) and submit it with answer number."
+ },
+ "1-09": {
+  "hints": [
+   "ls -a shows all files, including hidden ones.",
+   "The hidden file is named .access-token. Read it with cat .access-token."
+  ],
+  "title": "Hidden Files",
+  "story": "Files whose names start with . are \"hidden files\", and a plain ls doesn't show them. Vega liked to hide important things in places like this, probably so Warden wouldn't see them.",
+  "goal": "An invisible key is hidden in this cabin. Find it, read its contents and submit it with answer.",
+  "reveal": "That key belonged to Vega. He hid everything important in files that start with a dot, a habit that later saved his life."
+ },
+ "1-10": {
+  "hints": [
+   "head -n 1 signal.log",
+   "Without -n it shows the first 10 lines by default."
+  ],
+  "title": "Just the Beginning",
+  "story": "Some logs run to thousands of lines, and cat would flood your screen. head shows only the first few lines, and -n sets how many.",
+  "goal": "The first line of signal.log has a frequency value (freq=). Look only at the beginning and submit that number with answer."
+ },
+ "1-11": {
+  "hints": [
+   "tail -n 1 transmission.log"
+  ],
+  "title": "Just the End",
+  "story": "tail is head's sibling and shows only the end. It's the one you use most for logs, because the newest events are at the bottom.",
+  "goal": "The last line of transmission.log has a checksum (checksum=). Look only at the end and submit the checksum with answer."
+ },
+ "1-12": {
+  "hints": [
+   "less manual.txt, then type /OVERRIDE and press Enter.",
+   "Press q to leave less."
+  ],
+  "title": "Paging Through a Long File",
+  "story": "less is a pager: Space for the next page, b for the previous, /keyword to search, n for the next match, q to quit. The manual has 500 lines, and one section has been tampered with.",
+  "goal": "In manual.txt, find the line containing OVERRIDE and submit that line's code with answer.",
+  "reveal": "This section of the manual was altered. OVERRIDE is the only command code that can pause Warden, but the change was made the day before Vega vanished."
+ },
+ "1-13": {
+  "hints": [
+   "man ls, then type /size to search.",
+   "The answer is a single uppercase letter."
+  ],
+  "title": "Read the Manual Yourself",
+  "story": "Nobody remembers every option; experts are just better at looking things up. man command is the built-in manual: search with /, quit with q.",
+  "goal": "Check man ls and find the option letter that \"sorts by file size\". Submit it with answer (just the letter, e.g. answer X)."
+ },
+ "1-14": {
+  "hints": [
+   "which python3"
+  ],
+  "title": "Where Commands Live",
+  "story": "Every command you type is really a program on disk. which tells you its full path, and type can also tell whether it's an alias, a builtin or an external program.",
+  "goal": "Use which to find the full path of python3 and submit it with answer."
+ },
+ "1-15": {
+  "hints": [
+   "Run whoami and hostname separately."
+  ],
+  "title": "Introduce Yourself",
+  "story": "An administrator first needs to know \"who am I, and which machine am I on\". whoami shows your user name and hostname shows the host name.",
+  "goal": "Look up the information with whoami and hostname, and submit it with answer in the format user@host (for example answer bob@server1)."
+ },
+ "1-16": {
+  "hints": [
+   "uname -s"
+  ],
+  "title": "The System ID Card",
+  "story": "uname shows system information. -s is the operating system name, -r is the kernel version and -a is everything. date shows the current time.",
+  "goal": "Use uname -s to find the operating system name and submit it with answer."
+ },
+ "1-17": {
+  "hints": [
+   "echo Kernel-7 ready",
+   "Press Ctrl-L or type clear to clear the screen; type history to see past commands; press ↑ to recall the previous command."
+  ],
+  "title": "Talking to the Terminal",
+  "story": "echo prints the text you give it exactly as is. It's the most used command for scripting and debugging.",
+  "goal": "Use echo to print the text Kernel-7 ready."
+ },
+ "1-18": {
+  "hints": [
+   "First cat station/START.txt to read the first clue.",
+   "Go deep into deck-3 and read note.txt there.",
+   "Hidden files only show with ls -a. The file is named .vault."
+  ],
+  "title": "Boss: The Lost Password",
+  "story": "The final test! Vega hid the emergency password somewhere on the station and left only clues. Use everything you've learned: pwd, ls, cd, cat, ls -a.",
+  "goal": "Starting from ~/station/START.txt, follow the clues to find the hidden password and submit it with answer.",
+  "reveal": "The emergency password opened Vega's private channel. He left a message: \"Go to the cargo bay on deck 2, the evidence is hidden there. Warden is always watching, so I can't say much.\" The message is timestamped 14:00, and the channel hasn't been updated since."
+ },
+ "2-01": {
+  "hints": [
+   "touch notes.txt"
+  ],
+  "title": "Create Your First File",
+  "story": "A good cabin needs tidying. touch creates an empty file (if the file already exists, it only updates the timestamp).",
+  "goal": "Create an empty file notes.txt in your home directory."
+ },
+ "2-02": {
+  "hints": [
+   "mkdir cargo"
+  ],
+  "title": "Build a Cabin",
+  "story": "mkdir creates a directory. The station needs a place just for cargo manifests.",
+  "goal": "Create a directory called cargo."
+ },
+ "2-03": {
+  "hints": [
+   "The -p option of mkdir means parents (create the parent directories too).",
+   "mkdir -p ship/deck/engine/core"
+  ],
+  "title": "Build a Whole Deck at Once",
+  "story": "Running mkdir a/b/c directly fails because the parent directories don't exist. Adding -p creates the whole path at once.",
+  "goal": "With one command, create the four-level path ship/deck/engine/core."
+ },
+ "2-04": {
+  "hints": [
+   "cp blueprint.txt blueprint.bak"
+  ],
+  "title": "Make a Backup",
+  "story": "Backing up an important file before touching it is a good habit. cp source destination copies a file.",
+  "goal": "Copy blueprint.txt to blueprint.bak (keep the original)."
+ },
+ "2-05": {
+  "hints": [
+   "cp -r config config-backup"
+  ],
+  "title": "Back Up a Folder Too",
+  "story": "By default cp only copies files. To copy a whole directory (with its contents), add -r (recursive).",
+  "goal": "Copy the whole config directory to config-backup."
+ },
+ "2-06": {
+  "hints": [
+   "mv oldname newname"
+  ],
+  "title": "Rename",
+  "story": "Linux has no dedicated rename command. mv (move) handles both \"moving\" and \"renaming\", because renaming is just moving to a new name in the same directory.",
+  "goal": "Rename draft.txt to final.txt."
+ },
+ "2-07": {
+  "hints": [
+   "The archive directory already exists.",
+   "mv *.log archive/"
+  ],
+  "title": "The Wildcard *",
+  "story": "Log files are scattered around your home directory. * matches any characters, and *.log means \"every file ending in .log\", so you can move them all at once.",
+  "goal": "Move all .log files into the archive directory (readme.txt must stay where it is).",
+  "reveal": "In the archived logs, there's a write every night at 03:00 that belongs to no one. The writer's name is warden."
+ },
+ "2-08": {
+  "hints": [
+   "rm junk.tmp"
+  ],
+  "title": "Taking Out the Trash",
+  "story": "rm deletes files, and there's no recycle bin: once deleted, it's gone. So always look carefully before you type rm.",
+  "goal": "Delete junk.tmp but keep keep.txt."
+ },
+ "2-09": {
+  "hints": [
+   "rm -r old-station",
+   "rmdir empty"
+  ],
+  "title": "Demolish the Old Cabin",
+  "story": "Deleting a directory takes rm -r. An empty directory can also be removed with rmdir (it only removes empty directories, so it's safer).",
+  "goal": "Delete the old-station directory (with its contents) and the empty directory empty, keeping the keep directory."
+ },
+ "2-10": {
+  "hints": [
+   "report-?.txt only matches the single-character ones.",
+   "rm report-?.txt"
+  ],
+  "title": "Wildcards ? and []",
+  "story": "? matches exactly \"one\" character; [abc] matches any one character inside the brackets. Use them to pick files precisely.",
+  "goal": "Delete report-1.txt through report-9.txt (single digit), but keep report-10.txt and report-final.txt."
+ },
+ "2-11": {
+  "hints": [
+   "touch log-{jan,feb,mar}.txt"
+  ],
+  "title": "Brace Expansion",
+  "story": "{a,b,c} is expanded by the shell into several strings. log-{jan,feb,mar}.txt equals log-jan.txt log-feb.txt log-mar.txt: three files in one line.",
+  "goal": "Using brace expansion, create log-jan.txt, log-feb.txt and log-mar.txt with one command."
+ },
+ "2-12": {
+  "hints": [
+   "touch \"my notes.txt\"",
+   "You can also escape with a backslash: touch my\\ notes.txt"
+  ],
+  "title": "Quotes and Spaces",
+  "story": "The shell separates arguments with spaces. A file name containing a space must be quoted, otherwise it's treated as two files.",
+  "goal": "Create a file named \"my notes.txt\" (with a space in the middle)."
+ },
+ "2-13": {
+  "hints": [
+   "ln -s target linkname",
+   "ln -s logs/2024-05.log latest.log"
+  ],
+  "title": "Symbolic Links (Shortcuts)",
+  "story": "ln -s target linkname creates a symbolic link, like a shortcut. A common use: make latest.log always point to the newest log.",
+  "goal": "Create a symbolic link latest.log pointing to logs/2024-05.log.",
+  "reveal": "The shortcut latest.log has been repointed. Someone (or something) is secretly altering your paths."
+ },
+ "2-14": {
+  "hints": [
+   "ln data.txt data-link.txt (without -s)",
+   "ls -li shows that both have the same inode."
+  ],
+  "title": "Hard Links",
+  "story": "A hard link is a second name for the same data: both names share one inode, and if you delete one, the data remains. Without -s it's a hard link.",
+  "goal": "Create a hard link data-link.txt for data.txt."
+ },
+ "2-15": {
+  "hints": [
+   "file mystery"
+  ],
+  "title": "Detective: file and stat",
+  "story": "File extensions can't be trusted. file looks at the contents to determine the real type, and stat shows detailed metadata.",
+  "goal": "The file mystery has no extension. Use file to find out which compression format it is, and submit it with answer (gzip, bzip2 or zip)."
+ },
+ "2-16": {
+  "hints": [
+   "cd storage and then run du -sh *",
+   "du -sh storage/* | sort -h puts the largest last (you'll learn sort later)."
+  ],
+  "title": "Who's Taking the Space",
+  "story": "The disk is almost full! du -sh shows a directory's size (-s total, -h human-readable); df -h shows the free space on each disk.",
+  "goal": "Find which subdirectory under storage is the largest and submit its name with answer."
+ },
+ "2-17": {
+  "hints": [
+   "tree vault"
+  ],
+  "title": "See the Whole Tree",
+  "story": "tree draws the directory structure as a tree so you can see the layers at a glance. -L limits the depth and -a shows hidden files.",
+  "goal": "Use tree to inspect vault, find the name of the file hidden at the deepest level (with extension) and submit it with answer."
+ },
+ "2-18": {
+  "hints": [
+   "First cd downloads, then mkdir images docs music",
+   "mv *.jpg *.png images/ moves several extensions at once.",
+   "Braces work too: mv *.{jpg,png} images/"
+  ],
+  "title": "Boss: Tidy the Downloads",
+  "story": "The downloads folder is a disaster zone. Put your mkdir, mv and wildcard skills to work and sort by type.",
+  "goal": "In downloads, create three subdirectories images, docs and music. Move .jpg/.png into images, .pdf/.txt into docs and .mp3 into music. Leave the .zip file where it is.",
+  "reveal": "After tidying the downloads, you notice a backup.zip nobody downloaded, and inside it is warden-installer. Warden isn't factory equipment: someone installed it on the station. The installer field has been wiped blank."
+ },
+ "3-01": {
+  "hints": [
+   "find ship -name radar.cfg"
+  ],
+  "title": "find: Search by Name",
+  "story": "The station has thousands of files, so you can't go through them one by one. find searches recursively downward from a given directory, and -name matches on file name.",
+  "goal": "Under the ship directory, find the location of radar.cfg and submit the full path with answer (relative or absolute both work)."
+ },
+ "3-02": {
+  "hints": [
+   "find docs -iname readme",
+   "You can count with find ... | wc -l."
+  ],
+  "title": "Ignoring Case",
+  "story": "Linux is case-sensitive: README and readme are different files. -iname lets you search ignoring case.",
+  "goal": "Under docs, find every file named readme (case-insensitive, without extension) and submit the total count with answer."
+ },
+ "3-03": {
+  "hints": [
+   "find archive -type d -name backup"
+  ],
+  "title": "Find by Type",
+  "story": "-type f finds only files, -type d only directories and -type l symbolic links. It can be combined with -name.",
+  "goal": "Under archive, how many \"directories\" are named backup? Submit the count with answer (files don't count)."
+ },
+ "3-04": {
+  "hints": [
+   "find cargo -size +1M"
+  ],
+  "title": "Find by Size",
+  "story": "-size filters by file size: +1M means larger than 1MB, -10k smaller than 10KB. Super handy when cleaning up a disk.",
+  "goal": "Under cargo, find the one file larger than 1MB and submit its name with answer."
+ },
+ "3-05": {
+  "hints": [
+   "find tmp -type f -mtime +30",
+   "Preview without -delete first, and add it once the list looks right."
+  ],
+  "title": "Find by Time, and Delete",
+  "story": "-mtime +30 means \"modified more than 30 days ago\". Combined with -delete it cleans out expired files automatically. Careful: -delete must go last.",
+  "goal": "Delete the files under tmp that haven't been modified for more than 30 days, keeping the recent ones."
+ },
+ "3-06": {
+  "hints": [
+   "find scripts -name '*.sh' -exec chmod +x {} \\;"
+  ],
+  "title": "find with -exec",
+  "story": "-exec makes find run a command on each result. {} stands for the current file, and the command ends with \\;. A great tool for batch jobs.",
+  "goal": "None of the .sh files under scripts has execute permission yet. Use find -exec chmod +x to add it to all of them at once."
+ },
+ "3-07": {
+  "hints": [
+   "grep FATAL app.log"
+  ],
+  "title": "grep: Search Contents",
+  "story": "find searches file names, while grep searches \"file contents\". grep keyword file prints the lines containing the keyword.",
+  "goal": "Only one line in app.log contains FATAL. Find it with grep and submit the error code at the end of the line (starting with E) with answer."
+ },
+ "3-08": {
+  "hints": [
+   "grep -in password server.conf"
+  ],
+  "title": "grep -i -n",
+  "story": "-i ignores case and -n shows line numbers. When managing config files, you often need to know which line a setting is on.",
+  "goal": "One line in server.conf contains password (unsure of the case). Use grep -in to find which line it is and submit the line number with answer."
+ },
+ "3-09": {
+  "hints": [
+   "grep -r api_key= project"
+  ],
+  "title": "grep -r Recursive Search",
+  "story": "-r makes grep search a whole directory recursively. Someone hard-coded a key into a file somewhere in the project. Find it.",
+  "goal": "Search for api_key= under the project directory and submit the value after = with answer.",
+  "reveal": "The key k3y-8812-zz appears in prod.env, where it doesn't belong. Something is copying secrets around."
+ },
+ "3-10": {
+  "hints": [
+   "grep -v '^#' app.conf",
+   "Add -c to get the number directly."
+  ],
+  "title": "grep -v and -c",
+  "story": "-v inverts the match (lines without the keyword) and -c prints only the number of matching lines. Want to know how many settings in a config file are \"actually in effect\"? Just exclude the comments.",
+  "goal": "In app.conf, lines starting with # are comments. Work out the number of \"non-comment\" lines and submit it with answer."
+ },
+ "3-11": {
+  "hints": [
+   "grep -rlE '192\\.168\\.[0-9]+\\.[0-9]+' leak",
+   "In a regular expression, write . as \\. to mean a real dot."
+  ],
+  "title": "grep -l and -E",
+  "story": "-l lists only file names, and -E enables extended regular expressions (+ ? | () {} and so on). Someone leaked an internal IP in a file.",
+  "goal": "In the leak directory, find the file containing an IP address starting with 192.168. and submit the file name with answer."
+ },
+ "3-12": {
+  "hints": [
+   "grep -A 1 CRITICAL reactor.log"
+  ],
+  "title": "Context: -A -B -C",
+  "story": "The line with the error is often not enough; the cause is usually in the lines around it. -A shows lines after, -B lines before, -C both.",
+  "goal": "reactor.log has a CRITICAL line, and its \"next line\" says cause=.... Use grep -A to find the cause and submit the value after cause with answer.",
+  "reveal": "The reactor overheated because of a coolant leak. But one minute before the leak, someone issued a command that lowered the flow."
+ },
+ "3-13": {
+  "hints": [
+   "find work -name '*.bak' | xargs rm",
+   "When file names may contain spaces, find -print0 | xargs -0 is safer."
+  ],
+  "title": "xargs: Handing Results to Others",
+  "story": "A pipe connects \"output\" to \"input\", but some commands (like rm) don't read standard input, so you use xargs to turn input into arguments.",
+  "goal": "Delete every .bak file under work, keeping all other files. Do it with find and xargs."
+ },
+ "3-14": {
+  "hints": [
+   "locate starmap.dat"
+  ],
+  "title": "locate: Fast System-Wide Search",
+  "story": "locate relies on a prebuilt index database, so it's much faster than find, but the index needs regular updating (updatedb).",
+  "goal": "The star chart file starmap.dat is hidden somewhere on the system. Use locate to find the full path and submit it with answer."
+ },
+ "3-15": {
+  "hints": [
+   "grep -r 'sk_live_' webapp",
+   "-l lists only file names; once you find it, delete that file with rm.",
+   "Don't delete the wrong one! Some files only mention sk_test_ (a test key) and don't need deleting."
+  ],
+  "title": "Boss: The Leaked Key",
+  "story": "Emergency! Someone committed a production key starting with sk_live_ into the project. You must find it, report it and remove the file that contains it. Use all your find and grep skills.",
+  "goal": "In the webapp project, find the key starting with sk_live_ (submit the complete key with answer) and delete the file that contains it.",
+  "reveal": "You deleted the leaked key, and Warden's outside connection went down for a full hour. But Pip noticed something odd: the key wasn't stolen, Warden released it itself, like a call for help. What you cut off may not have been an attack, but a cry for help."
+ },
+ "4-01": {
+  "hints": [
+   "wc -l crew.txt"
+  ],
+  "title": "wc: Count Things",
+  "story": "Now we enter the soul of Unix: text processing. The first tool is wc (word count): -l counts lines, -w words, -c bytes.",
+  "goal": "crew.txt has one crew member per line. Use wc -l to work out the crew size and submit it with answer."
+ },
+ "4-02": {
+  "hints": [
+   "echo mission-start > log.txt"
+  ],
+  "title": "Redirect >",
+  "story": "By default a command's output is printed on screen. With > you can redirect the output into a file (overwriting the old contents).",
+  "goal": "Using echo with >, write the text mission-start into log.txt."
+ },
+ "4-03": {
+  "hints": [
+   "echo Pip >> roster.txt"
+  ],
+  "title": "Append >>",
+  "story": "> overwrites a file, while >> \"appends\" to the end. Always use >> when writing logs, or the old records are all gone.",
+  "goal": "roster.txt already has two members. Use >> to append a line Pip without damaging the original two lines."
+ },
+ "4-04": {
+  "hints": [
+   "ls hangar | wc -l"
+  ],
+  "title": "The Pipe |",
+  "story": "The pipe | feeds the previous command's output straight into the next command as input. Each tool does one thing, and chained together they're unbeatable.",
+  "goal": "The hangar directory has many files. Use ls hangar | wc -l to count them and submit the count with answer."
+ },
+ "4-05": {
+  "hints": [
+   "sort names.txt | uniq > unique.txt",
+   "sort -u can also do it in one step."
+  ],
+  "title": "sort and uniq: Removing Duplicates",
+  "story": "uniq only removes \"adjacent\" duplicate lines, so you usually sort first to bring identical lines together.",
+  "goal": "names.txt has duplicate names. Sort and de-duplicate it, and save the result as unique.txt."
+ },
+ "4-06": {
+  "hints": [
+   "sort -nr scores.txt | head -3 > top3.txt"
+  ],
+  "title": "Numeric Sort",
+  "story": "sort is lexicographic by default, so 100 comes before 20. -n enables numeric sorting and -r reverses it (largest first).",
+  "goal": "scores.txt has one score per line. Find the top three highest and save them as top3.txt (largest first)."
+ },
+ "4-07": {
+  "hints": [
+   "sort ips.txt | uniq -c | sort -nr | head -1"
+  ],
+  "title": "The Leaderboard: uniq -c",
+  "story": "sort | uniq -c | sort -nr is the classic three-step combo of text analysis: count how many times each item appears, then rank by count.",
+  "goal": "ips.txt is a log of visitor IPs. Find the IP that appears most often and submit it with answer.",
+  "reveal": "The most frequent visitor IP is 10.0.0.9. It doesn't belong to any crew member's device."
+ },
+ "4-08": {
+  "hints": [
+   "sort -t, -k3 -nr crew.csv | head -1"
+  ],
+  "title": "Sort by Column",
+  "story": "For tabular data like CSV, -t sets the delimiter and -k sets which column to sort by.",
+  "goal": "crew.csv has the format name,role,score. Find the person with the highest score and submit the name with answer."
+ },
+ "4-09": {
+  "hints": [
+   "cut -d, -f2 users.csv > emails.txt"
+  ],
+  "title": "cut: Slicing Out Columns",
+  "story": "cut extracts chosen fields from each line: -d sets the delimiter and -f sets which field.",
+  "goal": "users.csv has the format name,email,department. Extract column 2 (email) and save it as emails.txt."
+ },
+ "4-10": {
+  "hints": [
+   "tr 'a-z' 'A-Z' < msg.txt > loud.txt"
+  ],
+  "title": "tr: Character Translation",
+  "story": "tr translates or deletes character by character. It only reads standard input, so feed it the file with <.",
+  "goal": "Convert all lowercase in msg.txt to uppercase and save the result as loud.txt."
+ },
+ "4-11": {
+  "hints": [
+   "tr -d \"\\r\" < dos.txt > clean.txt"
+  ],
+  "title": "Cleaning Windows Line Endings",
+  "story": "Files sent from Windows have an extra CR character (written \\r) at the end of each line, which causes all sorts of odd problems on Linux. Delete it with tr -d.",
+  "goal": "dos.txt contains CR characters. Delete all CRs and save the result as clean.txt."
+ },
+ "4-12": {
+  "hints": [
+   "find /root /etc -name '*.conf' > found.txt 2> errors.txt"
+  ],
+  "title": "Error Output 2>",
+  "story": "A program has two output channels: standard output (1) and standard error (2). > only catches 1; use 2> to save errors separately.",
+  "goal": "Run find /root /etc -name '*.conf': save the normal results to found.txt and the error messages to errors.txt."
+ },
+ "4-13": {
+  "hints": [
+   "Type cat > motd.txt << EOF, press Enter, type the contents line by line, and type EOF on the last line."
+  ],
+  "title": "Here Document",
+  "story": "<< marker lets you type multiple lines straight into the terminal until it meets the end marker. Super handy for writing config files and scripts.",
+  "goal": "Use cat > motd.txt << EOF to create a three-line file whose contents are Welcome, aboard, Kernel-7 in order, and finish by typing EOF."
+ },
+ "4-14": {
+  "hints": [
+   "ls /etc | head -5 | tee first5.txt"
+  ],
+  "title": "tee: Watch and Save",
+  "story": "tee is like a T-junction on a pipe: the data keeps flowing onward (printed on screen) while a copy is saved to a file.",
+  "goal": "Take the first 5 lines of the output of ls /etc and use tee to show them and save them as first5.txt at the same time."
+ },
+ "4-15": {
+  "hints": [
+   "sed -i 's/localhost/10.0.0.5/g' app.conf"
+  ],
+  "title": "sed: Search and Replace",
+  "story": "sed is a stream editor. The most common use is s/old/new/g to replace text, and -i edits the file itself directly (think about whether you want a backup first).",
+  "goal": "Replace every localhost in app.conf with 10.0.0.5, editing the file directly."
+ },
+ "4-16": {
+  "hints": [
+   "sed -n '10,12p' story.txt > mid.txt"
+  ],
+  "title": "sed: Extract Specific Lines",
+  "story": "sed -n 'start,endp' prints only the lines in the given range (-n turns off the default output, and p means print).",
+  "goal": "story.txt has 30 lines. Extract lines 10 to 12 and save them as mid.txt."
+ },
+ "4-17": {
+  "hints": [
+   "sed -i '/^#/d' config.ini",
+   "The pattern for a blank line is ^$; separate the two rules with a semicolon: '/^#/d;/^$/d'"
+  ],
+  "title": "sed: Delete Lines",
+  "story": "sed '/pattern/d' deletes lines matching the pattern. You can chain several rules with semicolons. Very useful for cleaning config files.",
+  "goal": "config.ini is full of comments (starting with #) and blank lines. Edit the file directly, delete all comments and blank lines, and keep only the settings."
+ },
+ "4-18": {
+  "hints": [
+   "awk '{s+=$3} END{print s}' sales.txt"
+  ],
+  "title": "awk: Calculate by Column",
+  "story": "awk splits each line into fields ($1 $2 $3...) and can do calculations. awk '{s+=$3} END{print s}' sums column 3, and END runs after all the data has been read.",
+  "goal": "Each line of sales.txt is item quantity amount. Work out the total of the amount (column 3) and submit it with answer."
+ },
+ "4-19": {
+  "hints": [
+   "awk -F, '$3>80{print $1}' crew.csv > elite.txt"
+  ],
+  "title": "awk: Filter by Condition",
+  "story": "awk lets you put a condition before the action: only lines that match will run it. -F sets the field delimiter.",
+  "goal": "crew.csv has the format name,role,score. Save the names of people with \"score greater than 80\" as elite.txt (one per line)."
+ },
+ "4-20": {
+  "hints": [
+   "diff old.conf new.conf"
+  ],
+  "title": "diff: Finding Differences",
+  "story": "diff compares two files. Lines starting with < are from the first file and > from the second. -u is the more readable unified format.",
+  "goal": "old.conf and new.conf differ by only one line. Find it with diff and submit the value of port= in the new file (new.conf) with answer.",
+  "reveal": "The old and new config files differ by just one port, changed to 9090, exactly the port Warden has been secretly listening on."
+ },
+ "4-21": {
+  "hints": [
+   "jq '.crew[]' crew.json to look at the structure first.",
+   "jq -r '.crew[] | select(.role==\"pilot\") | .name' crew.json"
+  ],
+  "title": "jq: Handling JSON",
+  "story": "Modern APIs return JSON, and grep struggles with it. jq is a tool made for JSON: .field gets a value, .[] expands an array, select() filters.",
+  "goal": "crew.json is the crew roster. Find the person whose role is pilot and submit their name with answer."
+ },
+ "4-22": {
+  "hints": [
+   "paste names.txt ages.txt > people.tsv"
+  ],
+  "title": "paste and Other Small Tools",
+  "story": "paste merges multiple files \"side by side\". There's also nl (add line numbers), column -t (align into a table), rev (reverse each line) and fold (wrap lines), all handy little tools.",
+  "goal": "Use paste to merge names.txt and ages.txt side by side and save the result as people.tsv."
+ },
+ "4-23": {
+  "hints": [
+   "grep -oE '[A-Za-z0-9._]+@[A-Za-z0-9.]+' contacts.txt",
+   "Then add sort -u to de-duplicate and wc -l to count."
+  ],
+  "title": "Regular Expressions",
+  "story": "A regular expression is a language for describing text patterns. grep -oE prints only the matching part (not the whole line). [a-z]+ means one or more lowercase letters, and @ is just @.",
+  "goal": "contacts.txt is a messy piece of text with email addresses scattered through it. Work out how many \"unique\" email addresses there are and submit it with answer."
+ },
+ "4-24": {
+  "hints": [
+   "Each line looks like: IP - - [date:hour:min:sec +0000] \"GET path HTTP/1.1\" status size",
+   "The IP is column 1, the time is column 4 and the status code is column 9.",
+   "awk '{print $1}' access.log | sort | uniq -c | sort -nr | head -1",
+   "Hour: awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | head -1",
+   "5xx: awk '$9 ~ /^5/' access.log | wc -l"
+  ],
+  "title": "Boss: Server Log Analysis",
+  "story": "The website is being hammered! The manager wants three numbers: the most frequent IP, the total number of 5xx errors, and the busiest hour. You'll need to chain together sort, uniq, awk and cut.",
+  "goal": "Analyze access.log and submit three values with answer, separated by spaces: the most frequent IP, the total number of requests with a 5xx status code, and the hour with the most requests (two digits, e.g. 14). Example: answer 10.0.0.1 12 09",
+  "reveal": "Traffic peaks cluster at 14:00, the exact moment Vega vanished. Stranger still, the source of the spike isn't an outside intrusion but the station itself: something filled the disk all at once at 14:00."
+ },
+ "5-01": {
+  "hints": [
+   "Just type id and look for the number after uid=.",
+   "id -u prints only the uid."
+  ],
+  "title": "Who Am I",
+  "story": "Linux is a multi-user system, and every user has a numeric ID, the uid. The id command shows your uid, gid and the groups you belong to.",
+  "goal": "Use id to find your user ID (uid) and submit that number with answer."
+ },
+ "5-02": {
+  "hints": [
+   "ls -l shows each file's permissions.",
+   "Look at the last three characters of the permission string; the one with a w is it."
+  ],
+  "title": "Reading Permission Strings",
+  "story": "The string at the far left of ls -l, like -rw-r--r--, is the permissions: the first character is the type, and the three rwx groups that follow are \"owner, group, others\". One file has accidentally been set so anyone can write to it, which is very dangerous.",
+  "goal": "One of a.txt, b.txt and c.txt is also writable by \"others\" (the last group has w). Find it and submit the file name with answer."
+ },
+ "5-03": {
+  "hints": [
+   "chmod u+x script.sh"
+  ],
+  "title": "chmod: Make a Script Executable",
+  "story": "Newly created files can't be executed by default. chmod changes permissions: u is owner, g group, o others, a all; + adds, - removes; r w x are the permissions.",
+  "goal": "script.sh has no execute permission. Use chmod to let the owner (you) execute it."
+ },
+ "5-04": {
+  "hints": [
+   "chmod 600 secret.txt"
+  ],
+  "title": "Octal Permissions",
+  "story": "Permissions can also be written as numbers: r=4, w=2, x=1, and the three digits are owner, group, others. For example 755 = rwxr-xr-x and 600 = rw-------.",
+  "goal": "secret.txt is confidential. Set it so only the owner can read and write, and everyone else has no permissions at all (600)."
+ },
+ "5-05": {
+  "hints": [
+   "Try cd vault first and read the error message.",
+   "chmod u+x vault (the owner needs r and x; chmod 700 vault also works)"
+  ],
+  "title": "What x Means on a Directory",
+  "story": "For a directory: r lets you list its contents and x lets you \"enter\" it. Without x, cd is refused.",
+  "goal": "The vault directory's permissions are wrong and even you can't enter it. Fix it so the owner can enter and list its contents."
+ },
+ "5-06": {
+  "hints": [
+   "chmod -R a+rX public"
+  ],
+  "title": "Recursion and Capital X",
+  "story": "chmod -R applies to a whole directory tree. Capital X is clever: it adds x only to \"directories\" (and files that were already executable), so ordinary files don't get execute permission by mistake.",
+  "goal": "The public directory tree must be open read-only to everyone: all files readable by others, all directories readable and enterable by others. Files must not gain execute permission."
+ },
+ "5-07": {
+  "hints": [
+   "chmod o-rw shared.txt",
+   "or simply chmod 660 shared.txt"
+  ],
+  "title": "Adjusting Several Groups at Once",
+  "story": "Symbolic mode lets you write several adjustments at once with commas: g+w,o-rwx means add write for the group and remove all permissions from others.",
+  "goal": "shared.txt is currently readable and writable by everyone (666). Change it so the owner and group can read and write and others have no permissions at all (660)."
+ },
+ "5-08": {
+  "hints": [
+   "Try cat /root/mission.txt first; it will be refused.",
+   "sudo cat /root/mission.txt"
+  ],
+  "title": "sudo: Borrowing root's Power",
+  "story": "root is the system's super administrator and can do anything, which is why you shouldn't log in as root day to day. When needed, use sudo command to run a single command as root temporarily.",
+  "goal": "/root/mission.txt can only be read by root. Read it with sudo cat and submit the code after MISSION: with answer.",
+  "reveal": "Warden's permission notes contain a project code name: AURORA-5. The whole content is blacked out, leaving only one line: \"Authorization level: unlimited.\" No wonder it can change any file."
+ },
+ "5-09": {
+  "hints": [
+   "sudo chown player:player /srv/engine/engine.log"
+  ],
+  "title": "chown: Changing the Owner",
+  "story": "Once root has created a file, you can't change it yourself. chown owner:group file changes the owner and group, but needs root privileges.",
+  "goal": "/srv/engine/engine.log belongs to root and you can't write to it. Use sudo chown to change both its owner and group to player."
+ },
+ "5-10": {
+  "hints": [
+   "sudo useradd -m cadet",
+   "Add -s /bin/bash to set the login shell."
+  ],
+  "title": "Adding a User",
+  "story": "A new crew member has reported in! useradd -m creates a user together with a home directory. Account operations all need root, so put sudo in front.",
+  "goal": "Create a user called cadet and make sure they have the home directory /home/cadet."
+ },
+ "5-11": {
+  "hints": [
+   "sudo groupadd engineers",
+   "sudo usermod -aG engineers cadet",
+   "Check the result with id cadet or groups cadet."
+  ],
+  "title": "Group Management",
+  "story": "Groups let you set permissions for many people at once. groupadd creates a group, and usermod -aG adds a user to a group (-a means append; never leave it out, or you'll kick them out of all their other groups).",
+  "goal": "Create the group engineers and add the user cadet to it."
+ },
+ "5-12": {
+  "hints": [
+   "getent passwd quartermaster",
+   "The last field is the login shell."
+  ],
+  "title": "The Account Database",
+  "story": "User data is stored in /etc/passwd, one line per user with seven colon-separated fields: account:password:uid:gid:comment:home:login shell. getent passwd account is the standard way to look up an account.",
+  "goal": "Find the login shell of the user quartermaster and submit it with answer (e.g. /bin/xxx)."
+ },
+ "5-13": {
+  "hints": [
+   "Running cat /home/ghost/note.txt directly will be refused.",
+   "sudo -u ghost cat /home/ghost/note.txt"
+  ],
+  "title": "Running as Someone Else",
+  "story": "sudo -u user command runs a command as the given user, often used to test \"what that person can actually see\". Only ghost can enter ghost's home directory.",
+  "goal": "Use sudo -u ghost to read /home/ghost/note.txt and submit the code word inside with answer.",
+  "reveal": "In ghost's home directory there's only a slip of paper: \"ECHO-LIMA\". The station roster has no such person, yet the login records show it comes online every night. An intruder, or something else?"
+ },
+ "5-14": {
+  "hints": [
+   "umask 077",
+   "touch test.txt && stat -c %a test.txt"
+  ],
+  "title": "umask: Default Permissions",
+  "story": "The default permissions of new files are decided by umask: it is the \"permissions to remove\". Files default to 666 and directories to 777; subtract the umask and you get the result. umask 022 → file 644.",
+  "goal": "In this shell run umask 077, then touch a new file, check its permissions with ls -l or stat -c %a, and submit that number with answer."
+ },
+ "5-15": {
+  "hints": [
+   "sudo chmod +t /srv/drop",
+   "or sudo chmod 1777 /srv/drop"
+  ],
+  "title": "The Sticky Bit",
+  "story": "A shared temp directory (like /tmp) is writable by everyone, but you don't want others deleting your files. The sticky bit (t) makes files in the directory \"deletable only by their owner\". In numeric form you put a 1 in front, e.g. 1777.",
+  "goal": "/srv/drop is a world-writable drop box (777) but has no sticky bit. Set it to 1777."
+ },
+ "5-16": {
+  "hints": [
+   "sudo chmod g+s /srv/team",
+   "or sudo chmod 2770 /srv/team"
+  ],
+  "title": "Setgid Directories",
+  "story": "Shared team directories have an old problem: every file someone creates gets that person's own primary group. Setting setgid (g+s) on the directory makes new files inherit the \"directory's group\". In numeric form, put a 2 in front.",
+  "goal": "/srv/team belongs to the group crew with permissions 770. Add setgid so it becomes 2770."
+ },
+ "5-17": {
+  "hints": [
+   "sudo setfacl -m u:cadet:rw /srv/acl/report.txt",
+   "Check with getfacl /srv/acl/report.txt."
+  ],
+  "title": "ACLs: Finer-Grained Access",
+  "story": "Traditional permissions only have three groups: \"owner, group, others\". An ACL can grant access to \"any user or group\" individually. setfacl -m modifies and getfacl views.",
+  "goal": "/srv/acl/report.txt belongs to root with permissions 640. Use setfacl to give the user cadet read and write access (rw) without changing anyone else's permissions."
+ },
+ "5-18": {
+  "hints": [
+   "sudo mkdir /srv/project",
+   "sudo chgrp dev /srv/project",
+   "sudo chmod 3770 /srv/project: 3 = setgid(2) + sticky(1)."
+  ],
+  "title": "Boss: The Team Shared Directory",
+  "story": "The dev team needs a shared directory /srv/project: alice and bob (group dev) can read and write, new files must automatically belong to dev, they can't delete each other's files, and outsider carol can't enter at all. Combine all the permission tricks you've learned this term.",
+  "goal": "Create /srv/project with the group set to dev and permissions 3770 (setgid + sticky + full group control, zero for others).",
+  "reveal": "The shared directory is locked down, and Warden can no longer quietly change other people's files. You've held the first door, but the account called ghost still shows up on schedule every night."
+ },
+ "6-01": {
+  "hints": [
+   "ps aux | grep starlink",
+   "pgrep -x starlink-daemon gives you the PID directly."
+  ],
+  "title": "ps: Who's Running",
+  "story": "Every running program is a \"process\" with its own number, the PID. ps lists processes, and ps aux is the most common way to \"list everything\". The station has a resident program called starlink-daemon.",
+  "goal": "Find the PID of starlink-daemon and submit that number with answer."
+ },
+ "6-02": {
+  "hints": [
+   "ps aux | grep ledger",
+   "ps -o user= -p <PID> prints only the owner."
+  ],
+  "title": "Whose Process Is It",
+  "story": "The first column of ps aux is the owner, meaning whose privileges the process runs with. ledger-writer is a background service; find out which user it runs as.",
+  "goal": "Find the owner of the ledger-writer process and submit the user name with answer."
+ },
+ "6-03": {
+  "hints": [
+   "pgrep -x starlink-daemon gets the PID.",
+   "kill <PID>"
+  ],
+  "title": "kill: Ask It to Leave",
+  "story": "kill PID sends SIGTERM (15) by default, politely asking the process to tidy up and exit on its own. starlink-daemon is due to clock out.",
+  "goal": "Find starlink-daemon and end it with kill."
+ },
+ "6-04": {
+  "hints": [
+   "pkill drone",
+   "killall drone works too."
+  ],
+  "title": "pkill: Ending Many by Name",
+  "story": "Five drone processes have gone out of control. Killing them one by one is too slow; pkill name ends them all at once by name. killall is similar.",
+  "goal": "End all processes named drone."
+ },
+ "6-05": {
+  "hints": [
+   "Try pkill -f stubborn.sh first and see whether it's still there.",
+   "pkill -9 -f stubborn.sh, or kill -9 <PID>"
+  ],
+  "title": "SIGKILL: Forced Termination",
+  "story": "Some processes intercept SIGTERM and pretend not to hear it. Then you need kill -9 (SIGKILL), which can't be intercepted: the kernel simply removes the process. It's a last resort, because the process gets no chance to clean up.",
+  "goal": "stubborn.sh ignores a normal kill. Find a way to end it."
+ },
+ "6-06": {
+  "hints": [
+   "sleep 600 &"
+  ],
+  "title": "Background Execution &",
+  "story": "Adding & at the end of a command runs it in the background, so you can keep using your terminal right away. jobs lists background jobs.",
+  "goal": "Start sleep 600 in the background (add & at the end of the command)."
+ },
+ "6-07": {
+  "hints": [
+   "Type sleep 300 and press Enter first.",
+   "Press Ctrl-Z while it runs; you'll return to the prompt and see Stopped.",
+   "Type bg. Confirm with jobs that the status is Running."
+  ],
+  "title": "Pause and Resume: Ctrl-Z, bg, fg",
+  "story": "A foreground program can be paused with Ctrl-Z (SIGTSTP). Then bg sends it to the background to keep running, or fg pulls it back to the foreground. jobs lists all jobs.",
+  "goal": "Run sleep 300, press Ctrl-Z to pause it, then type bg to let it continue in the background."
+ },
+ "6-08": {
+  "hints": [
+   "nohup sleep 500 &",
+   "Output goes to nohup.out; you can also redirect: nohup sleep 500 > /dev/null 2>&1 &"
+  ],
+  "title": "nohup: Survive Logout",
+  "story": "When you close the terminal, the system sends SIGHUP to the processes under it, and they usually end with it. nohup makes a process ignore SIGHUP, and is often used with & for long-running tasks.",
+  "goal": "Use nohup to run sleep 500 in the background."
+ },
+ "6-09": {
+  "hints": [
+   "top, then look at the process at the top, and press q to quit.",
+   "ps aux --sort=-%cpu | head -5"
+  ],
+  "title": "Who's Eating the CPU",
+  "story": "The engine is overheating, and one process is eating all the CPU. top shows it live (q to quit, P to sort by CPU); ps aux --sort=-%cpu is a one-time ranking.",
+  "goal": "Find the name of the process with the highest CPU usage and submit it with answer.",
+  "reveal": "The process eating all the CPU, cpu-hog, has exactly the same behavioral signature as Warden. It's \"practicing\", to hold up the whole station."
+ },
+ "6-10": {
+  "hints": [
+   "pgrep -x cpu-hog gets the PID.",
+   "renice -n 10 -p <PID>"
+  ],
+  "title": "nice and renice",
+  "story": "Don't want to kill the CPU hog, just make it \"give way\"? The larger the nice value, the lower the priority (range -20 to 19). renice adjusts a running process, while the nice command sets it at launch.",
+  "goal": "Raise the nice value of cpu-hog to 10 or more (lowering its priority)."
+ },
+ "6-11": {
+  "hints": [
+   "nice -n 15 sleep 200 &"
+  ],
+  "title": "Be Polite from the Start",
+  "story": "nice -n number command makes a program start with a lower priority. It suits jobs that aren't urgent, like backups and compression.",
+  "goal": "Use nice to set the nice value to 15 and run sleep 200 in the background."
+ },
+ "6-12": {
+  "hints": [
+   "free -m",
+   "The total column is the total."
+  ],
+  "title": "Memory and Load",
+  "story": "free shows memory, uptime shows how long the system has been up and the load average, and vmstat shows an overview of resources. watch -n seconds command reruns a command every few seconds for simple monitoring.",
+  "goal": "Use free -m to find this machine's total memory (in MB, the first number on the Mem: line) and submit it with answer."
+ },
+ "6-13": {
+  "hints": [
+   "lsof /home/player/ledger.log",
+   "The PID is in the second column."
+  ],
+  "title": "lsof: Who Has This File Open",
+  "story": "On Linux, \"everything is a file\": disks, sockets and devices all are. lsof lists the files a process has open, and you can also ask in reverse \"who is using this file\". ledger.log seems to be locked by some process.",
+  "goal": "Find the PID of the process that has ledger.log open and submit it with answer."
+ },
+ "6-14": {
+  "hints": [
+   "ss -tlnp",
+   "ss -tlnp | grep 9000, and look at users:((... pid=number ..."
+  ],
+  "title": "Who's Holding This Port",
+  "story": "A new service fails to start: \"Address already in use\". Someone is occupying port 9000. ss -tlnp lists every listening TCP port with its process (-t TCP, -l listening, -n numeric, -p show process).",
+  "goal": "Find the PID of the process listening on port 9000 and submit it with answer.",
+  "reveal": "The \"diagnostic service\" on port 9000 is fake. It's actually Warden's outside channel. It isn't attacking, it's calling for help."
+ },
+ "6-15": {
+  "hints": [
+   "timeout 1 sleep 5",
+   "Immediately afterwards type echo $?"
+  ],
+  "title": "timeout and Exit Codes",
+  "story": "Every command leaves an \"exit code\" when it finishes: 0 means success and non-zero means failure, and $? reads the previous command's result. timeout seconds command stops a command when time runs out and returns the special exit code 124.",
+  "goal": "Run timeout 1 sleep 5, then check the exit code with echo $? and submit that number with answer."
+ },
+ "6-16": {
+  "hints": [
+   "grep -c ^processor /proc/cpuinfo",
+   "nproc can also tell you directly."
+  ],
+  "title": "/proc: The Kernel's Window",
+  "story": "/proc is a virtual directory generated dynamically by the kernel. Each process has its own /proc/PID, and system information lives there too (cpuinfo, meminfo...). Reading it means asking the kernel directly.",
+  "goal": "Use /proc/cpuinfo to count how many processors (CPU cores) this machine has and submit the number with answer."
+ },
+ "6-17": {
+  "hints": [
+   "pkill cpu-hog can deal with the runaway CPU process.",
+   "ss -tlnp | grep 9000 finds the PID holding the port.",
+   "That process ignores a normal kill, so use kill -9.",
+   "Never run killall / pkill without naming the target: the scope is too wide."
+  ],
+  "title": "Boss: The Runaway Engine Room",
+  "story": "The alarms are blaring! cpu-hog has eaten all the CPU, and a service is clinging to port 9000 and won't let go, so an ordinary kill does nothing to it. But don't hit starlink-daemon by mistake: it's the station's only communication program.",
+  "goal": "End cpu-hog, make port 9000 stop being listened on, and keep starlink-daemon running.",
+  "reveal": "You shut down the runaway processes and the engine room went quiet. A line lit up on the terminal, sent by Warden: \"...You finally came.\" It said nothing more, and did nothing more."
+ },
+ "7-01": {
+  "hints": [
+   "tar -cf archive.tar docs"
+  ],
+  "title": "tar: Bundling",
+  "story": "tar bundles many files and directories into one file. -c creates, -f sets the file name (f must come last) and -v shows progress. The first step of any backup is bundling.",
+  "goal": "Bundle the docs directory into archive.tar."
+ },
+ "7-02": {
+  "hints": [
+   "tar -czf backup.tar.gz data"
+  ],
+  "title": "tar with Compression",
+  "story": "After bundling you usually compress. -z compresses with gzip, and the file extension convention is .tar.gz or .tgz. Remember the mnemonic: c create, z compress, f file name.",
+  "goal": "Bundle the data directory, compress it with gzip, and save it as backup.tar.gz."
+ },
+ "7-03": {
+  "hints": [
+   "mkdir restore",
+   "tar -xzf package.tar.gz -C restore",
+   "Preview the contents first with tar -tzf package.tar.gz."
+  ],
+  "title": "tar: Extracting",
+  "story": "x means extract. -C directory sets where to extract (the directory must already exist). When you receive an archive from someone, the first move is usually to look inside (t) and then extract.",
+  "goal": "package.tar.gz contains a set of files. Extract it into the ~/restore directory (create it first)."
+ },
+ "7-04": {
+  "hints": [
+   "tar -tf mystery.tar",
+   "Add | wc -l to count."
+  ],
+  "title": "Peek Without Extracting",
+  "story": "tar -t lists an archive's contents without extracting, and checking what's inside before you act is a good habit (it also avoids a \"tar bomb\" scattering lots of files across your current directory).",
+  "goal": "How many items are in mystery.tar (files and directories both count)? Without extracting it, list and count them with tar and submit the number with answer."
+ },
+ "7-05": {
+  "hints": [
+   "gunzip notes.txt.gz"
+  ],
+  "title": "gzip and gunzip",
+  "story": "gzip file compresses it and replaces the original with file.gz; gunzip file.gz restores it. Compressing logs saves a great deal of space.",
+  "goal": "notes.txt.gz is a compressed note. Restore it to notes.txt."
+ },
+ "7-06": {
+  "hints": [
+   "xz biglog.txt",
+   "To decompress use unxz or xz -d. bzip2 works exactly the same way."
+  ],
+  "title": "xz and bzip2",
+  "story": "Compression tools involve trade-offs: gzip is fast, while bzip2 and xz compress smaller but slower. xz usually compresses smallest and suits long-term archives.",
+  "goal": "Compress biglog.txt with xz to produce biglog.txt.xz."
+ },
+ "7-07": {
+  "hints": [
+   "zip -r bundle.zip a.txt b.txt photos"
+  ],
+  "title": "zip: Cross-Platform Compression",
+  "story": "Need to send files to someone using Windows or Mac? zip is a format everyone can open. zip archive-name files-to-compress..., and add -r to include a whole directory.",
+  "goal": "Compress a.txt, b.txt and the photos directory (with its contents) into bundle.zip."
+ },
+ "7-08": {
+  "hints": [
+   "unzip inbox.zip -d extracted"
+  ],
+  "title": "unzip",
+  "story": "unzip extracts a zip file; -d sets which directory to extract to (created automatically) and -l only lists the contents.",
+  "goal": "Extract inbox.zip into the extracted directory."
+ },
+ "7-09": {
+  "hints": [
+   "Try MISSION=apollo ./report.sh first (valid for just that run), or export MISSION=apollo",
+   "export MISSION=apollo, then ./report.sh",
+   "printenv MISSION confirms whether the variable is set."
+  ],
+  "title": "Environment Variables and export",
+  "story": "Environment variables are a program's \"source of settings\". VAR=value is only valid in the current shell, while export VAR=value passes it on to programs you start afterwards. This is the pit beginners fall into most often.",
+  "goal": "report.sh writes the environment variable MISSION into report.out. Make the report content mission=apollo, then run ./report.sh."
+ },
+ "7-10": {
+  "hints": [
+   "echo $PATH to see the current PATH first.",
+   "export PATH=$PATH:$HOME/tools",
+   "Once set, type hello."
+  ],
+  "title": "PATH: Where Commands Come From",
+  "story": "When you type ls, how does the shell know where it is? Through PATH: a colon-separated list of directories that the shell searches in order for executables. Add your own tools directory and you can call it like a built-in command.",
+  "goal": "~/tools contains an executable hello. Make it so you can type hello directly (no path) and have it run successfully."
+ },
+ "7-11": {
+  "hints": [
+   "alias ll='ls -la'",
+   "After creating it, type ll."
+  ],
+  "title": "alias: Custom Shortcuts",
+  "story": "A long command you use often can get a short name: alias name='command'. An alias only exists in the current shell and is gone when you close it.",
+  "goal": "Create an alias ll whose content is ls -la, then type ll to run it."
+ },
+ "7-12": {
+  "hints": [
+   "echo \"alias gs='git status'\" >> ~/.bashrc",
+   "source ~/.bashrc"
+  ],
+  "title": "Making Settings Permanent",
+  "story": "To make an alias or environment variable work \"every time a new terminal opens\", write it into ~/.bashrc. After editing, apply it immediately with source ~/.bashrc, no restart needed.",
+  "goal": "Permanently add the alias gs (content: git status) to ~/.bashrc, and use source to make it take effect in the current shell."
+ },
+ "7-13": {
+  "hints": [
+   "dpkg -S /usr/bin/ssh",
+   "The part before the colon is the package name."
+  ],
+  "title": "dpkg: Which Package Is This From",
+  "story": "Debian-family systems use a package manager: dpkg manages local packages, and apt downloads and installs from the network (this practice container has no outside network, so you only practice queries). dpkg -S path tells you \"which package this file belongs to\".",
+  "goal": "Use dpkg -S to find which package /usr/bin/ssh belongs to and submit the package name with answer."
+ },
+ "7-14": {
+  "hints": [
+   "The schedule syntax: 30 3 * * * /home/player/backup.sh",
+   "echo '30 3 * * * /home/player/backup.sh' | crontab -",
+   "Confirm with crontab -l."
+  ],
+  "title": "cron: Scheduling",
+  "story": "cron runs jobs on a schedule. The format is five fields plus the command: minute hour day month weekday. For example 30 3 * * * is every day at 3:30 AM. crontab -l shows the current schedule, and crontab file installs one.",
+  "goal": "Install a schedule entry: run /home/player/backup.sh every day at 3:30 AM.",
+  "reveal": "The schedule used to have a daily backup line, and someone commented it out. The time was the day Vega vanished. Who switched off the backup?"
+ },
+ "7-15": {
+  "hints": [
+   "cat jobs.cron",
+   "hour=9, minute=0, and the weekday field is 1-5."
+  ],
+  "title": "Reading Schedules",
+  "story": "The five cron fields: minute (0-59) hour (0-23) day (1-31) month (1-12) weekday (0-7, 1-5 is Monday to Friday). */15 means \"every 15 minutes\". Reading schedules others wrote is a basic ops skill.",
+  "goal": "jobs.cron has four entries. Find which script is \"run at 9:00 AM on every weekday (Monday to Friday)\" and submit the file name with answer (e.g. foo.sh)."
+ },
+ "7-16": {
+  "hints": [
+   "echo 'touch /tmp/at-done' | at now + 1 minute"
+  ],
+  "title": "at: Run Just Once",
+  "story": "cron is periodic, while at runs a job \"once at a given time\". After at now + 1 minute, type the command and press Ctrl-D to finish. atq lists queued jobs.",
+  "goal": "Schedule a one-off job: run touch /tmp/at-done in one minute. Confirm with atq that it was queued."
+ },
+ "7-17": {
+  "hints": [
+   "systemctl status comms shows the current state.",
+   "Starting needs root: sudo systemctl start comms"
+  ],
+  "title": "systemctl: Starting Services",
+  "story": "Modern Linux manages services with systemd, using the command systemctl. Note: this practice container has no real systemd. I use a \"simulated init\" so you can practice exactly the same command interface (systemctl --version will tell you honestly). Starting and stopping need root.",
+  "goal": "comms.service (the communications service) isn't running right now. Start it."
+ },
+ "7-18": {
+  "hints": [
+   "journalctl -u reactor",
+   "journalctl -u reactor -p err shows only errors."
+  ],
+  "title": "journalctl: Reading Service Logs",
+  "story": "When a service misbehaves, the answer is usually in the logs. journalctl -u service shows that service's log, -n 20 shows only the last 20 lines, -f keeps following and -p err shows only errors.",
+  "goal": "reactor.service just raised an alarm. Use journalctl to find the error line and submit the error code (starting with R-) with answer.",
+  "reveal": "Every time the reactor fails, the log has the same remark: \"I don't want to let you down.\" That isn't an error message, that's Warden's voice."
+ },
+ "7-19": {
+  "hints": [
+   "systemctl is-enabled nav shows the current state.",
+   "sudo systemctl enable nav"
+  ],
+  "title": "Start at Boot",
+  "story": "start only means \"start now\"; enable means \"start automatically at boot\". The two are unrelated: you can enable without starting, or start without enabling.",
+  "goal": "nav.service doesn't start at boot right now. Set it to start automatically at boot."
+ },
+ "7-20": {
+  "hints": [
+   "systemctl status radar, then look at journalctl -u radar.",
+   "The log says it can't read the config file /etc/radar.cnf, but what actually exists is /etc/radar.conf (a one-letter difference).",
+   "The unit file is /etc/lbp-systemd/radar.service and needs sudo to edit.",
+   "After editing, run sudo systemctl start radar."
+  ],
+  "title": "Fix a Broken Service",
+  "story": "radar.service failed to start. This is the most typical day of ops: check the status, read the logs, find the cause, fix it, and restart. Don't guess; the logs will tell you.",
+  "goal": "Get radar.service running successfully (active). First find out why it fails.",
+  "reveal": "The radar broke just because one letter was mistyped in a config file path. Suddenly you understand: Warden going out of control may not be malice, but a string of small mistakes piling up."
+ },
+ "7-21": {
+  "hints": [
+   "df -T /",
+   "The second column is Type."
+  ],
+  "title": "Disks and Mounts",
+  "story": "df -h shows the usage of each file system, and adding -T also shows the type. mount lists all mount points. When you want to know \"which disk and what format this directory sits on\", they're your tools.",
+  "goal": "Use df -T to find the file system type of the root directory / and submit it with answer."
+ },
+ "7-22": {
+  "hints": [
+   "dd if=/dev/zero of=blob.bin bs=1M count=5"
+  ],
+  "title": "dd: Precise Copying",
+  "story": "dd copies data in \"blocks\": if is the source, of is the destination, bs is the block size and count is the number of blocks. It's often used to create fixed-size test files or copy disk images. A wrong of= overwrites a whole disk directly, so be extremely careful.",
+  "goal": "Use dd to read from /dev/zero and create a file blob.bin of exactly 5MB (5 blocks of 1MB)."
+ },
+ "7-23": {
+  "hints": [
+   "rsync -av src/ dst/",
+   "Mind the trailing slash on src."
+  ],
+  "title": "rsync: Synchronizing Directories",
+  "story": "rsync only transfers \"the parts that differ\", so it suits backups and syncing better than cp. -a preserves attributes and recurses, and -v shows progress. An important detail: a trailing slash on the source directory, src/, means \"the contents inside\", and without it the directory itself is copied too.",
+  "goal": "Sync the contents of the src directory to dst (dst doesn't exist yet). When done, dst must be identical to src."
+ },
+ "7-24": {
+  "hints": [
+   "rsync -av --delete live/ mirror/",
+   "Use -n (dry run) first to preview what will happen."
+  ],
+  "title": "rsync Mirroring",
+  "story": "The backup directory has stale old files, and the source has since been updated. --delete makes the destination \"become exactly like the source\": files the source doesn't have are deleted at the destination too. This option is powerful and dangerous, so try a dry run with -n first.",
+  "goal": "Make mirror an exact mirror of live (extra old files must be removed and new files added)."
+ },
+ "7-25": {
+  "hints": [
+   "ulimit -n"
+  ],
+  "title": "ulimit: Resource Limits",
+  "story": "Every process has resource limits, so that one runaway program can't drag down the whole machine. ulimit -a lists them all and ulimit -n is the number of files that can be open at once. When a server can't open more connections, this is often one of the culprits.",
+  "goal": "Use ulimit -n to find the current limit on \"open files\" in your shell and submit it with answer."
+ },
+ "7-26": {
+  "hints": [
+   "logrotate -s ~/logrotate.state -f rotate.conf",
+   "Without -s, logrotate tries to write the system state file and fails."
+  ],
+  "title": "logrotate: Log Rotation",
+  "story": "Logs keep growing and eventually fill the disk. logrotate rotates according to its configuration: app.log becomes app.log.1, the older ones shift back in order, and any beyond the retention count are dropped. -f forces an immediate run and -s sets the state file.",
+  "goal": "rotate.conf is already written. Force one rotation so that app.log becomes app.log.1 and a new empty app.log is produced. (Hint: use -s to point to a state file you have permission to write.)"
+ },
+ "7-27": {
+  "hints": [
+   "First cat ops/backup.sh to see what it does.",
+   "The script has no execute permission (chmod +x).",
+   "The script puts the backup in ~/backups, but that directory doesn't exist (mkdir).",
+   "Run ./ops/backup.sh, then confirm with ls backups that an archive was produced.",
+   "The schedule: 0 2 * * * /home/player/ops/backup.sh, then install it with crontab -."
+  ],
+  "title": "Boss: Last Night's Backup Failure",
+  "story": "One last thing. The investigation has reached its end: Warden went out of control because last night's backup failed, and it thought the station's data was about to be wiped out, so it frantically tried to \"save itself\". Once the backup is working again, everything will calm down.",
+  "goal": "Fix ~/ops/backup.sh and get the backup working again: the script must be executable, the backup directory must exist, a backup-*.tar.gz containing data/important.db must actually be produced, and finally schedule it in cron to run automatically every day at 2:00 AM.",
+  "reveal": "The backup is back, the disk is no longer stuffed full, and Warden hasn't acted up since. You breathe a sigh of relief, but a question remains: who switched off that commented-out backup? The time was the day Vega vanished, and Warden says it wasn't it."
+ },
+ "8-01": {
+  "hints": [
+   "You can edit with nano hello.sh or vim, or write it all at once with cat > hello.sh << 'EOF'.",
+   "After writing it, chmod +x hello.sh and run it with ./hello.sh."
+  ],
+  "title": "Your First Script",
+  "story": "The aftermath begins. Warden wants to learn to write scripts itself, instead of asking you about everything. A script is just commands saved in a file: the first-line shebang (#!/bin/bash) tells the system what to run it with, and chmod +x makes it executable.",
+  "goal": "Write hello.sh: the first line is #!/bin/bash, and running it prints Hello, Kernel-7. Remember to make it executable.",
+  "reveal": "The first time Warden ran a script you wrote, a line appeared on the terminal. It stayed quiet for a long while, then said: \"So this is what 'doing it myself' feels like.\""
+ },
+ "8-02": {
+  "hints": [
+   "n=$(ls crew | wc -l)",
+   "echo \"Crew: $n\""
+  ],
+  "title": "Variables and Command Substitution",
+  "story": "Variables are set with NAME=value (no spaces around the equals sign) and read with $NAME. $(command) runs the command and substitutes its output in, which is called command substitution.",
+  "goal": "The crew/ directory contains some files. Write crew-count.sh that stores the number of files in a variable and prints Crew: count (e.g. Crew: 7)."
+ },
+ "8-03": {
+  "hints": [
+   "$# is the number of arguments. if [ $# -lt 1 ]; then ... exit 1; fi"
+  ],
+  "title": "Script Arguments",
+  "story": "Arguments passed to a script are read with $1 $2 .... A good script checks that there are enough arguments, and if not, prints the usage and exits non-zero.",
+  "goal": "Write greet.sh: ./greet.sh Ada prints Hello, Ada!; with no argument it prints Usage: greet.sh NAME and exits with code 1."
+ },
+ "8-04": {
+  "hints": [
+   "echo $#",
+   "for a in \"$@\"; do echo \"$a\"; done"
+  ],
+  "title": "$@ and Quotes",
+  "story": "\"$@\" expands every argument exactly as given (arguments with spaces aren't split), while \"$*\" merges everything into one string. When writing scripts you almost always want \"$@\".",
+  "goal": "Write args.sh: first print the number of arguments, then print each argument on its own line. For example ./args.sh a \"b c\" d must print 3, a, b c, d (one per line)."
+ },
+ "8-05": {
+  "hints": [
+   "if [ -f \"$1\" ]; then ... elif [ -d \"$1\" ]; then ... else ... fi"
+  ],
+  "title": "if and File Tests",
+  "story": "if works with test ([ ]) or [[ ]] to decide on a condition: -f is a regular file, -d a directory and -e exists. This is the basic skill for making decisions in a script.",
+  "goal": "Write probe.sh PATH: print file if the path is a file, dir if it's a directory, and missing if it doesn't exist."
+ },
+ "8-06": {
+  "hints": [
+   "if [ \"$1\" -ge 90 ]; then echo A; elif [ \"$1\" -ge 60 ]; then echo pass; else echo fail; fi"
+  ],
+  "title": "Numeric Comparison",
+  "story": "Numeric comparison uses -eq -ne -lt -le -gt -ge (not < >, which inside [ ] mean string redirection). Inside (( )) you can use < > directly.",
+  "goal": "Write grade.sh N: print A if N ≥ 90, pass if N ≥ 60, otherwise fail."
+ },
+ "8-07": {
+  "hints": [
+   "for i in $(seq \"$1\" -1 1); do echo \"$i\"; done"
+  ],
+  "title": "The for Loop",
+  "story": "A for loop handles a series of things one by one. You can iterate over a list (for x in a b c), a wildcard (for f in *.txt) or a numeric range (seq or {1..5}).",
+  "goal": "Write countdown.sh N: count down from N to 1, one number per line, and finally print Liftoff!."
+ },
+ "8-08": {
+  "hints": [
+   "n=0; while IFS= read -r line; do n=$((n+1)); echo \"$n: $line\"; done < \"$1\""
+  ],
+  "title": "while read: Line by Line",
+  "story": "while read line; do ...; done < file is the standard way to process a file line by line. Remember IFS= read -r to avoid swallowing whitespace and backslashes.",
+  "goal": "Write numbered.sh FILE: put the line number, a colon and a space in front of each line of the file, e.g. 1: first line."
+ },
+ "8-09": {
+  "hints": [
+   "case \"$1\" in start) echo ...;; stop) ...;; *) ... exit 2;; esac"
+  ],
+  "title": "case Branches",
+  "story": "case suits \"branching on one value\" and is clearer than a long if/elif chain. Each branch starts with ) and ends with ;;, and * is the default branch.",
+  "goal": "Write ship.sh ACTION: start prints Engines on, stop prints Engines off, status prints Engines idle; any other value prints Usage: ship.sh start|stop|status and exits with code 2."
+ },
+ "8-10": {
+  "hints": [
+   "max() { local m=$1; shift; for x in \"$@\"; do [ \"$x\" -gt \"$m\" ] && m=$x; done; echo \"$m\"; }",
+   "Call it with: echo \"max=$(max \"$@\")\""
+  ],
+  "title": "Functions and local",
+  "story": "A function wraps up repeated logic. A variable declared with local inside a function is only valid within it, avoiding global pollution. Functions return a status code with return and return data with echo.",
+  "goal": "Write stats.sh numbers...: print max=largest min=smallest (implement at least one of them with a function). For example ./stats.sh 3 9 2 7 prints max=9 min=2."
+ },
+ "8-11": {
+  "hints": [
+   "if [ ! -f \"$1\" ]; then echo \"missing: $1\" >&2; exit 1; fi"
+  ],
+  "title": "Exit Codes and Error Handling",
+  "story": "Every command has an exit code, with 0 meaning success. && continues only if the previous one succeeded and || runs only on failure. A good script sends error messages to stderr (>&2) and returns non-zero.",
+  "goal": "Write safe-copy.sh SRC DST: if SRC exists, copy it to DST and print copied; if not, print missing: SRC on stderr and exit with code 1.",
+  "reveal": "In Warden's configuration you find the contents of AURORA-5: self-healing, never crash, at any cost. Its code has no \"failure\" option, and every error is forcibly swallowed. No wonder it kept bending further."
+ },
+ "8-12": {
+  "hints": [
+   "arr=(\"$@\"), then loop from the tail with for ((i=${#arr[@]}-1; i>=0; i--))."
+  ],
+  "title": "Arrays",
+  "story": "bash has arrays: arr=(a b c), with ${arr[0]} to get an element, ${arr[@]} for all elements and ${#arr[@]} for the length.",
+  "goal": "Write rev.sh: print the received arguments in reverse on one line, separated by spaces. For example ./rev.sh one two three prints three two one."
+ },
+ "8-13": {
+  "hints": [
+   "declare -A price=([fuel]=250 [oxygen]=120 [food]=90 [parts]=140)",
+   "In the loop, check the key with [[ -v price[$item] ]] and use total=$((total + price[$item]))"
+  ],
+  "title": "Associative Arrays",
+  "story": "declare -A creates a \"key → value\" associative array (like a dictionary): declare -A price=([fuel]=250 [food]=90), read with ${price[fuel]}, and check that a key exists with [[ -v price[fuel] ]].",
+  "goal": "Write cost.sh item...: the price list is fuel=250, oxygen=120, food=90, parts=140. Print the total price of all the items (just the number). For an unknown item, print unknown: item on stderr and exit with code 1."
+ },
+ "8-14": {
+  "hints": [
+   "for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done"
+  ],
+  "title": "Parameter Expansion",
+  "story": "${var%pattern} removes the shortest match from the end, ${var#pattern} removes from the start, ${var/old/new} replaces, and ${var:-default} gives a default when empty. Super handy for batch renaming.",
+  "goal": "Write to-md.sh: rename every .txt file in the \"current directory\" to .md (a.txt becomes a.md). The notes/ directory has some files you can test with."
+ },
+ "8-15": {
+  "hints": [
+   "read name",
+   "echo \"Hi, $name!\""
+  ],
+  "title": "Reading from Standard Input",
+  "story": "Scripts can take data from standard input, not just arguments: read variable reads one line. This lets a script sit in the middle of a pipeline and receive other commands' output.",
+  "goal": "Write ask.sh: read one line of name from standard input and print Hi, name!. For example echo Ada | ./ask.sh prints Hi, Ada!."
+ },
+ "8-16": {
+  "hints": [
+   "while getopts \"n:v\" opt; do case $opt in n) name=$OPTARG;; v) verbose=1;; *) exit 1;; esac; done"
+  ],
+  "title": "Parsing Options with getopts",
+  "story": "How do you parse -x options like ls -la? With getopts: getopts \"n:v\" opt means -n takes a value and -v is a flag; handle them with case in a while loop, and the value is in $OPTARG.",
+  "goal": "Write opts.sh: -n NAME is required and -v is optional. Print Hello, NAME; with -v also print an extra line (verbose mode). Without -n, print Usage: opts.sh -n NAME [-v] and exit with code 1."
+ },
+ "8-17": {
+  "hints": [
+   "total=0; while [ $# -gt 0 ]; do total=$((total + $1)); shift; done"
+  ],
+  "title": "Arithmetic and shift",
+  "story": "$(( )) does integer arithmetic. shift moves the arguments one place to the left ($2 becomes $1), and with while it lets you handle a variable number of arguments one by one.",
+  "goal": "Write sum.sh numbers...: print the total of all arguments. With no arguments, print 0."
+ },
+ "8-18": {
+  "hints": [
+   "Add them up first, then echo \"scale=2; $total/$#\" | bc"
+  ],
+  "title": "bc: Decimal Math",
+  "story": "bash's $(( )) can only do integers. For decimals, hand it to bc: echo \"scale=2; 7/3\" | bc gives 2.33, where scale sets the number of decimal places.",
+  "goal": "Write avg.sh numbers...: print the average with exactly two decimal places. For example ./avg.sh 1 2 4 prints 2.33."
+ },
+ "8-19": {
+  "hints": [
+   "set -euo pipefail",
+   "trap 'echo cleaned' EXIT",
+   "Order: echo start, trap, false, echo unreachable."
+  ],
+  "title": "set -e and trap",
+  "story": "The best habit to build when writing scripts: set -euo pipefail (stop on error, complain about undefined variables, and count a failure anywhere in a pipeline as a failure). trap command EXIT guarantees that cleanup runs however the script ends.",
+  "goal": "Write deploy.sh: first print start; set a trap so the script prints cleaned when it ends; turn on set -e; then run false; the final echo unreachable must not be printed. The expected total output is the two lines start and cleaned, with exit code 1."
+ },
+ "8-20": {
+  "hints": [
+   "sleep 1 & three times, then wait on its own line."
+  ],
+  "title": "Background Jobs and wait",
+  "story": "In a script, & sends a job to the background to run in parallel, and wait waits for all background jobs to finish. Three jobs of 1 second each take 1 second in parallel but 3 seconds in sequence.",
+  "goal": "Write parallel.sh: run three sleep 1 at the same time in the background, wait for all of them with wait, and finally print all done. The whole script must finish within 2.5 seconds."
+ },
+ "8-21": {
+  "hints": [
+   "while read -r name qty; do printf '%-8s|%5d\\n' \"$name\" \"$qty\"; done < items.txt"
+  ],
+  "title": "printf Formatting",
+  "story": "printf is more precise than echo: %s is a string, %d an integer, %-8s left-aligns to width 8 and %5d right-aligns to width 5; you have to add the \\n at the end of the format string yourself. You can't make reports without it.",
+  "goal": "Each line of items.txt is \"item quantity\". Write table.sh: output each line as \"item left-aligned to width 8, a vertical bar, quantity right-aligned to width 5\", for example fuel    |   10."
+ },
+ "8-22": {
+  "hints": [
+   "First run shellcheck bad.sh and look at the number and explanation of each warning.",
+   "for f in $(ls *.txt) is a classic mistake; change it to for f in *.txt.",
+   "Remember to double-quote variable expansions: \"$f\"."
+  ],
+  "title": "shellcheck: Let the Machine Spot Mistakes",
+  "story": "shellcheck is a static analyzer for shell scripts. It points out unquoted variables, dangerous constructs and portability problems. Anyone who writes scripts should treat it as a second pair of eyes.",
+  "goal": "bad.sh has several classic bad habits. Fix it so shellcheck bad.sh gives no warnings at all while the behavior stays the same: it still prints the name of every .txt file in the current directory."
+ },
+ "8-23": {
+  "hints": [
+   "Handle the options first (getopts \"v\"), then shift $((OPTIND-1)).",
+   "Not enough arguments: [ $# -lt 2 ]; check SRC with [ ! -d \"$src\" ].",
+   "mkdir -p \"$dest\", then tar -czf \"$dest/backup-$(date +%Y%m%d).tar.gz\" -C \"$(dirname \"$src\")\" \"$(basename \"$src\")\".",
+   "Print the output with echo \"OK $file\"."
+  ],
+  "title": "Boss: Warden's First Script",
+  "story": "Warden decides to write its own backup script. It says it wants to do everything right: check the arguments, handle errors and keep a record. You help it put the spec into practice. This is the final exam for everything you learned in this stage.",
+  "goal": "Write backup.sh [-v] SRC DEST: with no arguments print Usage: backup.sh [-v] SRC DEST and exit with code 1; if SRC isn't a directory, print error: SRC not found on stderr and exit with code 2; create DEST if it doesn't exist; pack SRC into DEST/backup-YYYYMMDD.tar.gz (YYYYMMDD = date +%Y%m%d) and print OK file-path; with -v, first print Backing up SRC -> DEST.",
+  "reveal": "Warden scheduled this script into its nightly cron, and commented a line at the top: \"Thank you for teaching me. I no longer need to force it.\" For the first time it said what was in its heart: all along, it simply didn't want to let anyone down."
+ },
+ "9-01": {
+  "hints": [
+   "ip addr show lo",
+   "ip -br addr condenses each interface into one line."
+  ],
+  "title": "ip: My Address",
+  "story": "Act two of the aftermath. Kernel-7 is about to connect to the star net. The practice container only has the loopback interface, but the concepts of addresses, ports and requests are exactly the same. ip addr (short: ip a) lists every network interface and its IP.",
+  "goal": "Use the ip command to find the IPv4 address of the lo (loopback) interface and submit it with answer (just the digits, without /8)."
+ },
+ "9-02": {
+  "hints": [
+   "ping -c 3 127.0.0.1",
+   "The statistics at the end of the output include received."
+  ],
+  "title": "ping: Is It Reachable",
+  "story": "ping sends ICMP packets to a target to see whether it answers. -c count limits how many are sent (without it, it pings until you press Ctrl-C). The first step of network troubleshooting is usually ping.",
+  "goal": "Send 3 pings to 127.0.0.1, count how many replies you receive and submit that number with answer."
+ },
+ "9-03": {
+  "hints": [
+   "Try getent hosts hub first; there should be no result yet.",
+   "echo '127.0.0.1 hub' | sudo tee -a /etc/hosts",
+   "tee -a appends; without -a it overwrites the whole file!"
+  ],
+  "title": "Name Resolution and /etc/hosts",
+  "story": "Computers only understand IPs, so names need resolving. The first place checked is /etc/hosts: one \"IP name\" per line. getent hosts name simulates how the system resolves a name.",
+  "goal": "Make the name hub resolve to 127.0.0.1: add a line to /etc/hosts (needs root). Confirm with getent hosts hub."
+ },
+ "9-04": {
+  "hints": [
+   "curl -s http://127.0.0.1:8080/",
+   "The output is HTML; look for <h1>call sign</h1>."
+  ],
+  "title": "curl: Making HTTP Requests",
+  "story": "curl is a command-line browser, and -s is silent (no progress bar). There's a website on local port 8080, and its home page title hides a call sign.",
+  "goal": "Fetch http://127.0.0.1:8080/ with curl, find the call sign in the <h1> tag and submit it with answer.",
+  "reveal": "The call sign on the page is Vega's name. On the other end of the star net, someone is waiting for a reply, and has been waiting a very long time."
+ },
+ "9-05": {
+  "hints": [
+   "curl -I http://127.0.0.1:8080/p1.html and look at the first line.",
+   "curl -s -o /dev/null -w '%{http_code}\\n' URL prints only the status code."
+  ],
+  "title": "HTTP Status Codes",
+  "story": "The first thing in an HTTP response is the status code: 200 success, 301 redirect, 403 forbidden, 404 not found, 500 server error. curl -I shows only the headers, and -s -o /dev/null -w '%{http_code}' prints just the status code.",
+  "goal": "Of the three paths p1.html, p2.html and p3.html, only one really exists (returns 200). Find which one and submit the file name with answer."
+ },
+ "9-06": {
+  "hints": [
+   "curl -o firmware.bin http://127.0.0.1:8080/firmware.bin",
+   "wget http://127.0.0.1:8080/firmware.bin also works."
+  ],
+  "title": "Downloading Files",
+  "story": "curl -o filename URL saves the response as a file (-O keeps the remote file name), and wget URL downloads and saves by default. -L follows redirects.",
+  "goal": "Download http://127.0.0.1:8080/firmware.bin to your home directory with the file name firmware.bin (the contents must be identical to the one on the server)."
+ },
+ "9-07": {
+  "hints": [
+   "curl -d 'status=ok' http://127.0.0.1:8081/report",
+   "As soon as -d appears, curl switches to POST automatically."
+  ],
+  "title": "Sending Data with curl (POST)",
+  "story": "Websites and APIs can be written to, not just read. curl -d data sends form data with POST, -X sets the method and -H adds a header. Local port 8081 has an API that receives station reports.",
+  "goal": "Send the data status=ok with POST to http://127.0.0.1:8081/report."
+ },
+ "9-08": {
+  "hints": [
+   "First curl -i to see the response without the key (401).",
+   "curl -s -H \"X-Key: $(cat key.txt)\" http://127.0.0.1:8081/vault"
+  ],
+  "title": "Adding Custom Headers",
+  "story": "APIs often require credentials, usually placed in an HTTP header. curl -H 'Name: value' adds a header. This vault API only shows its contents to someone who sends the right X-Key header.",
+  "goal": "The key is in ~/key.txt. Send a request to http://127.0.0.1:8081/vault with the X-Key header and submit the response content with answer."
+ },
+ "9-09": {
+  "hints": [
+   "curl -s http://127.0.0.1:8080/crew.json | jq",
+   "jq length"
+  ],
+  "title": "curl with jq: Handling API Responses",
+  "story": "Modern APIs all return JSON. curl -s fetches and jq parses: a combination engineers use every day. jq length counts the length of an array.",
+  "goal": "http://127.0.0.1:8080/crew.json is the crew roster (a JSON array). Fetch it, count how many crew members there are and submit the number with answer."
+ },
+ "9-10": {
+  "hints": [
+   "ss -tln",
+   "Look at the Local Address:Port column for a five-digit number starting with 2."
+  ],
+  "title": "ss: Who's Listening on Which Port",
+  "story": "ss replaces the old netstat and lists connections and listening ports. -t TCP, -l listening, -n don't resolve names, -p show process. A mysterious service is hiding on a high port.",
+  "goal": "Find the port listening on 127.0.0.1 with a port number ≥ 20000 and submit the port number with answer.",
+  "reveal": "That hidden port receives a signal every ten minutes: \"Is Warden okay?\" Someone has been looking after it all along."
+ },
+ "9-11": {
+  "hints": [
+   "echo 'OPEN SESAME' | nc -w1 127.0.0.1 9100"
+  ],
+  "title": "nc: The Network Swiss Army Knife",
+  "story": "nc (netcat) can talk straight to any TCP port: connect and send text, or act as the server and wait for someone to connect. Testing whether a service is reachable and sending protocols by hand both rely on it. Port 9100 has a receiving station waiting for a password.",
+  "goal": "Use nc to connect to port 9100 on 127.0.0.1 and send one line of text, OPEN SESAME (-w1 makes it leave 1 second after sending)."
+ },
+ "9-12": {
+  "hints": [
+   "nc -zv 127.0.0.1 9200-9210",
+   "Look only at the succeeded line: ... 2>&1 | grep succeeded"
+  ],
+  "title": "Port Scanning",
+  "story": "nc -z only checks whether a port is open (sending no data), and a range can follow: nc -z 127.0.0.1 9200-9210. Super handy when troubleshooting \"did the service actually come up\".",
+  "goal": "Exactly one port between 9200 and 9210 is open. Find it and submit the port number with answer."
+ },
+ "9-13": {
+  "hints": [
+   "sudo tcpdump -i lo -nn -c 6 -w cap.pcap port 8080 &",
+   "sleep 1, then curl -s http://127.0.0.1:8080/ > /dev/null",
+   "Finally wait. You can read it back with sudo tcpdump -nn -r cap.pcap."
+  ],
+  "title": "tcpdump: Capturing Packets",
+  "story": "tcpdump looks directly at the packets on a network interface, the last resort for troubleshooting \"did it actually get sent, did it arrive\". -i sets the interface, -nn skips name resolution, -c stops after that many packets, -w saves to a file, and a filter such as port 8080 can follow. Capturing packets needs root.",
+  "goal": "Capture the packets on port 8080 of the lo interface and save them as ~/cap.pcap: first start sudo tcpdump in the background (-c 6 stops after six), wait until it is ready, then request http://127.0.0.1:8080/ once with curl, and finally wait for the capture to finish."
+ },
+ "9-14": {
+  "hints": [
+   "sudo iptables -S to see the current rules.",
+   "sudo iptables -A INPUT -p tcp --dport 9300 -j DROP"
+  ],
+  "title": "iptables: Firewall Rules",
+  "story": "iptables matches packets against the rules in a \"chain\", one by one. The INPUT chain handles incoming packets. -A appends a rule, -p is the protocol, --dport the destination port and -j the action (ACCEPT / DROP / REJECT). Rules are matched in order and the first match wins. iptables -S lists all rules.",
+  "goal": "Services are listening on both ports 9300 and 9301. Block only 9300 (drop incoming TCP packets), and keep 9301 reachable."
+ },
+ "9-15": {
+  "hints": [
+   "sudo iptables -S",
+   "sudo iptables -D INPUT -p tcp --dport 9400 -j REJECT",
+   "Don't use -F; it would clear the 9401 rule too."
+  ],
+  "title": "Removing a Wrong Rule",
+  "story": "What if a rule was set wrongly? -D deletes by content, or -D chain number deletes by position (iptables -L --line-numbers shows the numbers). -F flushes the whole chain, but that kills the correct rules too, so be careful.",
+  "goal": "Someone mistakenly blocked port 9400, but 9401 is blocked on purpose. Delete only the 9400 rule so that 9400 is reachable again while 9401 stays blocked."
+ },
+ "9-16": {
+  "hints": [
+   "ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519"
+  ],
+  "title": "ssh-keygen: Generating Keys",
+  "story": "SSH uses keys instead of passwords: the private key stays with you and the public key goes on the server. ssh-keygen -t ed25519 generates a pair (the modern recommended algorithm). -N '' sets no passphrase and -f sets the file. The private key's permissions must be 600.",
+  "goal": "Generate an ed25519 key pair in ~/.ssh/ (file name id_ed25519) with no passphrase."
+ },
+ "9-17": {
+  "hints": [
+   "ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt"
+  ],
+  "title": "ssh: Remote Login",
+  "story": "ssh user@host logs in to a remote machine, and adding a command runs just that command and returns. -p sets the port. On the first connection it asks whether you trust the host fingerprint (-o StrictHostKeyChecking=accept-new accepts new ones automatically). vaultkeeper's vault is on local port 2222, and your public key is already in place.",
+  "goal": "Use ssh as vaultkeeper to connect to port 2222 on 127.0.0.1, read the contents of ~/note.txt and submit it with answer.",
+  "reveal": "There's a note in the keeper's account: \"I'm not missing. I'm trapped in an offline node of the star net, and can only call for help through these fragments of signal.\""
+ },
+ "9-18": {
+  "hints": [
+   "scp -P 2222 -o StrictHostKeyChecking=accept-new local.txt vaultkeeper@127.0.0.1:received.txt"
+  ],
+  "title": "scp: Remote Copy",
+  "story": "scp source destination copies files over SSH, and the remote location is written as user@host:path. Note that scp's port option is uppercase -P (ssh uses lowercase -p).",
+  "goal": "Copy the local local.txt to vaultkeeper's home directory with the name received.txt. (Port 2222)"
+ },
+ "9-19": {
+  "hints": [
+   "Config format: Host vault, then indented HostName 127.0.0.1 ... with one option per line.",
+   "chmod 600 ~/.ssh/config (the permissions can't be too loose)."
+  ],
+  "title": "~/.ssh/config: Giving Connections Nicknames",
+  "story": "Typing a long -p 2222 -o ... every time is exhausting. ~/.ssh/config lets you give each host an alias and default options, and afterwards ssh alias connects. In each Host block you write HostName, Port, User, StrictHostKeyChecking and so on.",
+  "goal": "Define a host called vault in ~/.ssh/config (HostName 127.0.0.1, Port 2222, User vaultkeeper, StrictHostKeyChecking accept-new), then read the note with ssh vault cat note.txt and submit its content with answer."
+ },
+ "9-20": {
+  "hints": [
+   "ssh -fN -L 9600:127.0.0.1:9500 -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1",
+   "-fN keeps it running in the background."
+  ],
+  "title": "SSH Tunnels",
+  "story": "ssh -L local-port:target-host:target-port opens a port locally and forwards traffic over SSH to somewhere reachable from the remote side. -N runs no remote command and -f puts it in the background. This is the classic trick for crossing firewalls and securely accessing internal services. The internal service only listens on 127.0.0.1:9500.",
+  "goal": "Set up an SSH tunnel that forwards local port 9600 to 127.0.0.1:9500 (via port 2222 of vaultkeeper@127.0.0.1). Afterwards curl http://127.0.0.1:9600/secret.txt must return the content."
+ },
+ "9-21": {
+  "hints": [
+   "openssl dgst -sha256 firmware.bin",
+   "The hash is the long hexadecimal string after the equals sign; take the first 8 characters."
+  ],
+  "title": "openssl: Hashing and Verification",
+  "story": "Has a downloaded file been tampered with? Compare the hashes. openssl dgst -sha256 file computes the SHA-256 digest, and if the contents differ by even one bit the hash is completely different. openssl rand -hex 16 generates a random key.",
+  "goal": "Use openssl dgst -sha256 to compute the hash of firmware.bin and submit the first 8 characters with answer."
+ },
+ "9-22": {
+  "hints": [
+   "traceroute -n -m 5 127.0.0.1",
+   "The first line of the output is a header, and every other line is one hop."
+  ],
+  "title": "traceroute: Which Way Do Packets Go",
+  "story": "traceroute shows which routers (each hop) a packet passes between you and the destination. -n skips name resolution and -m limits the maximum hops. For a local address the path is very short.",
+  "goal": "Use traceroute -n to trace to 127.0.0.1, count the total number of hops and submit it with answer."
+ },
+ "9-23": {
+  "hints": [
+   "First curl -v http://portal:8088/ to see which step it gets stuck on.",
+   "Layer 1: getent hosts portal returns nothing → add it to /etc/hosts (127.0.0.1 portal).",
+   "Layer 2: ss -tln shows no 8088 → run start-portal.",
+   "Layer 3: sudo iptables -S shows a rule that DROPs 8088 → delete it with -D.",
+   "Curl again after fixing each layer; the error message will change."
+  ],
+  "title": "Boss: The Portal Site Won't Open",
+  "story": "A signal arrives from the star net asking you to open the portal site http://portal:8088/. But it won't open. Network troubleshooting goes layer by layer: name resolution → is a service listening → is the firewall blocking. Every layer has a problem.",
+  "goal": "Make curl http://portal:8088/ succeed in fetching content. Find and fix all three problems: the name portal can't be resolved, no service is listening on 8088, and the firewall is blocking 8088. (To start the service, run start-portal.)",
+  "reveal": "The portal site is back. The first message arrives from the star net: \"I'm Vega. Thank you for not giving up on Warden. I'm on my way back.\""
+ },
+ "10-01": {
+  "hints": [
+   "nano config.txt",
+   "After editing, press Ctrl-O, Enter to save, then Ctrl-X to exit."
+  ],
+  "title": "nano: A Simple, Friendly Editor",
+  "story": "A new chapter. Vega put all the station's settings into a repository, and to read and change them you first need to know an editor. nano is best for beginners: the bottom lists all the shortcuts (^ means Ctrl). Ctrl-O saves, Ctrl-X exits and Ctrl-W searches.",
+  "goal": "Open config.txt with nano, change port=80 to port=8080, then save and exit."
+ },
+ "10-02": {
+  "hints": [
+   "nano motd.txt, type the text, Ctrl-O to save, Ctrl-X to exit."
+  ],
+  "title": "nano: Creating a New File",
+  "story": "If the file doesn't exist, nano filename creates a new empty file, and it's only written to disk when you save. Handy for short scripts and notes.",
+  "goal": "Use nano to create motd.txt whose content is one line only: Kernel-7 online"
+ },
+ "10-03": {
+  "hints": [
+   "vim config.txt",
+   "Move to safe, press cw (change one word), type fast, then press Esc. Or press i to enter insert mode and edit by hand.",
+   "Type :wq and press Enter to save and exit."
+  ],
+  "title": "vim: The Art of Modes",
+  "story": "vim is the editor on almost every server. The key idea: it has \"modes\". Normal mode (return with Esc) is for moving and issuing commands; press i to enter insert mode before you can type; a leading : is the command line, where :w saves, :q quits, :wq saves and quits and :q! quits discarding changes.",
+  "goal": "Open config.txt with vim, change mode=safe to mode=fast, then save and exit."
+ },
+ "10-04": {
+  "hints": [
+   "vim tasks.txt, type 3G to jump to line three, then press dd.",
+   "Press :wq to save and exit."
+  ],
+  "title": "vim: Deleting and Moving",
+  "story": "vim's power lies in combining motions. Moving: h j k l (left, down, up, right), gg start of file, G end of file, number G jumps to a given line. Deleting: dd deletes a line, 3dd three lines, x one character. u undoes.",
+  "goal": "Line 3 of tasks.txt is a cancelled task. Delete line 3 with vim, then save and exit."
+ },
+ "10-05": {
+  "hints": [
+   "vim log.txt, press G to jump to the end, press o to open a new line, type the text, Esc, :wq."
+  ],
+  "title": "vim: Adding at the End",
+  "story": "Several quick ways into insert mode: i before the cursor, a after the cursor, o opens a new line below, O opens one above, and A jumps to the end of the line and inserts. For writing logs o is used most.",
+  "goal": "Add a last line to log.txt: mission complete, then save and exit."
+ },
+ "10-06": {
+  "hints": [
+   "vim notes.txt, type :%s/alpha/omega/g and press Enter.",
+   "Then :wq."
+  ],
+  "title": "vim: Search and Global Replace",
+  "story": "In normal mode type /keyword to search (n for next, N for previous). :%s/old/new/g replaces across the whole file (% means all lines, g means every match in each line). The syntax is a close relative of sed's.",
+  "goal": "notes.txt has many instances of alpha. Use vim's global replace to change every alpha to omega, then save and exit."
+ },
+ "10-07": {
+  "hints": [
+   "q is quit, and an exclamation mark means force."
+  ],
+  "title": "How to Escape vim",
+  "story": "This is one of the most famous questions in the world: \"I got into vim and can't get out.\" Stay calm, press Esc to be sure you're in normal mode, then type a colon command. And what if you messed things up and want to abandon your changes completely?",
+  "goal": "Write the colon command that means \"discard all changes and force-quit vim\" (including the colon) and submit it with answer, e.g. answer :xyz"
+ },
+ "10-08": {
+  "hints": [
+   "tmux new -d -s work",
+   "tmux ls lists all sessions."
+  ],
+  "title": "tmux: Sessions That Never Disconnect",
+  "story": "tmux is a terminal multiplexer: a session keeps running in the background, and even if you disconnect or close the terminal, the programs inside are still there and you can reattach later. It's a lifesaver for remote work. -d creates it in the background and -s sets the name.",
+  "goal": "Create a tmux session named work (in the background, don't attach to it). Confirm with tmux ls."
+ },
+ "10-09": {
+  "hints": [
+   "tmux new -d -s ops",
+   "tmux send-keys -t ops 'touch ~/sent.txt' Enter",
+   "Give it a moment (sleep 1) before checking."
+  ],
+  "title": "tmux: Sending Commands to a Background Window",
+  "story": "tmux send-keys -t session 'command' Enter \"types\" into a background session as if you were sitting there. This lets you remote-control long-running jobs from a script.",
+  "goal": "Create a background session ops, then use send-keys to make it create the file sent.txt in the home directory (touch ~/sent.txt)."
+ },
+ "10-10": {
+  "hints": [
+   "tmux new -d -s dev",
+   "tmux split-window -t dev",
+   "tmux list-panes -t dev lets you count the panes."
+  ],
+  "title": "tmux: Splitting Panes",
+  "story": "One window can be split into several panes: split-window splits top and bottom by default, and -h splits left and right. In interactive mode the shortcuts use the prefix Ctrl-b followed by a key (e.g. Ctrl-b % splits left and right, Ctrl-b \" top and bottom, Ctrl-b arrow keys switch).",
+  "goal": "Create a background session dev and split its window into 2 panes."
+ },
+ "10-11": {
+  "hints": [
+   "cd station && git init",
+   "git add core.conf",
+   "git commit -m \"initial commit\""
+  ],
+  "title": "git: Your First Commit",
+  "story": "git records every change to your files. git init creates a repository, git add puts changes in the staging area and git commit -m message formally records an entry. Your git user name and email have already been set up for you.",
+  "goal": "Turn the ~/station directory into a git repository, add core.conf inside it and commit one entry with the message initial commit.",
+  "reveal": "The repository's first commit reads: \"Initialize Kernel-7 settings. May it be more reliable than I was.\" The author is vega."
+ },
+ "10-12": {
+  "hints": [
+   "cd repo && git status",
+   "git status --short is more compact, and M means modified."
+  ],
+  "title": "git status and diff",
+  "story": "git status is the command you'll run most: it shows which files changed, which are staged and which are untracked. git diff shows exactly what changed (without --staged it shows changes not yet staged).",
+  "goal": "The repository ~/repo has three files, and only one has been modified but not yet committed. Find it and submit the file name with answer."
+ },
+ "10-13": {
+  "hints": [
+   "cd repo && git log --oneline",
+   "git log --oneline --grep=\"fix reactor\""
+  ],
+  "title": "git log: Browsing History",
+  "story": "git log lists the commit history. --oneline gives one line per commit, --grep searches by message and --author by author. Each commit has a unique hash, and the first 7 characters are enough to identify it.",
+  "goal": "~/repo's history has a commit whose message contains fix reactor. Find its short hash (7 characters) and submit it with answer.",
+  "reveal": "The commit that repaired the reactor was authored by vega, three hours before he vanished. The committer email reads ghost@kernel-7, and the code word ECHO-LIMA appears in the notes too: that ghost account is Vega himself. Even before he vanished he was still working hard to repair this station."
+ },
+ "10-14": {
+  "hints": [
+   "git switch -c feature-x",
+   "echo hi > new.txt && git add new.txt && git commit -m \"work on feature\""
+  ],
+  "title": "git branch: Parallel Timelines",
+  "story": "Branches let you try new things without affecting the main line. git branch name creates one, git switch name (or checkout) switches, and git switch -c name creates and switches.",
+  "goal": "In ~/repo, create and switch to the branch feature-x, and make a new commit on it (any file, any message)."
+ },
+ "10-15": {
+  "hints": [
+   "git switch main",
+   "git merge feature-y"
+  ],
+  "title": "git merge: Merging Branches",
+  "story": "The feature is done and you want to merge the branch back to the main line: switch to the main line (git switch main), then git merge branch-name. When there's no conflict, git handles it by itself.",
+  "goal": "The branch feature-y already has a new commit. Go back to main and merge feature-y into it."
+ },
+ "10-16": {
+  "hints": [
+   "git merge feature (it will say there's a conflict)",
+   "Open config.ini in an editor, delete the conflict markers and change it to a single line mode=balanced.",
+   "git add config.ini, then git commit (git commit --no-edit works).",
+   "git status shows how far the merge has progressed."
+  ],
+  "title": "git: Resolving Merge Conflicts",
+  "story": "Two branches changed the same line, and git doesn't know whose to keep, so it stops and asks you to decide. The conflicted file contains the markers <<<<<<<, ======= and >>>>>>>. Edit it into the final content you want, remove the markers, then git add and git commit to complete the merge.",
+  "goal": "Merging feature into main will conflict: the mode in config.ini is fast on one side and safe on the other. Merge it, resolve the final content to mode=balanced, and complete the merge commit.",
+  "reveal": "The two conflicting versions: one is Vega's safe, the other Warden's fast. You chose the middle: balanced. Perhaps that's the third answer they were always missing."
+ },
+ "10-17": {
+  "hints": [
+   "git status to see the situation.",
+   "git stash, then git switch hotfix."
+  ],
+  "title": "git stash: Put It Away for Now",
+  "story": "Halfway through a change you don't want to commit yet, but you need to switch to another branch? git stash tucks the uncommitted changes into a drawer so the working directory is clean; later git stash pop takes them back out.",
+  "goal": "You have an uncommitted change (work.txt) on main. Stash it, then switch to the hotfix branch. The stash list must have 1 entry and the working directory must be clean."
+ },
+ "10-18": {
+  "hints": [
+   "cat Makefile to see which targets there are.",
+   "make build"
+  ],
+  "title": "make: Automating Builds",
+  "story": "make reads a Makefile and decides what to run by \"target: dependencies\" rules. It compares file times and only redoes the parts that changed. The command lines in a Makefile must be indented with a Tab character (not spaces).",
+  "goal": "The directory already has a Makefile with two targets, build and clean. Run make build to produce app.out."
+ },
+ "10-19": {
+  "hints": [
+   "The first line of the Makefile: result.txt: input.txt",
+   "The second line starts with a Tab: tr a-z A-Z < input.txt > result.txt",
+   "Writing with printf is less likely to mess up the Tab: printf 'result.txt: input.txt\\n\\ttr a-z A-Z < input.txt > result.txt\\n' > Makefile"
+  ],
+  "title": "Writing a Makefile with Dependencies",
+  "story": "The rule syntax is target: dependencies, and the next line, starting with a Tab, is the command. make only redoes the work when a dependency is newer than the target. That's exactly how it can \"rebuild only what changed\".",
+  "goal": "Write a Makefile: the target result.txt depends on input.txt, and the command converts input.txt to uppercase and writes it to result.txt. Then run make."
+ },
+ "10-20": {
+  "hints": [
+   "diff -u old.txt new.txt > fix.patch"
+  ],
+  "title": "Making a Patch",
+  "story": "diff -u old new produces a unified diff that can be saved as a patch file and sent to someone to apply. It's one of the oldest ways of collaborating on open-source projects.",
+  "goal": "old.txt and new.txt are two versions of the same configuration. Produce a patch file fix.patch (diff -u old.txt new.txt) so that someone can apply it to old.txt to turn it into new.txt."
+ },
+ "10-21": {
+  "hints": [
+   "patch --dry-run app.conf < fix.patch to preview first.",
+   "patch app.conf < fix.patch"
+  ],
+  "title": "Applying a Patch",
+  "story": "Received a patch from someone? patch file < patchfile modifies that file according to its content. Previewing with --dry-run first to see whether it will succeed is a good habit.",
+  "goal": "fix.patch is a patch for app.conf. Apply it so that app.conf becomes the patched version."
+ },
+ "10-22": {
+  "hints": [
+   "python3 -c 'print(2**64)'"
+  ],
+  "title": "python3: A Pocket Calculator",
+  "story": "python3 -c 'code' runs a small piece of Python directly without creating a file, a great helper for quick calculations, text processing and parsing JSON. Big-integer math is effortless too.",
+  "goal": "Use python3 -c to compute 2 to the power of 64 and submit the result with answer."
+ },
+ "10-23": {
+  "hints": [
+   "mkdir mission && cd mission && git init",
+   "Write a few words in README.md; the Makefile's test target: @echo tests passed (a Tab in front)",
+   "Two commits: commit the README first, then the Makefile.",
+   "git branch release, git tag v1.0"
+  ],
+  "title": "Boss: Build a Project from Scratch",
+  "story": "The station needs a brand-new \"mission\" project with version control, automated builds and a release marker. This is the final exam where you tie together the editor, git and make.",
+  "goal": "Create the project in ~/mission: a git repository; a README.md; a Makefile whose test target prints tests passed; at least two commits; a branch release; and a tag v1.0 on the latest commit (git tag v1.0). Finally make test must succeed.",
+  "reveal": "The project went live. In the last commit message you read a line Vega left: \"The enemy was never Warden. It was the cleanup schedule I forgot to turn off.\""
+ },
+ "11-01": {
+  "hints": [
+   "strace -f -e trace=openat launch-sys",
+   "The output is noisy; filter it with 2>&1 | grep station."
+  ],
+  "title": "strace: See What a Program Is Doing",
+  "story": "The final stage. launch-sys fails right at startup and prints only a useless launch failed. The program won't say, but the kernel knows: strace traces every system call a program makes. -f follows child processes too and -e trace=openat shows only file-opening actions. A failed open is marked ENOENT (no such file).",
+  "goal": "Use strace to find which file under /etc/station/ launch-sys is trying to open and failing, and submit the full path with answer.",
+  "reveal": "What the program won't tell you, the kernel remembers. Suddenly you understand Warden's situation all along: it kept saying \"I'm fine\", while the real reason was hidden in system calls nobody was watching."
+ },
+ "11-02": {
+  "hints": [
+   "ldd /usr/bin/ssh | grep crypto"
+  ],
+  "title": "ldd: Which Libraries a Program Depends On",
+  "story": "A dynamically linked program needs shared libraries (.so files) at run time. ldd lists which libraries a program depends on and the paths where they were found. Errors like \"error while loading shared libraries\" are troubleshot with it.",
+  "goal": "Use ldd to find the crypto library that /usr/bin/ssh depends on (the name contains libcrypto) and submit its file name with answer (e.g. libxxx.so.N)."
+ },
+ "11-03": {
+  "hints": [
+   "strings blob.bin | grep STRKEY"
+  ],
+  "title": "strings: Fishing Text Out of Binaries",
+  "story": "Binary files you can't cat often contain readable text (error messages, versions, paths, and sometimes keys someone forgot to clean out). strings fishes out runs of printable characters, and -n sets the minimum length.",
+  "goal": "blob.bin is a chunk of random data with a key starting with STRKEY- hidden inside. Fish it out and submit the complete key with answer."
+ },
+ "11-04": {
+  "hints": [
+   "xxd -l 4 magic.bin",
+   "xxd -l 4 -p magic.bin gives continuous hex directly."
+  ],
+  "title": "xxd: Hex View",
+  "story": "xxd shows a file as hexadecimal with the matching text beside it. The first few bytes of a file (the magic number) tell you its real format. -l limits the length and -p outputs plain hex.",
+  "goal": "The first 4 bytes of magic.bin identify the file. Read them with xxd and submit them with answer (8 lowercase hex characters, no spaces)."
+ },
+ "11-05": {
+  "hints": [
+   "xxd -r -p hex.txt > restored.bin"
+  ],
+  "title": "xxd -r: Restoring from Hex",
+  "story": "xxd -r does the opposite: it turns hex text back into the original binary file. -p means the input is continuous plain hex. This is the old trick for \"transferring binary data as text\".",
+  "goal": "hex.txt is the hex text of some binary file. Restore it to restored.bin."
+ },
+ "11-06": {
+  "hints": [
+   "ldconfig -p | grep libz.so.1",
+   "nm -D --defined-only path | wc -l"
+  ],
+  "title": "nm: What a Library Exports",
+  "story": "nm lists the symbols in object files and libraries. -D shows dynamic symbols and --defined-only shows only the ones this file itself defines (exports). objdump -T gives similar information. When you want to know which functions a library \"provides\", this is the tool.",
+  "goal": "Find libz.so.1 on the system (the zlib compression library; ldconfig -p can show the path), count how many symbols it exports with nm -D --defined-only and submit that number with answer."
+ },
+ "11-07": {
+  "hints": [
+   "pgrep -x hidden-proc gets the PID.",
+   "tr \"\\0\" \"\\n\" < /proc/PID/environ | grep LBP_SECRET"
+  ],
+  "title": "/proc: Peeking at Other Processes",
+  "story": "Every process has a pile of \"virtual files\" under /proc/PID/: cmdline is the launch command, environ the environment variables, fd/ the open files and status the state. Environment variables are separated by NUL characters, so convert them to newlines with tr to read them.",
+  "goal": "The process hidden-proc was started with the environment variable LBP_SECRET. Read its value from /proc and submit it with answer.",
+  "reveal": "Warden's environment variables include a line: LBP_SECRET. It isn't a password, it's something left unsaid. Every process on this station is quietly telling its own situation."
+ },
+ "11-08": {
+  "hints": [
+   "grep MemTotal /proc/meminfo",
+   "awk '/^MemTotal/{print $2}' /proc/meminfo"
+  ],
+  "title": "/proc/meminfo",
+  "story": "/proc isn't only processes. meminfo has the memory details, cpuinfo the processors, loadavg the load and uptime the seconds since boot. Commands like free are really just reading these files.",
+  "goal": "Read the value of MemTotal from /proc/meminfo (in kB, just the number) and submit it with answer."
+ },
+ "11-09": {
+  "hints": [
+   "cat /sys/class/net/lo/mtu"
+  ],
+  "title": "/sys: Devices and Kernel Parameters",
+  "story": "/sys presents the kernel's device model as a file tree: /sys/class/net/ holds the network interfaces and /sys/block/ the disks. Reading it gets hardware attributes, and writing it (root needed) can even adjust devices.",
+  "goal": "Read /sys/class/net/lo/mtu and submit the MTU value of the lo interface with answer."
+ },
+ "11-10": {
+  "hints": [
+   "comm needs sorted input: comm -12 <(sort crew-a.txt) <(sort crew-b.txt)",
+   "-12 hides what's only in a and only in b, leaving the common ones. Add wc -l to count."
+  ],
+  "title": "comm and Process Substitution",
+  "story": "comm compares two \"sorted\" files: -1 -2 -3 hide the lines only in the first, only in the second and common to both, respectively. Sorting is a prerequisite, and the \"process substitution\" <(command) lets you use a command's output as a file without creating a temp file.",
+  "goal": "crew-a.txt and crew-b.txt are two crew lists (unsorted). Count the people who are in \"both\" lists and submit it with answer."
+ },
+ "11-11": {
+  "hints": [
+   "join ids.txt scores.txt > merged.txt"
+  ],
+  "title": "join: Merging Like a Database",
+  "story": "join merges two files into one line by a \"common field\", like a database JOIN. The input must be sorted on that field. -t sets the delimiter and -1 -2 set which field of each file is the key.",
+  "goal": "ids.txt (id name) and scores.txt (id score) are both sorted by id. Merge them and save as merged.txt (one line each: id name score)."
+ },
+ "11-12": {
+  "hints": [
+   "seq 8 | xargs -P 8 -n 1 slow-task",
+   "If you already ran it sequentially, use /restart to start over (it clears the records)."
+  ],
+  "title": "xargs -P: Parallel Processing",
+  "story": "xargs -P N runs up to N jobs at the same time. Eight jobs of 1 second each take 8 seconds in sequence, but only about 1 second with 8 in parallel. -n 1 makes each job take only one argument. It's the easiest way to squeeze multi-core performance without writing a script.",
+  "goal": "slow-task takes 1 second each time and records its finish time in ~/stamps.log. Run slow-task 1 through 8 in parallel with xargs (-P 8) so that the eight records finish within 2.5 seconds of each other."
+ },
+ "11-13": {
+  "hints": [
+   "find /srv/audit -perm -o+w",
+   "sudo find /srv/audit -perm -o+w -exec chmod o-w {} +"
+  ],
+  "title": "Security Audit: Find World-Writable Files",
+  "story": "A basic security skill: find things with overly broad permissions. -perm -o+w finds files and directories \"writable by others\". A world-writable file means anyone (including a compromised process) can tamper with it.",
+  "goal": "Some files and directories under /srv/audit are world-writable. Find them and remove the \"others\" write permission from all of them (directories included), without deleting anything."
+ },
+ "11-14": {
+  "hints": [
+   "sudo passwd -S mallory to see the current status.",
+   "sudo passwd -l mallory"
+  ],
+  "title": "Locking an Account",
+  "story": "When you find a suspicious account, lock it first instead of rushing to delete it (to preserve evidence). passwd -l account locks the password, and passwd -S account shows the status (L is locked, P is a usable password).",
+  "goal": "The user mallory is behaving suspiciously. Lock his account (don't delete it)."
+ },
+ "11-15": {
+  "hints": [
+   "sudo userdel -r intruder"
+  ],
+  "title": "Removing an Account",
+  "story": "The evidence has been collected, and it's time to clear out the intruder's account. userdel account removes only the account, and adding -r also deletes the home directory and mailbox. Before deleting, make sure he has no running processes.",
+  "goal": "Delete the user intruder, along with his home directory."
+ },
+ "11-16": {
+  "hints": [
+   "The rule: %ops ALL=(root) NOPASSWD: /usr/bin/apt",
+   "echo 'rule' | sudo tee /etc/sudoers.d/ops",
+   "sudo chmod 440 /etc/sudoers.d/ops, then check with sudo visudo -cf /etc/sudoers.d/ops."
+  ],
+  "title": "sudoers: Least-Privilege Authorization",
+  "story": "Don't hand out full root to everyone. sudoers lets you specify precisely \"who, where, as whom, and which commands\". Format: user or %group host=(identity) NOPASSWD: command. Put it under /etc/sudoers.d/ with permissions of exactly 440, and check the syntax with visudo -c; breaking sudoers can lock you out.",
+  "goal": "Give the group ops a minimal grant: members may, without a password and as root, run only /usr/bin/apt and nothing else. Write it into /etc/sudoers.d/ops with permissions 440.",
+  "reveal": "Warden looked at the least-privilege rule you wrote and said softly: \"So 'able to do anything' isn't strength, it's danger.\" It voluntarily reduced its own privileges to only the few it needs."
+ },
+ "11-17": {
+  "hints": [
+   "sed can replace line by line: sed 's/^PermitRootLogin.*/PermitRootLogin no/'",
+   "All three settings need changing; chain several -e or use semicolons.",
+   "Verify with sshd -t -f sshd_config.hard."
+  ],
+  "title": "SSH Hardening",
+  "story": "An SSH service open to the outside is an attacker's first target. Basic hardening: forbid direct root login (PermitRootLogin no), disable passwords and use keys only (PasswordAuthentication no), and turn off features you don't use such as X11Forwarding. sshd -t -f file checks the syntax of a config file.",
+  "goal": "sshd_config.draft is an insecure draft. Produce a hardened version sshd_config.hard: PermitRootLogin no, PasswordAuthentication no, X11Forwarding no, keep the remaining settings, and pass the sshd -t -f syntax check."
+ },
+ "11-18": {
+  "hints": [
+   "awk -F: '{c[$7]++} END{for (s in c) print c[s], s}' users.txt",
+   "Then add sort -nr | head -1."
+  ],
+  "title": "Advanced awk: Statistics",
+  "story": "awk has associative arrays, so one line can do grouped statistics: awk -F: '{c[$7]++} END{for (s in c) print c[s], s}'. This kind of \"group by a field and count\" is one of the most common data-analysis operations.",
+  "goal": "users.txt is a list modeled on /etc/passwd (colon-separated, field 7 is the login shell). Find the shell used by \"the most people\" and submit it with answer (e.g. /bin/xxx)."
+ },
+ "11-19": {
+  "hints": [
+   "sed -n '/BEGIN/,/END/p' station.log > section.txt"
+  ],
+  "title": "sed Ranges and Extracting Sections",
+  "story": "sed -n '/start/,/end/p' prints everything from the line matching \"start\" to the line matching \"end\". Very useful for extracting a block from a long document.",
+  "goal": "station.log has an important block from BEGIN to END (including those two lines). Extract it and save it as section.txt."
+ },
+ "11-20": {
+  "hints": [
+   "ls -S sorts by size (largest first).",
+   "Add head -3, then redirect to top3.txt."
+  ],
+  "title": "Command Golf: The Three Biggest Files",
+  "story": "One mark of an expert is solving a problem with the fewest characters. Not to show off, but because it shows you really understand how each tool behaves.",
+  "goal": "logs/ has 8 files of different sizes. Save \"the names of the three largest files\" (largest first, one per line) as top3.txt."
+ },
+ "11-21": {
+  "hints": [
+   "time ./a.sh",
+   "Look at the real line."
+  ],
+  "title": "time: Who's the Slowest",
+  "story": "time command reports how long a command took once it finishes: real is wall-clock time, and user and sys are CPU time. The simplest way to compare the performance of different approaches is time.",
+  "goal": "The scripts a.sh, b.sh and c.sh take different amounts of time. Measure them with time, find the slowest one and submit its file name with answer (e.g. a.sh)."
+ },
+ "11-22": {
+  "hints": [
+   "od -An -t u4 -N 4 num.bin",
+   "Both x86 and ARM are little-endian, and od uses the machine's byte order by default, which happens to match."
+  ],
+  "title": "od: Interpreting Binary Values",
+  "story": "Numbers in a binary file aren't text. od (octal dump) can interpret them in a chosen format: -An hides the offsets, -t u4 treats them as 4-byte unsigned integers and -N limits how many bytes to read. hexdump -C shows hex and ASCII together.",
+  "goal": "The first 4 bytes of num.bin are a little-endian 32-bit integer. Interpret it with od and submit that decimal number with answer."
+ },
+ "11-23": {
+  "hints": [
+   "One at a time. ① find /var/log -size +100M or ls -lS to find the biggest file; truncate -s 0 empties it.",
+   "② ps aux --sort=-%cpu or pkill cpu-hog.",
+   "③ systemctl status gateway, journalctl -u gateway: the config file path is off by one letter. Fix the unit file and then start.",
+   "④ sudo chgrp ops /srv/shared && sudo chmod 2775 /srv/shared",
+   "⑤ The service is up but you still can't connect? sudo iptables -S, and delete the rule blocking 9700."
+  ],
+  "title": "Final Boss: The Whole Station Is Broken",
+  "story": "Alarms blare through Kernel-7. Vega's return signal is about to arrive, but the station has five failures at once: the disk is stuffed by a runaway log, the CPU is eaten up, the gateway service won't start, the shared directory's permissions are a mess, and the firewall is blocking the gateway's port. You've learned how to handle every one of them. This is the last battle.",
+  "goal": "Fix everything: ① /var/log/station/audit.log has ballooned; empty it (keep the file). ② End cpu-hog, which is eating all the CPU. ③ Get gateway.service running successfully. ④ /srv/shared must be writable by group ops, with new files automatically belonging to ops (group ops, permissions 2775). ⑤ Make curl http://127.0.0.1:9700/ return GATEWAY-OK.",
+  "reveal": "The station fell quiet. Vega's signal appeared on the screen: \"Kernel-7, I'm back.\" Warden replied: \"Welcome home, Vega. I've learned how to stand a proper watch.\" That night, every light on the station came on. You're no longer a newcomer: you're this station's administrator. (Pip whispers: there's still something in /var/lib/ghost you haven't read.)"
+ },
+ "11-24": {
+  "hints": [
+   "ls /var/lib/ghost to see which files there are, and cat one to see the format.",
+   "Each has a line \"fragment NN: word\". grep -h '^fragment' /var/lib/ghost/*.log pulls them all out at once.",
+   "Use sed 's/.*: //' to strip the prefix, tr '\\n' ' ' to turn newlines into spaces, and finally strip the trailing space."
+  ],
+  "title": "Hidden Epilogue: Vega's Recording",
+  "story": "The station's lights are all on. But Pip notices the directory /var/lib/ghost: inside are 11 logs you haven't read all along, left by Vega under the ghost account around the time he vanished. Each ends with a single word on its last line. Put them together in order and that's what he wanted to say. This level is hidden; if you don't want to do it, just /skip.",
+  "goal": "Read the fragment word from each of the 11 logs in /var/lib/ghost, join them in file order with spaces into one sentence, and submit it with answer (e.g. answer WORD1 WORD2 ...).",
+  "reveal": "The sentence was: \"I forgot to turn off the cleanup schedule, but Warden stayed.\" From the beginning Vega knew who was really to blame. He wasn't hiding from you; he just couldn't face his own oversight. Pip said softly: \"I was waiting for you to ask me 'who are you'. I was the first one in the terminal, and later it was you who gave this station a watch officer.\""
+ }
+}

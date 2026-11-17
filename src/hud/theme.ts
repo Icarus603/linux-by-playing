@@ -1,3 +1,4 @@
+import { T } from '../i18n'
 // 色調：寶藍 → 天藍 → 淡冰藍的漸層。數值取「偏綠版」與「偏紫版」的中間值。金色只用在任務卡與重點。
 export const C = {
   royal: '#2878E8', // 寶藍
@@ -31,11 +32,11 @@ export const C = {
 export const GRADIENT = [C.royal, C.sky, C.ice] as const
 
 export const PRAISE = [
-  '漂亮！這招你已經會用了。',
-  '乾淨俐落，連我都學到了。',
-  '過關！引擎室的燈亮了。',
-  '就是這樣！下一個挑戰在等你。',
-  '不錯喔，指令感越來越好了。',
+  T('漂亮！這招你已經會用了。'),
+  T('乾淨俐落，連我都學到了。'),
+  T('過關！引擎室的燈亮了。'),
+  T('就是這樣！下一個挑戰在等你。'),
+  T('不錯喔，指令感越來越好了。'),
 ]
 
 const hex = (s: string): [number, number, number] => [

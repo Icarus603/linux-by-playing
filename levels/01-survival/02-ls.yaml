@@ -10,7 +10,7 @@ hints:
 setup: |
   cd /home/player
   mkdir -p logbook tools
-  echo "歡迎來到 Kernel-7" > welcome.txt
+  if [ "${LBP_LANG:-}" = en ]; then echo "Welcome to Kernel-7" > welcome.txt; else echo "歡迎來到 Kernel-7" > welcome.txt; fi
 check: |
   [[ "$LBP_LAST" == "ls" ]]
 solution: |

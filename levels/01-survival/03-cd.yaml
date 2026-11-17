@@ -10,7 +10,7 @@ hints:
   - "你現在在家目錄，logbook 就在這裡，直接 cd logbook。"
 setup: |
   mkdir -p /home/player/logbook
-  echo "今日無異常。" > /home/player/logbook/entry-000.txt
+  if [ "${LBP_LANG:-}" = en ]; then echo "No anomalies today." > /home/player/logbook/entry-000.txt; else echo "今日無異常。" > /home/player/logbook/entry-000.txt; fi
 check: |
   [[ "$LBP_CWD" == /home/player/logbook ]]
 solution: |

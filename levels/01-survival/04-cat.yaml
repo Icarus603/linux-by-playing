@@ -12,7 +12,11 @@ hints:
 setup: |
   code="NOVA-$((RANDOM % 9000 + 1000))"
   mkdir -p /home/player/logbook /var/lib/lbp
-  printf '航行日誌 #1\n今日補給完成。\n通行碼：%s\n備註：請勿外流。\n' "$code" > /home/player/logbook/entry-001.txt
+  if [ "${LBP_LANG:-}" = en ]; then
+    printf 'Flight Log #1\nSupplies restocked today.\nAccess code: %s\nNote: do not leak.\n' "$code" > /home/player/logbook/entry-001.txt
+  else
+    printf '航行日誌 #1\n今日補給完成。\n通行碼：%s\n備註：請勿外流。\n' "$code" > /home/player/logbook/entry-001.txt
+  fi
   echo "$code" > /var/lib/lbp/answer
   chmod 600 /var/lib/lbp/answer
 check: |
@@ -22,4 +26,4 @@ check: |
 reveal: "Vega 的最後一則日誌寫著：「Warden 開始不聽話了。如果有人讀到這個，別相信它的狀態報告。」站上自己的 AI，為什麼要提防它？"
 solution: |
   cat entry-001.txt
-  answer "$(grep 通行碼 entry-001.txt | sed 's/.*：//')"
+  answer "$(grep -E '通行碼|Access code' entry-001.txt | sed 's/^[^:：]*[:：] *//')"

@@ -10,7 +10,7 @@ hints:
   - "隱藏檔叫 .access-token，用 cat .access-token 讀它。"
 setup: |
   cd /home/player
-  echo "普通檔案" > readme.txt
+  if [ "${LBP_LANG:-}" = en ]; then echo "Ordinary file" > readme.txt; else echo "普通檔案" > readme.txt; fi
   t="TOKEN-$((RANDOM % 9000 + 1000))"
   echo "$t" > .access-token
   mkdir -p /var/lib/lbp && echo "$t" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer

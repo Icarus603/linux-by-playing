@@ -2,6 +2,7 @@ import React from 'react'
 import { Ansi, Box, Text } from './ink'
 import { C } from './theme'
 import type { Entry } from './store'
+import { t } from '../i18n'
 
 const MAX_VISIBLE_LINES = 300
 const shortCwd = (cwd: string): string => (cwd === '/home/player' ? '~' : cwd.replace(/^\/home\/player\//, '~/'))
@@ -34,7 +35,7 @@ export const CmdBlock = React.memo(function CmdBlock({
           {cmd}
         </Text>
       </Text>
-      {(hidden > 0 || dropped > 0) && <Text color={C.dim}>… 前面省略 {hidden + dropped} 行</Text>}
+      {(hidden > 0 || dropped > 0) && <Text color={C.dim}>{t`… 前面省略 ${hidden + dropped} 行`}</Text>}
       {shown.map((l, i) => (
         <Text key={i}>{l === '' ? ' ' : <Ansi>{l}</Ansi>}</Text>
       ))}
@@ -45,7 +46,7 @@ export const CmdBlock = React.memo(function CmdBlock({
         </Text>
       ))}
       {!done && lines.length === 0 && <Text color={C.dim}>…</Text>}
-      {done && rc !== null && rc !== 0 && <Text color={C.err}>✗ 結束碼 {rc}</Text>}
+      {done && rc !== null && rc !== 0 && <Text color={C.err}>{t`✗ 結束碼 ${rc}`}</Text>}
     </Box>
   )
 })

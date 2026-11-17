@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { goto, hint, listLevels, resetLevel, setAnswer, skip, tick, verify } from './engine/game'
+import { goto, hint, listLevels, resetLevel, setAnswer, skip, stripMark, tick, verify } from './engine/game'
 import { LEVELS_DIR, loadCatalog } from './engine/levels'
 
 const [cmd, ...args] = process.argv.slice(2)
@@ -12,13 +12,13 @@ async function main(): Promise<number> {
       process.stdout.write(tick(process.env.LBP_LAST ?? '', process.env.LBP_CWD ?? '', process.env.LBP_RC ?? '0'))
       return 0
     case 'hint':
-      console.log(hint())
+      console.log(stripMark(hint()))
       return 0
     case 'skip':
-      console.log(skip())
+      console.log(stripMark(skip()))
       return 0
     case 'goto':
-      console.log(goto(args[0] ?? ''))
+      console.log(stripMark(goto(args[0] ?? '')))
       return 0
     case 'reset':
       console.log(resetLevel())

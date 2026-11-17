@@ -1,12 +1,12 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { continueGame, goto, resetProgress, hint, nextLevelCmd, prevLevel, resetLevel, skip, tick } from '../engine/game'
+import { ERR, HINT_OK, continueGame, goto, resetProgress, hint, nextLevelCmd, prevLevel, resetLevel, skip, stripMark, tick } from '../engine/game'
 import { badgeName, BADGES } from '../engine/badges'
 import { loadCatalog, stageOf } from '../engine/levels'
 import { SAVE_DIR, loadState, rankOf } from '../engine/state'
 import type { GameEvent, State } from '../engine/types'
 import { setClipboard } from './ink'
-import { type Activity, ask as askPip, warmup as warmupLlm } from '../ask/answer'
+import { type Activity, ask as askPip, resetChat, warmup as warmupLlm } from '../ask/answer'
 import { isNaturalLanguage } from '../ask/route'
 import { OutBuf } from '../shell/outbuf'
 import { PtyShell, type PromptInfo } from '../shell/ptyshell'
@@ -14,6 +14,7 @@ import type { PipPose } from './Pip'
 import { PRAISE } from './theme'
 import { SLASH_NAMES, runSlash } from './slash'
 import { Store, type Entry } from './store'
+import { LANGS, currentLang, setLang, t, tr, trFeedback, type Lang } from '../i18n'
 
 const RC = process.env.LBP_RC ?? '/game/player.bashrc'
 const HOME = '/home/player'
@@ -54,6 +55,11 @@ export class Controller {
   answering = false
   /** Pip 目前說的話（固定位置、打字機效果） */
   speech: Speech | null = null
+  /** 語言選單（第一次啟動一定會出現；之後用 /language） */
+  langPickerOpen = false
+  langSel = 0
+  langFirst = false
+  private pendingBoot: (() => void) | null = null
   /** 關卡選單 */
   pickerOpen = false
   /** 短暫的狀態訊息（例如「已複製 N 字」） */
@@ -152,8 +158,8 @@ export class Controller {
     this.speak([
       {
         text: this.game.hard
-          ? '卡住了嗎？困難模式沒有提示，不過 /explain 還是可以問我，實在不行就 /skip。'
-          : '卡住了嗎？別急。輸入 /hint 看提示（會少拿一點 XP），或 /explain 讓我解釋這關用到的指令。',
+          ? t('卡住了嗎？困難模式沒有提示，不過 /explain 還是可以問我，實在不行就 /skip。')
+          : t('卡住了嗎？別急。輸入 /hint 看提示（會少拿一點 XP），或 /explain 讓我解釋這關用到的指令。'),
         pose: 'worry',
         tone: 'plain',
       },
@@ -201,9 +207,18 @@ export class Controller {
     if (!this.ready) {
       this.ready = true
       setTimeout(() => void warmupLlm(), 6000).unref?.()
-      this.welcome()
-      this.afterCommand('', info)
-      this.changed()
+      const boot = (): void => {
+        this.welcome()
+        this.afterCommand('', info)
+        this.changed()
+      }
+      if (currentLang() === null) {
+        // 第一次啟動：先選語言，選完才開始遊戲
+        this.pendingBoot = boot
+        this.openLangPicker(true)
+        return
+      }
+      boot()
       return
     }
     const e = this.running
@@ -248,7 +263,7 @@ export class Controller {
     }
     // 一般模式一律是 shell 指令；自然語言要先輸入 ! 進入聊天模式。看起來像在聊天時，Pip 提醒一下
     if (!multi && isNaturalLanguage(line)) {
-      this.speak([{ text: '看起來你是想跟我聊天？先輸入 ! 進入聊天模式（輸入框會變藍色），再用自然語言問我；Esc 回到指令模式。', pose: 'think', tone: 'info' }])
+      this.speak([{ text: t('看起來你是想跟我聊天？先輸入 ! 進入聊天模式（輸入框會變藍色），再用自然語言問我；Esc 回到指令模式。'), pose: 'think', tone: 'info' }])
       return
     }
 
@@ -284,10 +299,10 @@ export class Controller {
       /\bmkfs/.test(line) ||
       /chmod\s+-R\s+\S+\s+\/(\s|$)/.test(line)
     if (danger) {
-      this.store.push({ kind: 'note', text: `✋ Pip 攔下了：${line}`, tone: 'warn' })
+      this.store.push({ kind: 'note', text: t`✋ Pip 攔下了：${line}`, tone: 'warn' })
       this.speak([
         {
-          text: '等等等等！！這個指令會把整個空間站（的檔案系統）一起刪光。我先幫你攔下來了。\n真正的管理員會先 ls 看清楚、再動手。',
+          text: t('等等等等！！這個指令會把整個空間站（的檔案系統）一起刪光。我先幫你攔下來了。\n真正的管理員會先 ls 看清楚、再動手。'),
           pose: 'worry',
           tone: 'plain',
         },
@@ -295,7 +310,7 @@ export class Controller {
       return true
     }
     if (/^\s*sudo\s+make\s+me\s+a\s+sandwich/i.test(line)) {
-      this.speak([{ text: '好吧，這次有 sudo，我破例！（企鵝遞來一個三明治）', pose: 'happy', tone: 'ok' }])
+      this.speak([{ text: t('好吧，這次有 sudo，我破例！（企鵝遞來一個三明治）'), pose: 'happy', tone: 'ok' }])
     }
     return false
   }
@@ -324,12 +339,12 @@ export class Controller {
         return
       case 'hint': {
         const msg = hint()
-        if (!/^提示 \d/.test(msg)) this.speak([{ text: msg, pose: 'idle', tone: 'plain' }])
+        if (!msg.startsWith(HINT_OK)) this.speak([{ text: stripMark(msg), pose: 'idle', tone: 'plain' }])
         this.afterCommand('', null)
         return
       }
       case 'ask':
-        if (!arg) this.speak([{ text: '想問什麼？直接輸入問題就好，例如：怎麼找檔案？或 /ask grep 怎麼用。我會根據我的資料庫回答。', pose: 'idle', tone: 'plain' }])
+        if (!arg) this.speak([{ text: t('想問什麼？直接輸入問題就好，例如：怎麼找檔案？或 /ask grep 怎麼用。我會根據我的資料庫回答。'), pose: 'idle', tone: 'plain' }])
         else this.ask(arg)
         return
       case 'levels':
@@ -339,7 +354,7 @@ export class Controller {
         if (arg.toLowerCase() !== 'confirm') {
           this.speak([
             {
-              text: '這會清除所有進度：經驗值、等級、徽章、日誌碎片、連勝，並回到第 1 關。這個動作無法復原。\n確定的話，請輸入 /reset confirm。',
+              text: t('這會清除所有進度：經驗值、等級、徽章、日誌碎片、連勝，並回到第 1 關。這個動作無法復原。\n確定的話，請輸入 /reset confirm。'),
               pose: 'worry',
               tone: 'plain',
             },
@@ -351,7 +366,7 @@ export class Controller {
         this.lastEventAt = 0
         this.lastFeedback = ''
         this.booting = false
-        if (/^setup 失敗/.test(msg)) this.speak([{ text: msg, pose: 'worry', tone: 'plain' }])
+        if (msg.startsWith(ERR)) this.speak([{ text: stripMark(msg), pose: 'worry', tone: 'plain' }])
         else this.afterCommand('', null, true)
         return
       }
@@ -372,7 +387,7 @@ export class Controller {
           : name === 'next' ? nextLevelCmd()
           : name === 'continue' ? continueGame()
           : goto(arg)
-        if (/^(找不到|目前沒有|setup 失敗|已經是|所有關卡|你已經在)/.test(msg)) this.speak([{ text: msg, pose: 'worry', tone: 'plain' }])
+        if (msg.startsWith(ERR)) this.speak([{ text: stripMark(msg), pose: 'worry', tone: 'plain' }])
         else this.afterCommand('', null, true)
         return
       }
@@ -381,11 +396,49 @@ export class Controller {
     const near = SLASH_NAMES.filter((n) => n.startsWith(name.slice(0, 2)))[0]
     this.speak([
       {
-        text: `我不認識 /${name}。${near ? `你是想輸入 /${near} 嗎？` : ''}輸入 /help 可以看我會的所有指令。`,
+        text: t`我不認識 /${name}。${near ? t`你是想輸入 /${near} 嗎？` : ''}輸入 /help 可以看我會的所有指令。`,
         pose: 'worry',
         tone: 'plain',
       },
     ])
+  }
+
+  // ---- 語言選單 ----
+  openLangPicker(first = false): void {
+    this.langFirst = first
+    this.langSel = Math.max(0, LANGS.findIndex((l) => l.code === currentLang()))
+    this.langPickerOpen = true
+    this.changed()
+  }
+  moveLang(d: number): void {
+    this.langSel = (this.langSel + d + LANGS.length) % LANGS.length
+    this.changed()
+  }
+  closeLang(): void {
+    if (this.langFirst) return // 第一次啟動必須選一個
+    this.langPickerOpen = false
+    this.changed()
+  }
+  pickLang(): void {
+    this.setLanguage(LANGS[this.langSel]!.code)
+  }
+  /** 切換語言：存檔、清掉對話歷史、讓模型預熱新語言的提示詞，Pip 用新語言確認。 */
+  setLanguage(code: Lang): void {
+    const first = this.langFirst
+    setLang(code)
+    resetChat()
+    void warmupLlm()
+    this.langPickerOpen = false
+    this.langFirst = false
+    const ok = code === 'en' ? 'Switched to English.' : code === 'zh-CN' ? '已切换为简体中文。' : '已切換為繁體中文。'
+    if (first && this.pendingBoot) {
+      const b = this.pendingBoot
+      this.pendingBoot = null
+      b()
+      return
+    }
+    this.speak([{ text: ok, pose: 'happy', tone: 'ok' }])
+    this.changed()
   }
 
   // ---- 關卡選單 ----
@@ -394,7 +447,7 @@ export class Controller {
     const i = cat.levels.findIndex((l) => l.id === this.game.current)
     this.pickerSel = Math.max(0, i)
     this.pickerOpen = true
-    this.speak([{ text: '想去哪一關？用 ↑↓ 選擇，←→ 跳階段，Enter 前往。已完成的關卡可以重玩，不會重複計 XP。', pose: 'idle', tone: 'plain' }])
+    this.speak([{ text: t('想去哪一關？用 ↑↓ 選擇，←→ 跳階段，Enter 前往。已完成的關卡可以重玩，不會重複計 XP。'), pose: 'idle', tone: 'plain' }])
     this.changed()
   }
   closePicker(): void {
@@ -458,7 +511,7 @@ export class Controller {
       ac.signal,
       this.recentActivity(),
     ).catch((e) => {
-      if (!ac.signal.aborted) this.showAnswer(`查資料時出了點問題：${String(e).slice(0, 60)}`, 'plain', false)
+      if (!ac.signal.aborted) this.showAnswer(t`查資料時出了點問題：${String(e).slice(0, 60)}`, 'plain', false)
     })
   }
 
@@ -497,13 +550,13 @@ export class Controller {
   farewell(): void {
     if (this.quitting) return
     this.quitting = true
-    const text = '下次見！你的進度已經自動存好了，隨時回來繼續。'
+    const text = t('下次見！你的進度已經自動存好了，隨時回來繼續。')
     this.speak([{ text, pose: 'wave', tone: 'plain' }])
     setTimeout(() => this.shutdown(), [...text].length * 34 + 900)
   }
 
   nudgeQuit(): void {
-    this.speak([{ text: '想離開的話，輸入 /quit 或按 Ctrl-D 就可以囉。', pose: 'idle', tone: 'plain' }])
+    this.speak([{ text: t('想離開的話，輸入 /quit 或按 Ctrl-D 就可以囉。'), pose: 'idle', tone: 'plain' }])
   }
 
   // ---- 引擎同步 ----
@@ -523,7 +576,7 @@ export class Controller {
       this.onEvent(ev, prev, next)
     } else if (next.feedback && next.feedback !== this.lastFeedback) {
       this.failCount++
-      this.store.push({ kind: 'note', text: `↳ ${next.feedback}`, tone: 'warn' })
+      this.store.push({ kind: 'note', text: `↳ ${trFeedback(next.feedback)}`, tone: 'warn' })
     }
     this.lastFeedback = next.feedback
     if (cd.startsWith('cd:')) this.hiddenCd(cd.slice(3))
@@ -612,7 +665,7 @@ export class Controller {
     const st = stageOf(lvl)
     const first = cat.levels.find((l) => stageOf(l) === st)
     const meta = cat.stages.find((x) => x.id === st)
-    const intro = first?.id === lvl.id && meta ? `【階段 ${st}　${meta.title}】${meta.intro}\n\n` : ''
+    const intro = first?.id === lvl.id && meta ? t`【階段 ${st}　${meta.title}】${meta.intro}\n\n` : ''
     return { text: intro + lvl.story, pose: 'wave', tone: 'plain', level: lvl.id }
   }
 
@@ -622,37 +675,37 @@ export class Controller {
       case 'pass':
       case 'finish': {
         if (ev.replay) {
-          const t = cat.byId.get(ev.id)?.title ?? ev.id
-          const msgs: Msg[] = [{ text: `複習完成：「${t}」。重玩不會重複計 XP。`, pose: 'happy', tone: 'ok' }]
-          if (ev.type === 'finish') msgs.push({ text: '所有關卡你都完成了！想再練習，輸入 /levels 選一關。', pose: 'happy', tone: 'ok', level: null })
+          const title = cat.byId.get(ev.id)?.title ?? ev.id
+          const msgs: Msg[] = [{ text: t`複習完成：「${title}」。重玩不會重複計 XP。`, pose: 'happy', tone: 'ok' }]
+          if (ev.type === 'finish') msgs.push({ text: t('所有關卡你都完成了！想再練習，輸入 /levels 選一關。'), pose: 'happy', tone: 'ok', level: null })
           else {
             const lm = this.levelMsg(next.current)
-            if (lm) msgs.push({ ...lm, text: `回到你的進度。\n${lm.text}` })
+            if (lm) msgs.push({ ...lm, text: t`回到你的進度。\n${lm.text}` })
           }
           this.speak(msgs)
           return
         }
         const title = cat.byId.get(ev.id)?.title ?? ev.id
-        const praise = PRAISE[ev.at % PRAISE.length]!
-        let text = `${praise}\n「${title}」完成，+${ev.xp} XP`
+        const praise = tr(PRAISE[ev.at % PRAISE.length]!)
+        let text = t`${praise}\n「${title}」完成，+${ev.xp} XP`
         const b = ev.bonus
         const extra: string[] = []
-        if (b?.streak) extra.push(`連勝 ×${next.streak}（+${b.streak}）`)
-        if (b?.speed) extra.push(`快速通關 +${b.speed}`)
-        if (b?.golf) extra.push(`指令高爾夫 +${b.golf}`)
-        if (b?.hard) extra.push(`困難模式 +${b.hard}`)
+        if (b?.streak) extra.push(t`連勝 ×${next.streak}（+${b.streak}）`)
+        if (b?.speed) extra.push(t`快速通關 +${b.speed}`)
+        if (b?.golf) extra.push(t`指令高爾夫 +${b.golf}`)
+        if (b?.hard) extra.push(t`困難模式 +${b.hard}`)
         if (extra.length) text += `\n${extra.join(' · ')}`
-        const r0 = rankOf(prev.xp).name
-        const r1 = rankOf(next.xp).name
-        if (r0 !== r1) text += `\n★ 晉升為「${r1}」`
+        const r0 = tr(rankOf(prev.xp).name)
+        const r1 = tr(rankOf(next.xp).name)
+        if (r0 !== r1) text += t`\n★ 晉升為「${r1}」`
         const msgs: Msg[] = [{ text, pose: 'happy', tone: 'ok', danceMs: 1400 }]
         for (const id of ev.badges ?? []) {
           const d = BADGES.find((x) => x.id === id)
-          msgs.push({ text: `★ 解鎖徽章「${badgeName(id)}」\n${d?.desc ?? ''}`, pose: 'happy', tone: 'ok', danceMs: 1800 })
+          msgs.push({ text: t`★ 解鎖徽章「${badgeName(id)}」\n${tr(d?.desc ?? '')}`, pose: 'happy', tone: 'ok', danceMs: 1800 })
         }
-        if (ev.reveal) msgs.push({ text: `日誌碎片 #${next.lore.length}\n${ev.reveal}`, pose: 'think', tone: 'info' })
+        if (ev.reveal) msgs.push({ text: t`日誌碎片 #${next.lore.length}\n${ev.reveal}`, pose: 'think', tone: 'info' })
         if (ev.type === 'finish') {
-          msgs.push({ text: '全部通關了！你現在是真正的 Root 大師。去真實世界大顯身手吧。', pose: 'happy', tone: 'ok', level: null })
+          msgs.push({ text: t('全部通關了！你現在是真正的 Root 大師。去真實世界大顯身手吧。'), pose: 'happy', tone: 'ok', level: null })
         } else {
           const lm = this.levelMsg(next.current)
           if (lm) msgs.push(lm)
@@ -663,7 +716,7 @@ export class Controller {
       case 'hint': {
         const lvl = next.current ? cat.byId.get(next.current) : undefined
         const text = lvl?.hints[next.hintsShown - 1]
-        if (lvl && text) this.speak([{ text: `提示 ${next.hintsShown}/${lvl.hints.length}：${text}`, pose: 'think', tone: 'info' }])
+        if (lvl && text) this.speak([{ text: t`提示 ${next.hintsShown}/${lvl.hints.length}：${text}`, pose: 'think', tone: 'info' }])
         return
       }
       case 'skip':
@@ -679,7 +732,7 @@ export class Controller {
   private welcome(): void {
     this.speak([
       {
-        text: '嗨，我是 Pip，Kernel-7 號空間站的領航員！下面的輸入框就是真正的 Linux 終端機，輸入 help 可以看操作說明。',
+        text: t('嗨，我是 Pip，Kernel-7 號空間站的領航員！下面的輸入框就是真正的 Linux 終端機，輸入 help 可以看操作說明。'),
         pose: 'wave',
         tone: 'plain',
       },

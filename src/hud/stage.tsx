@@ -4,6 +4,7 @@ import { PIP_HEIGHT, PIP_WIDTH, Pip } from './Pip'
 import type { Controller } from './controller'
 import { C } from './theme'
 import { loadCatalog } from '../engine/levels'
+import { t } from '../i18n'
 
 /**
  * 固定位置的 Pip 與對話框。訊息以「打字機」方式逐字出現，換訊息就在原地重新打字，
@@ -114,20 +115,20 @@ export function TaskCard({ ctl, compact }: { ctl: Controller; compact: boolean }
   return (
     <Box flexShrink={0} flexDirection="column" borderStyle="round" borderColor={C.accent} paddingX={1}>
       <Text bold>
-        <Text color={C.accent}>◆ 任務 {lvl.id} · {lvl.title}</Text>
+        <Text color={C.accent}>{t`◆ 任務 ${lvl.id} · ${lvl.title}`}</Text>
         {boss && <Text color={C.err}>{'  BOSS'}</Text>}
       </Text>
       <Text color={C.text}>{lvl.goal}</Text>
       {lvl.golf !== undefined && !compact && (
         <Text color={C.dim}>
-          高爾夫：最後一個指令 ≤ <Text color={C.accent}>{lvl.golf}</Text> 個字元，額外 +10 XP
+          {t`高爾夫：最後一個指令 ≤ `}<Text color={C.accent}>{lvl.golf}</Text>{t` 個字元，額外 +10 XP`}
         </Text>
       )}
       {lvl.teaches.length > 0 && !ctl.game.hard && (
         <Box flexWrap="wrap" columnGap={1}>
-          <Text color={C.dim}>指令</Text>
+          <Text color={C.dim}>{t('指令')}</Text>
           {lvl.teaches.map((t) => (
-            <Text key={t} color="#08263A" backgroundColor={C.sky}>
+            <Text key={t} color={C.sky} backgroundColor={C.track}>
               {` ${t} `}
             </Text>
           ))}

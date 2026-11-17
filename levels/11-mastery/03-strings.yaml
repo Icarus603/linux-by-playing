@@ -10,7 +10,7 @@ hints:
 setup: |
   cd /home/player
   k="STRKEY-$((RANDOM % 9000 + 1000))"
-  { head -c 400 /dev/urandom; printf '%s' "$k"; head -c 400 /dev/urandom; } > blob.bin
+  { head -c 400 /dev/urandom; printf '\n%s\n' "$k"; head -c 400 /dev/urandom; } > blob.bin
   mkdir -p /var/lib/lbp && echo "$k" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
 check: |
   [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0

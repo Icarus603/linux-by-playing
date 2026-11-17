@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import { LANGS, t, tr } from '../i18n'
 import { Box, Text, stringWidth, useInput, useTerminalSize } from './ink'
 import { Rule } from './Gradient'
 import type { Controller } from './controller'
@@ -60,7 +61,15 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
   const picking = ctl.pickerOpen
 
   useInput((input, key) => {
-    // ---- 關卡選單（最優先）----
+    // ---- 語言選單（最優先）----
+    if (ctl.langPickerOpen) {
+      if (key.upArrow || key.wheelUp) return ctl.moveLang(-1)
+      if (key.downArrow || key.wheelDown) return ctl.moveLang(1)
+      if (key.return) return ctl.pickLang()
+      if (key.escape || (key.ctrl && input === 'c')) return ctl.closeLang()
+      return
+    }
+    // ---- 關卡選單 ----
     if (picking) {
       if (key.upArrow) return ctl.movePicker(-1)
       if (key.downArrow) return ctl.movePicker(1)
@@ -237,6 +246,18 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
   const ink = chat ? C.chatInk : C.ivory
   return (
     <Box flexDirection="column" flexShrink={0}>
+      {ctl.langPickerOpen && (
+        <Box paddingX={1} flexShrink={0} flexDirection="column">
+          <Text color={C.roseDim}>Language · 語言 · 语言　（↑↓ / Enter）</Text>
+          {LANGS.map((l, i) =>
+            i === ctl.langSel ? (
+              <Text key={l.code} color={C.roseInk} backgroundColor={C.rose}>{` ❯ ${l.native}${l.native === l.name ? '' : `  (${l.name})`} `}</Text>
+            ) : (
+              <Text key={l.code} color={C.roseFaint}>{`   ${l.native}${l.native === l.name ? '' : `  (${l.name})`}`}</Text>
+            ),
+          )}
+        </Box>
+      )}
       {picking && (() => {
         const cat = loadCatalog()
         const g = ctl.game
@@ -246,7 +267,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
         const start = Math.max(0, Math.min(sel - 4, total - view))
         return (
           <Box paddingX={1} flexShrink={0} flexDirection="column">
-            <Text color={C.roseDim}>關卡選單 · ↑↓ 移動 · ←→ 跳階段 · PgUp/PgDn 翻頁 · Enter 前往 · Esc 關閉</Text>
+            <Text color={C.roseDim}>{t('關卡選單 · ↑↓ 移動 · ←→ 跳階段 · PgUp/PgDn 翻頁 · Enter 前往 · Esc 關閉')}</Text>
             {cat.levels.slice(start, start + view).map((l, k) => {
               const i = start + k
               const on = i === sel
@@ -265,39 +286,39 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
                 </Text>
               )
             })}
-            <Text color={C.roseDim}>{`   第 ${sel + 1}/${total} 關 · 已完成 ${Object.keys(g.done).length}`}</Text>
+            <Text color={C.roseDim}>{t`   第 ${sel + 1}/${total} 關 · 已完成 ${Object.keys(g.done).length}`}</Text>
           </Box>
         )
       })()}
       {popup && (
         <Box paddingX={1} flexShrink={0} flexDirection="column">
-          <Text color={C.roseDim}>指令選單 · ↑↓ 選擇 · Enter 確認 · Tab 填入 · Esc 關閉</Text>
+          <Text color={C.roseDim}>{t('指令選單 · ↑↓ 選擇 · Enter 確認 · Tab 填入 · Esc 關閉')}</Text>
           {matches.slice(Math.max(0, Math.min(selIdx - 3, matches.length - 8)), Math.max(0, Math.min(selIdx - 3, matches.length - 8)) + 8).map((c) => {
             const on = matches[selIdx]!.name === c.name
-            const pad = ' '.repeat(Math.max(1, 20 - stringWidth(c.usage)))
+            const pad = ' '.repeat(Math.max(1, 20 - stringWidth(tr(c.usage))))
             return on ? (
               <Text key={c.name} color={C.roseInk} backgroundColor={C.rose} wrap="truncate-end">
-                {` ❯ ${c.usage}${pad}${c.desc} `}
+                {` ❯ ${tr(c.usage)}${pad}${tr(c.desc)} `}
               </Text>
             ) : (
               <Text key={c.name} wrap="truncate-end">
                 <Text color={C.dim}>{'   '}</Text>
-                <Text color={C.rose}>{c.usage}</Text>
+                <Text color={C.rose}>{tr(c.usage)}</Text>
                 <Text color={C.roseDim}>
                   {pad}
-                  {c.desc}
+                  {tr(c.desc)}
                 </Text>
               </Text>
             )
           })}
-          {matches.length > 8 && <Text color={C.roseDim}>{`   … 共 ${matches.length} 個（↑↓ 可捲動）`}</Text>}
+          {matches.length > 8 && <Text color={C.roseDim}>{t`   … 共 ${matches.length} 個（↑↓ 可捲動）`}</Text>}
         </Box>
       )}
       {cands.length > 0 && (
         <Box paddingX={1} flexShrink={0}>
           <Text color={C.beigeDim} wrap="truncate-end">
             {cands.slice(0, 24).join('  ')}
-            {cands.length > 24 ? `  … 共 ${cands.length} 個` : ''}
+            {cands.length > 24 ? t`  … 共 ${cands.length} 個` : ''}
           </Text>
         </Box>
       )}
@@ -321,8 +342,8 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
           <Text color={ink}>{before}</Text>
           <Text color={ink} inverse>{at === '\n' ? ' ' : at}</Text>
           <Text color={ink}>{(at === '\n' ? '\n' : '') + after}</Text>
-          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.chatHint}> 用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
-          {chars.length === 0 && running && <Text color={C.dim}> 輸入會送給執行中的程式 · Ctrl-C 中斷 · Ctrl-D 結束輸入</Text>}
+          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.chatHint}>{t(' 用自然語言問 Pip… Esc 回到指令模式')}</Text> : <Text color={C.beigeDim}>{t(' 輸入指令… help 查看說明 · ! 和 Pip 聊天')}</Text>)}
+          {chars.length === 0 && running && <Text color={C.dim}>{t(' 輸入會送給執行中的程式 · Ctrl-C 中斷 · Ctrl-D 結束輸入')}</Text>}
         </Text>
       </Box>
       <Rule width={columns} mode={mode} />

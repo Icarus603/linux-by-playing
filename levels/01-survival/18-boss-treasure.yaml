@@ -13,11 +13,17 @@ setup: |
   cd /home/player
   mkdir -p station/deck-{1,2,3,4}/room-{a,b,c}
   c="ORBIT-$((RANDOM % 9000 + 1000))"
-  echo "第一條線索：往 deck-3 去找。" > station/START.txt
-  echo "第二條線索：密碼藏在 room-b，用 ls -a 仔細看。" > station/deck-3/note.txt
+  if [ "${LBP_LANG:-}" = en ]; then
+    echo "Clue one: go look on deck-3." > station/START.txt
+    echo "Clue two: the password is hidden in room-b. Look carefully with ls -a." > station/deck-3/note.txt
+    echo "There is nothing here." > station/deck-3/room-a/empty.txt
+  else
+    echo "第一條線索：往 deck-3 去找。" > station/START.txt
+    echo "第二條線索：密碼藏在 room-b，用 ls -a 仔細看。" > station/deck-3/note.txt
+    echo "這裡什麼都沒有。" > station/deck-3/room-a/empty.txt
+  fi
   echo "BOSS-CODE: $c" > station/deck-3/room-b/.vault
   echo "BOSS-CODE: FAKE-0000" > station/deck-1/room-a/.vault
-  echo "這裡什麼都沒有。" > station/deck-3/room-a/empty.txt
   mkdir -p /var/lib/lbp && echo "$c" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer
 check: |
   [[ -s /var/lib/lbp/answer && "$LBP_ANSWER" == "$(cat /var/lib/lbp/answer)" ]] && exit 0

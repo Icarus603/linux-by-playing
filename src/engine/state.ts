@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { emptyState, type State } from './types'
+import { T } from '../i18n'
 
 export const SAVE_DIR = process.env.LBP_SAVE ?? '/save'
 export const STATE_FILE = join(SAVE_DIR, 'state.json')
@@ -28,14 +29,14 @@ export const earnedXp = (base: number, hints: number): number =>
   Math.max(Math.ceil(base / 2), base - 3 * hints)
 
 export const RANKS: { at: number; name: string }[] = [
-  { at: 0, name: '實習生' },
-  { at: 100, name: '見習船員' },
-  { at: 300, name: '技術員' },
-  { at: 700, name: '工程師' },
-  { at: 1400, name: '資深工程師' },
-  { at: 2400, name: '輪機長' },
-  { at: 3600, name: '艦長' },
-  { at: 5000, name: 'Root 大師' },
+  { at: 0, name: T('實習生') },
+  { at: 100, name: T('見習船員') },
+  { at: 300, name: T('技術員') },
+  { at: 700, name: T('工程師') },
+  { at: 1400, name: T('資深工程師') },
+  { at: 2400, name: T('輪機長') },
+  { at: 3600, name: T('艦長') },
+  { at: 5000, name: T('Root 大師') },
 ]
 
 export function rankOf(xp: number): { name: string; next: number | null; floor: number } {

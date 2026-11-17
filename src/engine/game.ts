@@ -4,8 +4,15 @@ import { asPlayer, asRoot, check, enter, leave } from './runner'
 import { newBadges } from './badges'
 import { earnedXp, loadState, saveState } from './state'
 import { emptyState, type GameEvent, type Level, type State } from './types'
+import { t } from '../i18n'
 
 const now = (): number => Date.now()
+// 回傳給 HUD 的訊息會依語言翻譯，所以 HUD 不能再用文字內容判斷「是不是錯誤」。
+// 改在訊息開頭放不可見的標記：ERR = 需要 Pip 說明的錯誤；HINT_OK = 提示已顯示在面板（不必再說一次）。
+export const ERR = '\u200b'
+export const HINT_OK = '\u200c'
+export const HINT_NO = ''
+export const stripMark = (s: string): string => s.replace(/^[\u200b\u200c]/, '')
 // 容器是用完即丟的：存檔記得「已進入」某關，但新容器裡 setup 建立的檔案已經不在。
 // 用容器內的暫存標記判斷這個容器是否真的進入過該關。
 const MARK = '/tmp/.lbp-entered'
@@ -41,7 +48,7 @@ function switchTo(s: State, target: Level | null, resume = false): string | null
   try {
     writeFileSync(MARK, target.id)
   } catch {}
-  return r.code === 0 ? null : `setup 失敗（${target.id}）：${r.err.trim().split('\n').pop()}`
+  return r.code === 0 ? null : ERR + t`setup 失敗（${target.id}）：${r.err.trim().split('\n').pop()}`
 }
 
 /** 確保存檔有「目前關卡」並已建好環境。回傳 true 代表剛切換過關卡。 */
@@ -130,49 +137,49 @@ export function hint(): string {
   const cat = loadCatalog()
   const s = loadState()
   const lvl = s.current ? cat.byId.get(s.current) : undefined
-  if (!lvl) return '目前沒有進行中的關卡。'
-  if (s.hard) return '困難模式沒有提示。想要提示可以輸入 /hard 關閉困難模式。'
-  if (lvl.hints.length === 0) return '這關沒有提示，靠你自己了。'
-  if (s.hintsShown >= lvl.hints.length) return '提示已經全部用完。'
+  if (!lvl) return ERR + t('目前沒有進行中的關卡。')
+  if (s.hard) return HINT_NO + t('困難模式沒有提示。想要提示可以輸入 /hard 關閉困難模式。')
+  if (lvl.hints.length === 0) return HINT_NO + t('這關沒有提示，靠你自己了。')
+  if (s.hintsShown >= lvl.hints.length) return HINT_NO + t('提示已經全部用完。')
   s.hintsShown += 1
   s.event = ev('hint', lvl.id)
   saveState(s)
-  return `提示 ${s.hintsShown}/${lvl.hints.length}（已顯示在右側面板）`
+  return HINT_OK + t`提示 ${s.hintsShown}/${lvl.hints.length}（已顯示在右側面板）`
 }
 
 export function skip(): string {
   const cat = loadCatalog()
   const s = loadState()
   const lvl = s.current ? cat.byId.get(s.current) : undefined
-  if (!lvl) return '目前沒有進行中的關卡。'
+  if (!lvl) return ERR + t('目前沒有進行中的關卡。')
   const nxt = nextLevel(cat, lvl.id)
   s.streak = 0
   const err = switchTo(s, nxt)
   s.event = ev('skip', lvl.id)
   saveState(s)
-  return err ?? `已跳過 ${lvl.id}。之後可用 goto ${lvl.id} 回來。`
+  return err ?? t`已跳過 ${lvl.id}。之後可用 goto ${lvl.id} 回來。`
 }
 
 export function goto(id: string): string {
   const cat = loadCatalog()
   const target = cat.byId.get(id)
-  if (!target) return `找不到關卡 ${id}。輸入 levels 看清單。`
+  if (!target) return ERR + t`找不到關卡 ${id}。輸入 levels 看清單。`
   const s = loadState()
   const err = switchTo(s, target)
   s.event = ev('start', id)
   saveState(s)
-  return err ?? `前往 ${id}：${target.title}`
+  return err ?? t`前往 ${id}：${target.title}`
 }
 
 export function resetLevel(): string {
   const cat = loadCatalog()
   const s = loadState()
   const lvl = s.current ? cat.byId.get(s.current) : undefined
-  if (!lvl) return '目前沒有進行中的關卡。'
+  if (!lvl) return ERR + t('目前沒有進行中的關卡。')
   const err = switchTo(s, lvl)
   s.event = ev('start', lvl.id)
   saveState(s)
-  return err ?? `已重設 ${lvl.id}。`
+  return err ?? t`已重設 ${lvl.id}。`
 }
 
 export function setAnswer(text: string): void {
@@ -191,7 +198,7 @@ export function listLevels(): string {
     if (st !== stage) {
       stage = st
       const meta = cat.stages.find((x) => x.id === st)
-      lines.push('', `階段 ${st}　${meta?.title ?? ''}`)
+      lines.push('', t`階段 ${st}　${meta?.title ?? ''}`)
     }
     const mark = s.done[l.id] ? '✔' : l.id === s.current ? '▶' : '·'
     lines.push(`  ${mark} ${l.id}  ${l.title}`)
@@ -231,13 +238,13 @@ export function verify(filter?: string): { ok: boolean; report: string[] } {
     }
     const e = enter(l)
     if (e.code !== 0) {
-      fail(`setup 失敗: ${e.err.trim().split('\n').pop()}`)
+      fail(t`setup 失敗: ${e.err.trim().split('\n').pop()}`)
       leave(l)
       continue
     }
     const before = check(l, { last: '', answer: '', cwd: l.cwd })
     if (before.code === 0) {
-      fail('尚未作答就通過了（check 太寬鬆）')
+      fail(t('尚未作答就通過了（check 太寬鬆）'))
       leave(l)
       continue
     }
@@ -248,9 +255,9 @@ export function verify(filter?: string): { ok: boolean; report: string[] } {
     const answer = loadState().answer
     const after = check(l, { last: lastLine(l.solution), answer, cwd: endCwd })
     if (after.code !== 0) {
-      fail(`套用解答後仍未通過（solution exit=${sol.code}）${sol.err.trim() ? ' stderr: ' + sol.err.trim().split('\n')[0] : ''}${after.out.trim() ? ' check: ' + after.out.trim().split('\n')[0] : ''}`)
+      fail(t`套用解答後仍未通過（solution exit=${sol.code}）${sol.err.trim() ? ' stderr: ' + sol.err.trim().split('\n')[0] : ''}${after.out.trim() ? ' check: ' + after.out.trim().split('\n')[0] : ''}`)
     } else if (l.golf !== undefined && !golfReachable(l)) {
-      fail(`高爾夫目標 ${l.golf} 無法被（golf_solution 或參考解答）達成`)
+      fail(t`高爾夫目標 ${l.golf} 無法被（golf_solution 或參考解答）達成`)
     } else report.push(`✔ ${l.id} ${l.title}`)
     leave(l)
   }
@@ -271,8 +278,8 @@ export function prevLevel(): string {
   const cat = loadCatalog()
   const s = loadState()
   const i = s.current ? cat.levels.findIndex((l) => l.id === s.current) : cat.levels.length
-  const t = cat.levels[i - 1]
-  return t ? goto(t.id) : '已經是第一關了。'
+  const lv = cat.levels[i - 1]
+  return lv ? goto(lv.id) : ERR + t('已經是第一關了。')
 }
 
 /** 到下一關（不扣分，也不算跳過；會中斷連勝以外沒有懲罰）。 */
@@ -280,18 +287,18 @@ export function nextLevelCmd(): string {
   const cat = loadCatalog()
   const s = loadState()
   const i = s.current ? cat.levels.findIndex((l) => l.id === s.current) : -1
-  const t = cat.levels[i + 1]
-  return t ? goto(t.id) : '已經是最後一關了。'
+  const lv = cat.levels[i + 1]
+  return lv ? goto(lv.id) : ERR + t('已經是最後一關了。')
 }
 
 /** 回到最前面還沒完成的關卡。 */
 export function continueGame(): string {
   const cat = loadCatalog()
   const s = loadState()
-  const t = cat.levels.find((l) => !s.done[l.id])
-  if (!t) return '所有關卡都完成了！想複習的話用 /levels 選一關。'
-  if (t.id === s.current) return `你已經在最前面的未完成關卡 ${t.id} 了。`
-  return goto(t.id)
+  const lv = cat.levels.find((l) => !s.done[l.id])
+  if (!lv) return ERR + t('所有關卡都完成了！想複習的話用 /levels 選一關。')
+  if (lv.id === s.current) return ERR + t`你已經在最前面的未完成關卡 ${lv.id} 了。`
+  return goto(lv.id)
 }
 
 /** 重置全部進度：清掉 XP、徽章、日誌碎片、連勝，回到第 1 關。 */
@@ -306,5 +313,5 @@ export function resetProgress(): string {
   const err = switchTo(s, first)
   s.event = ev('start', first?.id ?? '')
   saveState(s)
-  return err ?? '已重置所有進度。'
+  return err ?? t('已重置所有進度。')
 }

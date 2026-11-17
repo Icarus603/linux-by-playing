@@ -22,10 +22,10 @@ case "${1:-play}" in
   build) build ;;
   update) if [ -d .git ]; then git pull --ff-only; fi; build ;;
   verify) docker image inspect "$IMAGE" >/dev/null 2>&1 || build
-          docker run --init "${RUN_ARGS[@]}" -e LBP_SAVE=/tmp/verify-save --entrypoint lbp "$IMAGE" verify "${2:-}" ;;
+          docker run --init "${RUN_ARGS[@]}" -e LBP_SAVE=/tmp/verify-save ${LBP_LANG:+-e LBP_LANG=$LBP_LANG} --entrypoint lbp "$IMAGE" verify "${2:-}" ;;
   shell)  docker run -it "${RUN_ARGS[@]}" --entrypoint bash "$IMAGE" ;;
   play)   docker image inspect "$IMAGE" >/dev/null 2>&1 || build
-          docker run -it "${RUN_ARGS[@]}" -e TERM=xterm-256color -e COLORTERM=truecolor -e "TERM_PROGRAM=${TERM_PROGRAM:-}" ${LBP_CTX:+-e LBP_CTX=$LBP_CTX} "$IMAGE" ;;
+          docker run -it "${RUN_ARGS[@]}" -e TERM=xterm-256color -e COLORTERM=truecolor -e "TERM_PROGRAM=${TERM_PROGRAM:-}" ${LBP_LANG:+-e LBP_LANG=$LBP_LANG} ${LBP_CTX:+-e LBP_CTX=$LBP_CTX} "$IMAGE" ;;
   reset)  if [ ! -f "$SAVE/state.json" ]; then echo "沒有存檔，不需要重置。"; exit 0; fi
           read -r -p "這會清除 $SAVE 的所有進度，無法復原。輸入 yes 確認: " ans
           [ "$ans" = "yes" ] && rm -f "$SAVE/state.json" && echo "已重置進度。" || echo "已取消。" ;;

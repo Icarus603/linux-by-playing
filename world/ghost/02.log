@@ -1,3 +1,4 @@
-ghost 日誌 02/11
+ghost log 02/11 (ghost 日誌)
 我在 Warden 的設定裡留了一支每日清理，用來砍掉過期日誌。很小的一個排程，我沒多想。
+I left a daily cleanup job in Warden's settings to purge expired logs. A tiny schedule entry, and I didn't think much of it.
 fragment 02: FORGOT

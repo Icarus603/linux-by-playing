@@ -13,3 +13,8 @@
 | Ink、React、chalk 等 npm 套件 | 由 `bun install` 安裝 | 各自的 MIT 等授權 |
 
 映像檔內的 `ref.json` 是上述 tldr-pages、核心文件與 man page 的衍生資料；散布映像時請一併保留本文件。
+
+
+## 其他
+
+- [opencc-js](https://github.com/nk2028/opencc-js)（MIT）：簡繁轉換，用於簡體中文顯示。

@@ -9,6 +9,7 @@ import { C } from './theme'
 import { loadCatalog, stageOf } from '../engine/levels'
 import { rankOf } from '../engine/state'
 import type { Entry } from './store'
+import { t, tr } from '../i18n'
 
 function Header({ ctl, width }: { ctl: Controller; width: number }): React.ReactNode {
   const cat = loadCatalog()
@@ -26,13 +27,13 @@ function Header({ ctl, width }: { ctl: Controller; width: number }): React.React
       <Text wrap="truncate-end">
         <Gradient bold>KERNEL-7</Gradient>
         <Text color={C.dim}>
-          {'  '}階段 {st}/{cat.stages.length} {stage?.title ?? ''} · 已完成 {done}/{cat.levels.length}
+          {'  '}{t`階段 ${st}/${cat.stages.length} ${stage?.title ?? ''} · 已完成 ${done}/${cat.levels.length}`}
         </Text>
-        {g.streak >= 2 && <Text color={C.accent}>{`  連勝 ${g.streak}`}</Text>}
+        {g.streak >= 2 && <Text color={C.accent}>{t`  連勝 ${g.streak}`}</Text>}
         {g.hard && <Text color={C.err}>{'  HARD'}</Text>}
       </Text>
       <Text>
-        <Text color={C.accent}>{r.name}</Text>
+        <Text color={C.accent}>{tr(r.name)}</Text>
         <Text color={C.dim}> {g.xp} XP </Text>
         <GradientBar width={filled} />
         <Text color={C.track}>{'━'.repeat(barW - filled)}</Text>
@@ -66,7 +67,7 @@ function CopyOnSelect({ ctl }: { ctl: Controller }): React.ReactNode {
         const text = sel.copySelectionNoClear()
         if (text && text !== last.current) {
           last.current = text
-          ctl.flash(`已複製 ${[...text].length} 字`)
+          ctl.flash(t`已複製 ${[...text].length} 字`)
         }
       }),
     [sel, ctl],
@@ -115,7 +116,7 @@ export function App({ ctl }: { ctl: Controller }): React.ReactNode {
             <Text color={C.accent}>✓ {ctl.flashText}</Text>
           ) : (
             <Text color={C.dim} wrap="truncate-end">
-              ↑↓ 歷史 · Tab 補全 · ! 和 Pip 聊天 · /levels 選關 · /help 指令 · /quit 離開
+              {t('↑↓ 歷史 · Tab 補全 · ! 和 Pip 聊天 · /levels 選關 · /help 指令 · /quit 離開')}
             </Text>
           )}
         </Box>
