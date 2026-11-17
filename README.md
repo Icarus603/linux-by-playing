@@ -14,6 +14,12 @@ curl -fsSL https://raw.githubusercontent.com/Icarus603/linux-by-playing/main/ins
 playnux            # 開始；playnux update 更新；playnux reset 重置進度
 ```
 
+不想裝指令的話，直接 clone 後執行：
+
+```bash
+git clone https://github.com/Icarus603/linux-by-playing.git && cd linux-by-playing && ./playnux
+```
+
 第一次執行會在本機建置映像（編譯 llama.cpp、下載約 2.6GB 的 4B 模型，約十幾分鐘），之後秒開。只要精簡版（不含模型）：`docker build --build-arg WITH_LLM=0 -t lbp:dev ~/.local/share/playnux`。預設限制 5GB 記憶體（`LBP_MEM` 可調）。遊戲在容器內執行，預設不連外網，進度存在 `~/.linux-by-playing`。
 
 ## 問 Pip（自然語言問答）
