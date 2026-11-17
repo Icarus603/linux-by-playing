@@ -19,6 +19,8 @@ export type Entry =
 
 export type NewEntry = Entry extends infer E ? (E extends { id: number } ? Omit<E, 'id'> : never) : never
 
+const MAX_ENTRIES = 200
+
 export class Store {
   entries: Entry[] = []
   version = 0
@@ -35,6 +37,8 @@ export class Store {
   push(e: NewEntry): Entry {
     const entry = { ...e, id: this.nextId++ } as Entry
     this.entries.push(entry)
+    // 換關不再清空紀錄，所以要設上限：太長會拖慢排版與捲動
+    if (this.entries.length > MAX_ENTRIES) this.entries.splice(0, this.entries.length - MAX_ENTRIES)
     this.touch()
     return entry
   }

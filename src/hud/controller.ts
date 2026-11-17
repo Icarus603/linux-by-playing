@@ -36,6 +36,9 @@ export class Controller {
   running: CmdEntry | null = null
   quit = false
   ready = false
+  /** 使用者正在捲動：此時暫停吉祥物動畫，把整個畫面的重繪留給捲動 */
+  scrolling = false
+  private scrollTimer: ReturnType<typeof setTimeout> | null = null
   /** 輸入框上方吉祥物的狀態 */
   mood: Mood = { pose: 'wave', at: 0, danceMs: 0, streaming: false }
   /** 關卡選單 */
@@ -441,6 +444,19 @@ export class Controller {
     ).catch((e) => {
       if (!ac.signal.aborted) this.showAnswer(`查資料時出了點問題：${String(e).slice(0, 60)}`, 'worry', 'plain', false)
     })
+  }
+
+  noteScroll(): void {
+    if (!this.scrolling) {
+      this.scrolling = true
+      this.changed()
+    }
+    if (this.scrollTimer) clearTimeout(this.scrollTimer)
+    this.scrollTimer = setTimeout(() => {
+      this.scrolling = false
+      this.scrollTimer = null
+      this.changed()
+    }, 350)
   }
 
   /** 最近執行過的指令與輸出（供 Pip 回答時當上下文）。 */

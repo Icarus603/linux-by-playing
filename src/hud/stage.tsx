@@ -10,7 +10,7 @@ import { loadCatalog } from '../engine/levels'
  * 說話或串流時嘴巴會動、閒置時偶爾眨眼、/dance 時搖擺。
  */
 export function PipDock({ ctl }: { ctl: Controller }): React.ReactNode {
-  const [, time] = useAnimationFrame(130)
+  const [, time] = useAnimationFrame(ctl.scrolling ? null : 130)
   const m = ctl.mood
   const typing = m.streaming || Date.now() - m.at < 1200
   const idleBlink = !typing && Math.floor(time / 130) % 30 === 0

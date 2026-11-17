@@ -102,7 +102,10 @@ export function App({ ctl }: { ctl: Controller }): React.ReactNode {
         {rows >= 26 && <PipDock ctl={ctl} />}
         <Prompt
           ctl={ctl}
-          onScroll={(dy) => scroll.current?.scrollBy(dy)}
+          onScroll={(dy) => {
+            ctl.noteScroll()
+            scroll.current?.scrollBy(dy)
+          }}
           onBottom={() => {
             if (scroll.current && !scroll.current.isSticky()) scroll.current.scrollToBottom()
           }}
