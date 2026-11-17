@@ -1,22 +1,35 @@
 import { loadCatalog, nextLevel } from './levels'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { asPlayer, asRoot, check, enter, leave } from './runner'
 import { newBadges } from './badges'
 import { earnedXp, loadState, saveState } from './state'
 import { emptyState, type GameEvent, type Level, type State } from './types'
 
 const now = (): number => Date.now()
+// 容器是用完即丟的：存檔記得「已進入」某關，但新容器裡 setup 建立的檔案已經不在。
+// 用容器內的暫存標記判斷這個容器是否真的進入過該關。
+const MARK = '/tmp/.lbp-entered'
+const markedEntered = (): string => {
+  try {
+    return readFileSync(MARK, 'utf8').trim()
+  } catch {
+    return ''
+  }
+}
+
 const ev = (type: GameEvent['type'], id: string, xp?: number): GameEvent => ({ type, id, xp, at: now() })
 
 /** 進入關卡：離開舊關 → 重設環境 → 執行 setup。回傳 setup 的錯誤訊息（若有）。 */
-function switchTo(s: State, target: Level | null): string | null {
+function switchTo(s: State, target: Level | null, resume = false): string | null {
   const cat = loadCatalog()
   const prev = s.entered ? cat.byId.get(s.entered) : undefined
-  if (prev) leave(prev)
-  s.hintsShown = 0
-  s.answer = ''
-  s.feedback = ''
-  s.startedAt = now()
+  if (prev && !resume) leave(prev)
+  if (!resume) {
+    s.hintsShown = 0
+    s.answer = ''
+    s.feedback = ''
+    s.startedAt = now()
+  }
   if (!target) {
     s.current = null
     s.entered = null
@@ -25,6 +38,9 @@ function switchTo(s: State, target: Level | null): string | null {
   s.current = target.id
   const r = enter(target)
   s.entered = target.id
+  try {
+    writeFileSync(MARK, target.id)
+  } catch {}
   return r.code === 0 ? null : `setup 失敗（${target.id}）：${r.err.trim().split('\n').pop()}`
 }
 
@@ -32,6 +48,13 @@ function switchTo(s: State, target: Level | null): string | null {
 export function ensureEntered(s: State): boolean {
   const cat = loadCatalog()
   if (s.current === null && Object.keys(s.done).length === 0) s.current = cat.levels[0]?.id ?? null
+  if (s.current && s.entered === s.current && markedEntered() !== s.current) {
+    // 重新開啟遊戲（新容器）：關卡環境要重建，但保留提示、計時與答案進度
+    s.answer = '' // 隨機答案會跟著重新產生，舊答案作廢
+    switchTo(s, cat.byId.get(s.current) ?? null, true)
+    s.event = ev('start', s.current)
+    return true
+  }
   if (s.current && s.entered !== s.current) {
     switchTo(s, cat.byId.get(s.current) ?? null)
     s.event = ev('start', s.current)
