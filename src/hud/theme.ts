@@ -22,6 +22,9 @@ export const C = {
   roseInk: '#06202E', // 玫瑰金底上的深色字
   info: '#78C8F0',
   track: '#254459',
+  chatLine: '#2F6F94', // 聊天模式的橫線：比天藍暗
+  chatInk: '#9CCBDD', // 聊天模式輸入文字
+  chatHint: '#5F8EA8', // 聊天模式的提示文字
 } as const
 
 /** 漸層停駐點（由左至右） */

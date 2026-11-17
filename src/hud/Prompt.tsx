@@ -230,7 +230,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
   const at = chars[cur] ?? ' '
   const after = chars.slice(cur + 1).join('')
   const mode = running ? 'run' : chat ? 'chat' : ctl.busy ? 'busy' : 'idle'
-  const ink = chat ? C.ice : C.ivory
+  const ink = chat ? C.chatInk : C.ivory
   return (
     <Box flexDirection="column" flexShrink={0}>
       {picking && (() => {
@@ -303,7 +303,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
           {running ? (
             <Text color={C.accent}>{'› '}</Text>
           ) : chat ? (
-            <Text color={C.sky}>{'● '}</Text>
+            <Text>{''}</Text>
           ) : (
             <>
               <Text color={C.ivory}>player</Text>
@@ -317,7 +317,7 @@ export function Prompt({ ctl, onScroll, onBottom }: Props): React.ReactNode {
           <Text color={ink}>{before}</Text>
           <Text color={ink} inverse>{at === '\n' ? ' ' : at}</Text>
           <Text color={ink}>{(at === '\n' ? '\n' : '') + after}</Text>
-          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.sky}>用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
+          {chars.length === 0 && !running && !ctl.busy && (chat ? <Text color={C.chatHint}>用自然語言問 Pip… Esc 回到指令模式</Text> : <Text color={C.beigeDim}> 輸入指令… help 查看說明 · ! 和 Pip 聊天</Text>)}
           {chars.length === 0 && running && <Text color={C.dim}> 輸入會送給執行中的程式 · Ctrl-C 中斷 · Ctrl-D 結束輸入</Text>}
         </Text>
       </Box>

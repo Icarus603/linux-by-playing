@@ -37,7 +37,7 @@ export const Rule = React.memo(function Rule({
 }): React.ReactNode {
   const line = '─'.repeat(Math.max(0, width))
   if (mode === 'run') return <Text color={C.accent}>{line}</Text>
-  if (mode === 'chat') return <Text color={C.sky}>{line}</Text>
+  if (mode === 'chat') return <Text color={C.chatLine}>{line}</Text>
   if (mode === 'busy') return <Text color={C.track}>{line}</Text>
   return <Text color={C.rule}>{line}</Text>
 })
