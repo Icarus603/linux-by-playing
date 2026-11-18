@@ -1,13 +1,14 @@
 id: "2-07"
 title: 萬用字元 *
 kind: practice
-story: "日誌檔散落在家目錄。* 能匹配任意字元，*.log 代表「所有 .log 結尾的檔案」，一次搬完。"
-goal: 把所有 .log 檔案搬進 archive 目錄（readme.txt 要留在原地）。
+story: "日誌檔散落在家目錄裡，一個個搬太累了。星號 * 是「萬用字元」，代表「任意多個任意字元」。\n\n所以 *.log 就是「所有以 .log 結尾的檔案」。shell 會自動把它展開成實際的檔名清單，再交給 mv。\n\n搬到目錄去的格式：mv 檔案們 目的目錄/。"
+goal: "把所有 .log 檔案搬進 archive 目錄（readme.txt 不是 .log，要留在原地）。"
 teaches: [mv, "*"]
 xp: 15
 hints:
-  - "archive 目錄已經存在了。"
-  - "mv *.log archive/"
+  - "archive 目錄已經存在，不用再建。"
+  - "格式：mv *.log archive/"
+  - "搬完用 ls 看，.log 檔消失了，readme.txt 還在；用 ls archive 看搬過去的檔案。"
 setup: |
   cd /home/player
   mkdir -p archive

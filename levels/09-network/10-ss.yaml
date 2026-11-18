@@ -1,13 +1,14 @@
 id: "9-10"
 title: ss：誰在聽哪個埠
 kind: practice
-story: "ss 取代了老舊的 netstat，列出連線與監聽中的連接埠。-t TCP、-l 監聽中、-n 不解析名稱、-p 顯示程序。有個神祕的服務躲在高位連接埠上。"
+story: "一台電腦同時跑很多網路服務，靠「連接埠」（port，一個 0~65535 的編號）區分，像大樓裡不同的辦公室門牌。有人在「監聽」某個埠，就代表他在等人連進來。\n\nss 指令列出這些連線和監聽的埠：\n  ss -tln   -t 只看 TCP、-l 只看監聽中、-n 用數字顯示（不翻成名稱）\n看 Local Address:Port 這欄，冒號後面就是埠號。\n有個神祕服務躲在高位的埠上。"
 goal: "找出在 127.0.0.1 上監聽、且埠號 ≥ 20000 的那個連接埠，answer 提交埠號。"
 teaches: [ss, netstat]
 xp: 30
 hints:
-  - "ss -tln"
-  - "看 Local Address:Port 欄，找 2 開頭的五位數。"
+  - "打：ss -tln"
+  - "看 Local Address:Port 這欄，格式像 127.0.0.1:12345。"
+  - "找冒號後面是五位數、開頭是 2 或更大的那個，answer 那個埠號。"
 setup: |
   p=$((RANDOM % 9000 + 20000))
   mkdir -p /var/lib/lbp && echo "$p" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer

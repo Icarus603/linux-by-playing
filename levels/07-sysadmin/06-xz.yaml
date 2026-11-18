@@ -1,13 +1,14 @@
 id: "7-06"
 title: xz 與 bzip2
 kind: practice
-story: "壓縮工具有取捨：gzip 快、bzip2 與 xz 壓得更小但更慢。xz 通常壓得最小，適合長期封存。"
+story: "壓縮工具有取捨：\n  gzip   最快，壓縮率普通\n  bzip2  更小，較慢\n  xz     通常壓得最小，最慢，適合長期封存\n用法都差不多：xz 檔案 壓縮，xz -d 檔案.xz（或 unxz）解壓縮。"
 goal: "把 biglog.txt 用 xz 壓縮，產生 biglog.txt.xz。"
 teaches: [xz, bzip2]
 xp: 20
 hints:
-  - "xz biglog.txt"
-  - "解壓縮是 unxz 或 xz -d。bzip2 的用法一模一樣。"
+  - "格式：xz 檔案名"
+  - "打：xz biglog.txt"
+  - "用 ls 確認出現 biglog.txt.xz（原檔會被換掉）。"
 setup: |
   cd /home/player
   for i in $(seq 1 2000); do echo "log line $i: all systems nominal"; done > biglog.txt

@@ -1,12 +1,14 @@
 id: "3-01"
 title: find：用名字找
 kind: learn
-story: "站上有幾千個檔案，不可能一個個翻。find 從指定目錄往下遞迴搜尋，-name 依檔名比對。"
-goal: "在 ship 目錄底下找出 radar.cfg 的位置，answer 提交完整路徑（相對或絕對都可以）。"
+story: "站上有幾千個檔案，不可能一個個翻。find 會從你指定的目錄開始，一層層往下找，直到找到符合條件的東西。\n\n最基本的條件是檔名：find 起點目錄 -name 檔名\n意思是：「從這個目錄開始，找名字是這個的檔案」，找到就印出它的完整位置。"
+goal: "在 ship 目錄底下找出 radar.cfg 在哪，answer 提交它印出來的路徑。"
 teaches: [find]
 xp: 15
 hints:
-  - "find ship -name radar.cfg"
+  - "格式：find 從哪裡找 -name 要找的檔名"
+  - "打：find ship -name radar.cfg"
+  - "它會印出一行路徑，把那整行 answer 出來。"
 setup: |
   cd /home/player
   mkdir -p ship/deck-{1,2,3,4}/{nav,comms,engine}

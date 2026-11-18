@@ -1,12 +1,14 @@
 id: "4-03"
 title: 追加 >>
 kind: learn
-story: "> 會覆蓋檔案，>> 則是「追加」到檔案結尾。寫日誌時一定要用 >>，不然舊紀錄全沒了。"
-goal: "roster.txt 已有兩位成員。用 >> 追加一行 Pip，原本兩行不能被破壞。"
+story: "上一關的 > 會把整個檔案蓋掉。如果想「接在後面」而不破壞原本內容，要用兩個大於號 >>（追加，append）：\n  echo 新的一行 >> 檔名\n寫日誌時一定要用 >>，不然舊紀錄全沒了。"
+goal: "roster.txt 已經有兩位成員。用 >> 追加一行 Pip，原本兩行不能被破壞。"
 teaches: [">>"]
 xp: 15
 hints:
-  - "echo Pip >> roster.txt"
+  - "是兩個大於號 >>，不是一個。"
+  - "格式：echo 文字 >> 檔名"
+  - "打：echo Pip >> roster.txt，再用 cat roster.txt 確認變成三行。"
 setup: |
   cd /home/player
   printf 'Ada\nLinus\n' > roster.txt

@@ -1,12 +1,14 @@
 id: "8-16"
 title: getopts 解析選項
 kind: practice
-story: "像 ls -la 這種 -x 選項怎麼解析？用 getopts：getopts \"n:v\" opt 表示 -n 需要值、-v 是旗標，在 while 迴圈裡用 case 處理，值在 $OPTARG。"
+story: "像 ls -la 這種「-選項」，腳本怎麼解析？用內建的 getopts：\n  while getopts \"n:v\" opt; do\n    case $opt in\n      n) name=$OPTARG;;     # -n 後面接著一個值，值在 $OPTARG\n      v) verbose=1;;        # -v 只是旗標，沒有值\n      *) exit 1;;           # 其他不認得的選項\n    esac\n  done\n\"n:v\" 裡，字母後面有冒號表示「這個選項需要一個值」。"
 goal: "寫 opts.sh：-n NAME 必填、-v 選填。印 Hello, NAME；有 -v 時再多印一行 (verbose mode)。沒給 -n 就印 Usage: opts.sh -n NAME [-v] 並以結束碼 1 結束。"
 teaches: [getopts, shift, bash]
 xp: 50
 hints:
-  - "while getopts \"n:v\" opt; do case $opt in n) name=$OPTARG;; v) verbose=1;; *) exit 1;; esac; done"
+  - "用 getopts \"n:v\" 解析，把 n 的值存進 name，v 存進 verbose。"
+  - "迴圈結束後檢查：if [ -z \"$name\" ]; then echo \"Usage: opts.sh -n NAME [-v]\"; exit 1; fi（-z 是「空的」）"
+  - "然後 echo \"Hello, $name\"，並在 verbose 有設時再 echo \"(verbose mode)\"。"
 setup: ""
 check: |
   PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }

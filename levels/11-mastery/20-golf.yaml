@@ -1,13 +1,14 @@
 id: "11-20"
 title: 指令高爾夫：最大的三個檔案
 kind: combine
-story: "高手的標誌之一，是用最少的字元解決問題。不是為了炫技，而是代表你真的懂每個工具的行為。"
+story: "高手的標誌之一，是用最少的字元解決問題。不是為了炫技，而是代表你真的懂每個工具的行為。這關很簡單，但試試看，能不能寫得又短又準。\n\n提示工具：ls -S 會依「檔案大小」排序（大的在前）；再用 head -3 取前三個，並用 > 存檔。"
 goal: "logs/ 裡有 8 個大小不同的檔案。把「最大的三個檔名」（由大到小，每行一個）存成 top3.txt。"
 teaches: [ls, head]
 xp: 50
 hints:
-  - "ls -S 依大小排序（大到小）。"
-  - "接 head -3，再重導向到 top3.txt。"
+  - "ls -S logs 依大小由大到小列出檔名（每行一個）。"
+  - "只要前三個：| head -3"
+  - "打：ls -S logs | head -3 > top3.txt"
 setup: |
   cd /home/player
   rm -rf logs; mkdir logs

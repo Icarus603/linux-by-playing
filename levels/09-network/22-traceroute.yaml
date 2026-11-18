@@ -1,13 +1,14 @@
 id: "9-22"
 title: traceroute：封包走哪條路
 kind: practice
-story: "traceroute 顯示封包到目的地之間經過哪些路由器（每一跳）。-n 不解析名稱、-m 限制最大跳數。對本機位址來說，路徑會非常短。"
+story: "封包從你的電腦到目的地，中間會經過好幾台「路由器」（負責轉送的設備），每經過一台叫一「跳」（hop）。traceroute 把沿途每一跳都列出來，網路慢或不通時，能看出卡在哪一段。\n  traceroute -n 目標     -n 不翻譯名稱（比較快）\n  -m 5                  最多追蹤 5 跳\n對本機位址（自己連自己）來說，路徑會非常短。"
 goal: "用 traceroute -n 追蹤到 127.0.0.1，數一數總共有幾跳，answer 提交。"
 teaches: [traceroute]
 xp: 20
 hints:
-  - "traceroute -n -m 5 127.0.0.1"
-  - "輸出第一行是標題，其餘每行一跳。"
+  - "打：traceroute -n -m 5 127.0.0.1"
+  - "輸出第一行是標題，其餘每一行是一跳。"
+  - "數一下有幾行跳（開頭是 1、2、3…的），answer 總跳數。"
 setup: ""
 check: |
   exp=$(traceroute -n -m 5 127.0.0.1 2>/dev/null | tail -n +2 | wc -l)

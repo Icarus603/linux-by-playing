@@ -1,13 +1,13 @@
 id: "1-17"
 title: 對著終端機說話
 kind: practice
-story: "echo 會把你給的文字原樣印出來，是寫腳本與除錯最常用的指令。"
-goal: "用 echo 印出文字 Kernel-7 ready。"
+story: "echo 會把你給它的文字原樣印出來：echo 你好 就會印出「你好」。聽起來很蠢，但它是寫腳本和除錯時最常用的指令之一（後面會常用到）。\n\n順便教你三個超實用的小技巧：\n  clear 或 Ctrl-L   清空螢幕\n  history           看你過去打過哪些指令\n  ↑ 方向鍵          叫回上一個指令，省得重打"
+goal: "用 echo 印出文字 Kernel-7 ready（echo、空格、然後文字）。"
 teaches: [echo, clear, history]
 xp: 10
 hints:
-  - "echo Kernel-7 ready"
-  - "按 Ctrl-L 或輸入 clear 可以清空螢幕；輸入 history 看過去輸入的指令；按 ↑ 叫回上一個指令。"
+  - "打：echo Kernel-7 ready"
+  - "文字要和題目一模一樣，包括大小寫與減號。"
 setup: ""
 check: |
   [[ "$LBP_LAST" =~ ^echo[[:space:]]+[\"\']?Kernel-7[[:space:]]+ready[\"\']?[[:space:]]*$ ]]

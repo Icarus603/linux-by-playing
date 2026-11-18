@@ -1,13 +1,14 @@
 id: "1-12"
 title: 翻閱長文件
 kind: practice
-story: "less 是分頁瀏覽器：空白鍵下一頁、b 上一頁、/關鍵字 搜尋、n 找下一個、q 離開。操作手冊有 500 行，而且有一節被人動過手腳。"
-goal: "在 manual.txt 中找到含有 OVERRIDE 的那一行，answer 提交該行的代碼。"
+story: "檔案太長、想慢慢翻時用 less，它會一次顯示一頁，像翻書。進去之後的按鍵：\n  空白鍵   下一頁\n  b        上一頁\n  /關鍵字  搜尋（打斜線、關鍵字，按 Enter）\n  n        跳到下一個搜尋結果\n  q        離開（重要！不按 q 你會被卡在裡面）\n\n操作手冊有 500 行，其中一節被人動過手腳。"
+goal: "用 less manual.txt 打開手冊，搜尋 OVERRIDE，找到那一行，answer 提交該行的代碼。"
 teaches: [less]
 xp: 20
 hints:
-  - "less manual.txt，然後輸入 /OVERRIDE 再按 Enter。"
-  - "按 q 離開 less。"
+  - "先打：less manual.txt"
+  - "進入後打 /OVERRIDE 再按 Enter，畫面會跳到有這個字的地方。"
+  - "看完記下代碼，按 q 離開，再用 answer 提交。"
 setup: |
   cd /home/player
   z="ZULU-$((RANDOM % 9000 + 1000))"

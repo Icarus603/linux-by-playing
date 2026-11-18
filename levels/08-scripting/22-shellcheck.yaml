@@ -1,14 +1,14 @@
 id: "8-22"
 title: shellcheck：讓機器幫你挑錯
 kind: practice
-story: "shellcheck 是 shell 腳本的靜態分析器，會指出沒加引號的變數、危險的寫法、可攜性問題。寫腳本的人都該把它當成第二雙眼睛。"
+story: "shellcheck 是腳本的「自動檢查員」：它會讀你的腳本，指出沒加引號的變數、危險的寫法、容易出錯的地方，並附上編號（像 SC2086）和說明。寫腳本的人都該把它當成第二雙眼睛。\n用法：shellcheck 檔名。沒輸出就代表沒有問題。"
 goal: "bad.sh 有幾個典型壞習慣。修好它，讓 shellcheck bad.sh 沒有任何警告，同時功能不變：仍然會印出目前目錄中每個 .txt 檔的名稱。"
 teaches: [shellcheck]
 xp: 55
 hints:
   - "先執行 shellcheck bad.sh，看每個警告的編號與說明。"
-  - "for f in $(ls *.txt) 是經典錯誤，改成 for f in *.txt。"
-  - "變數展開記得加雙引號：\"$f\"。"
+  - "for f in $(ls *.txt) 是經典錯誤（檔名有空格會被拆開），改成 for f in *.txt。"
+  - "變數展開記得加雙引號：\"$f\"。改完再跑 shellcheck bad.sh，直到沒有任何輸出。"
 setup: |
   cd /home/player
   cat > bad.sh <<'EOS'

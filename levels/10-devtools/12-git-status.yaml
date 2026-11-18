@@ -1,13 +1,14 @@
 id: "10-12"
 title: git status 與 diff
 kind: practice
-story: "git status 是你最常下的指令：看哪些檔案改了、哪些已暫存、哪些沒被追蹤。git diff 顯示具體改了什麼（沒加 --staged 是還沒暫存的變更）。"
+story: "git status 是你最常下的指令，它告訴你目前的狀況：\n  哪些檔案改了但還沒暫存（Changes not staged）\n  哪些已經 add 進暫存區（Changes to be committed）\n  哪些是 git 沒在追蹤的新檔案（Untracked）\n  git status --short   精簡版：每個檔案一行，M 代表被修改過（Modified）\n  git diff             顯示具體改了哪些內容（- 是被刪的行、+ 是新增的行）"
 goal: "版本庫 ~/repo 裡有三個檔案，其中只有一個被修改過但還沒提交。找出它，answer 提交檔名。"
 teaches: [git]
 xp: 35
 hints:
-  - "cd repo && git status"
-  - "git status --short 更簡潔，M 代表修改過。"
+  - "先進去版本庫：cd repo"
+  - "打：git status（或精簡版 git status --short）。"
+  - "名字旁邊標示 modified（或 M）的那個檔案就是答案。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

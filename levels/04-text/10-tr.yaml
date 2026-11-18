@@ -1,12 +1,14 @@
 id: "4-10"
 title: tr：字元轉換
 kind: practice
-story: "tr 逐字元轉換或刪除。它只讀標準輸入，所以要用 < 把檔案餵給它。"
+story: "tr（translate，轉換）逐個「字元」做替換：tr '舊字元們' '新字元們'，會把前者的每個字元換成後者對應位置的字元。\n  a-z 代表「小寫字母 a 到 z」，A-Z 是大寫，所以 tr 'a-z' 'A-Z' 就是「小寫變大寫」。\n\ntr 有個特別的地方：它不接檔名，只從輸入讀資料。所以要用 < 把檔案餵給它：\n  tr 'a-z' 'A-Z' < 輸入檔 > 輸出檔"
 goal: "把 msg.txt 的小寫全部轉成大寫，結果存成 loud.txt。"
 teaches: [tr, "<"]
 xp: 20
 hints:
-  - "tr 'a-z' 'A-Z' < msg.txt > loud.txt"
+  - "tr 不能直接寫檔名，要用 < 把檔案接進來。"
+  - "格式：tr 'a-z' 'A-Z' < 輸入檔 > 輸出檔"
+  - "打：tr 'a-z' 'A-Z' < msg.txt > loud.txt"
 setup: |
   cd /home/player
   echo "all systems nominal" > msg.txt

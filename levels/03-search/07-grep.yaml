@@ -1,12 +1,14 @@
 id: "3-07"
 title: grep：搜尋內容
 kind: learn
-story: "find 找檔名，grep 找「檔案內容」。grep 關鍵字 檔案 會印出含有關鍵字的行。"
-goal: "app.log 裡只有一行含 FATAL。用 grep 找到它，answer 提交行尾的錯誤代碼（E 開頭）。"
+story: "find 是找「檔案的名字」，grep 是找「檔案裡面的文字」。\n\ngrep 關鍵字 檔名：把檔案裡含有關鍵字的行，整行印出來。像是在一本很厚的書裡，把有某個詞的句子全部標出來。"
+goal: "app.log 裡只有一行含 FATAL。用 grep 找到它，answer 提交行尾的錯誤代碼（E 開頭的那串）。"
 teaches: [grep]
 xp: 15
 hints:
-  - "grep FATAL app.log"
+  - "格式：grep 關鍵字 檔名"
+  - "打：grep FATAL app.log"
+  - "在印出的那行最後面找 E 開頭的代碼，answer 它。"
 setup: |
   cd /home/player
   { for i in $(seq 1 400); do echo "[INFO] heartbeat $i"; done; echo "[FATAL] core meltdown code=E4096"; for i in $(seq 401 600); do echo "[INFO] heartbeat $i"; done; } > app.log

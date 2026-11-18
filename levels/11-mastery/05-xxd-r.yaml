@@ -1,12 +1,14 @@
 id: "11-05"
 title: xxd -r：從十六進位還原
 kind: practice
-story: "xxd -r 做相反的事：把十六進位文字還原成原本的二進位檔。-p 表示輸入是連續的純十六進位。這是「用文字傳輸二進位資料」的老招。"
+story: "xxd -r 做相反的事：把「十六進位的文字」還原成原本的二進位檔。-p 表示輸入是連續的純十六進位。\n\n這是「用文字傳輸二進位資料」的老招（二進位檔不方便貼在訊息裡，但十六進位文字可以）：\n  xxd -r -p 輸入文字檔 > 輸出二進位檔"
 goal: "hex.txt 是某個二進位檔的十六進位文字。把它還原成 restored.bin。"
 teaches: [xxd]
 xp: 40
 hints:
-  - "xxd -r -p hex.txt > restored.bin"
+  - "格式：xxd -r -p 輸入檔 > 輸出檔"
+  - "輸入檔是 hex.txt，輸出檔是 restored.bin。"
+  - "打：xxd -r -p hex.txt > restored.bin，再 file restored.bin 看它是什麼。"
 setup: |
   cd /home/player
   head -c 64 /dev/urandom > /var/lib/lbp-expected.bin 2>/dev/null || { mkdir -p /var/lib/lbp; head -c 64 /dev/urandom > /var/lib/lbp-expected.bin; }

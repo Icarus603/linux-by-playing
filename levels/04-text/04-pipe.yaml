@@ -1,12 +1,14 @@
 id: "4-04"
 title: 管線 |
 kind: learn
-story: "管線 | 把前一個指令的輸出，直接當成下一個指令的輸入。每個工具只做一件事，串起來威力無窮。"
+story: "管線符號 | （鍵盤上 Enter 上方那個直線）把「前一個指令的輸出」直接交給「下一個指令」當輸入，像水管一樣接起來：\n  指令A | 指令B\n每個工具只做一件事，串起來就能完成很複雜的工作。\n\n例如 ls hangar 會列出一堆檔名（一行一個），再用 | wc -l 數行數，就知道有幾個檔案。"
 goal: "hangar 目錄裡有很多檔案。用 ls hangar | wc -l 算出檔案數量，answer 提交。"
 teaches: ["|"]
 xp: 15
 hints:
-  - "ls hangar | wc -l"
+  - "| 是直線符號，通常在 Enter 鍵上方，要按 Shift。"
+  - "打：ls hangar | wc -l"
+  - "輸出的那個數字就是答案。"
 setup: |
   cd /home/player
   mkdir -p hangar

@@ -1,13 +1,14 @@
 id: "9-08"
 title: 加上自訂標頭
 kind: practice
-story: "API 常要求身分憑證，通常放在 HTTP 標頭。curl -H '名稱: 值' 加上標頭。這個保險庫 API 只有帶對 X-Key 標頭的人才讀得到內容。"
+story: "很多 API 要驗證身分，憑證通常放在 HTTP 的「標頭」（每次請求附帶的額外資訊，格式是「名稱: 值」）。\n  curl -H '名稱: 值' 網址   加上一個標頭\n  curl -i 網址              連回應的標頭一起印出來，可以看到狀態碼\n這個保險庫 API 只有帶對 X-Key 標頭的人才讀得到內容，沒帶會得到 401（未授權）。"
 goal: "金鑰在 ~/key.txt。向 http://127.0.0.1:8081/vault 發出請求並帶上 X-Key 標頭，answer 提交回應內容。"
 teaches: [curl]
 xp: 40
 hints:
-  - "先 curl -i 看看不帶金鑰時的回應（401）。"
-  - "curl -s -H \"X-Key: $(cat key.txt)\" http://127.0.0.1:8081/vault"
+  - "先看不帶金鑰會怎樣：curl -i http://127.0.0.1:8081/vault（會看到 401）。"
+  - "金鑰在 key.txt，可以用 $(cat key.txt) 把它的內容塞進指令。"
+  - "打：curl -s -H \"X-Key: $(cat key.txt)\" http://127.0.0.1:8081/vault，answer 回應內容。"
 setup: |
   mkdir -p /srv/api /usr/local/lib/lbp
   chown player:player /srv/api

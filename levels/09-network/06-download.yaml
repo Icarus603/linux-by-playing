@@ -1,13 +1,14 @@
 id: "9-06"
 title: 下載檔案
 kind: practice
-story: "curl -o 檔名 網址 把回應存成檔案（-O 沿用遠端檔名），wget 網址 則預設就是下載存檔。-L 會跟隨轉址。"
+story: "要把網路上的檔案「下載」存下來：\n  curl -o 檔名 網址   把回應存成指定檔名（-o 小寫）\n  curl -O 網址        沿用遠端的檔名（-O 大寫）\n  wget 網址           預設就是下載並存檔\n  -L                  遇到轉址（301 之類）時自動跟過去"
 goal: "把 http://127.0.0.1:8080/firmware.bin 下載到家目錄，檔名叫 firmware.bin（內容要與伺服器上完全相同）。"
 teaches: [curl, wget]
 xp: 30
 hints:
-  - "curl -o firmware.bin http://127.0.0.1:8080/firmware.bin"
-  - "wget http://127.0.0.1:8080/firmware.bin 也行。"
+  - "確認你在家目錄（pwd 看看，不在就 cd ~）。"
+  - "打：curl -o firmware.bin http://127.0.0.1:8080/firmware.bin"
+  - "或者：wget http://127.0.0.1:8080/firmware.bin。再用 ls -l 看檔案有出現。"
 setup: |
   rm -rf /srv/site; mkdir -p /srv/site
   head -c 4096 /dev/urandom > /srv/site/firmware.bin

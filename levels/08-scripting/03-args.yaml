@@ -1,12 +1,14 @@
 id: "8-03"
 title: 腳本的參數
 kind: practice
-story: "傳給腳本的參數用 $1 $2 … 取得。好腳本會檢查參數夠不夠，不夠就印用法並以非 0 結束。"
+story: "執行腳本時，後面可以接「參數」：./greet.sh Ada，裡面的 Ada 在腳本中叫 $1（第 1 個參數），第 2 個是 $2……；$# 是「一共給了幾個參數」。\n\n好腳本會先檢查參數夠不夠，不夠就印出用法，並用 exit 1 結束（結束碼非 0 代表失敗）：\n  if [ $# -lt 1 ]; then\n    echo \"Usage: ...\"\n    exit 1\n  fi\n意思是：如果（if）參數個數小於（-lt，less than）1，就印用法並離開。注意 [ ] 的內側兩邊都要有空格。"
 goal: "寫 greet.sh：./greet.sh Ada 印出 Hello, Ada!；沒有給參數時印出 Usage: greet.sh NAME 並以結束碼 1 結束。"
 teaches: [bash]
 xp: 30
 hints:
-  - "$# 是參數個數。if [ $# -lt 1 ]; then ... exit 1; fi"
+  - "先檢查：if [ $# -lt 1 ]; then echo \"Usage: greet.sh NAME\"; exit 1; fi"
+  - "再印招呼：echo \"Hello, $1!\""
+  - "存檔、chmod +x 後分別測 ./greet.sh Ada 和 ./greet.sh（不給參數）。"
 setup: ""
 check: |
   PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }

@@ -1,13 +1,14 @@
 id: "8-01"
 title: 第一支腳本
 kind: learn
-story: "後日談開始了。Warden 想學自己寫腳本，不再事事問你。腳本就是把指令存進檔案：第一行 shebang（#!/bin/bash）告訴系統用誰來執行，再用 chmod +x 讓它可執行。"
+story: "後日談開始了。Warden 想學自己寫腳本，不再事事問你。\n\n「腳本」就是把一串指令寫進一個檔案，讓電腦照順序自動執行，你不用每次重打。寫腳本要做三件事：\n  ① 檔案第一行寫 #!/bin/bash（叫做 shebang，告訴系統「請用 bash 來執行這個檔案」）\n  ② 接著一行一行寫你要執行的指令\n  ③ 用 chmod +x 檔名 讓它可執行，然後用 ./檔名 執行（./ 代表「目前目錄裡的這個檔案」）\n\n怎麼把內容寫進檔案？用你學過的 Here Document：\n  cat > hello.sh << 'EOF'\n  （逐行輸入內容）\n  EOF"
 goal: "寫一支 hello.sh：第一行是 #!/bin/bash，執行後印出 Hello, Kernel-7。記得讓它可執行。"
 teaches: [bash, chmod, echo]
 xp: 25
 hints:
-  - "可以用 nano hello.sh 或 vim 編輯，也可以 cat > hello.sh << 'EOF' 一次寫完。"
-  - "寫好後 chmod +x hello.sh，用 ./hello.sh 執行。"
+  - "用 Here Document 寫檔：輸入 cat > hello.sh << 'EOF'，按 Enter，接著逐行輸入，最後單獨一行 EOF 結束。"
+  - "檔案內容兩行：#!/bin/bash 和 echo \"Hello, Kernel-7\"。"
+  - "寫好後：chmod +x hello.sh，然後 ./hello.sh 執行，應該印出 Hello, Kernel-7。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

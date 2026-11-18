@@ -1,13 +1,14 @@
 id: "9-12"
 title: 連接埠掃描
 kind: practice
-story: "nc -z 只檢查連接埠有沒有開（不送資料），後面可以接範圍：nc -z 127.0.0.1 9200-9210。排查「服務到底有沒有起來」時超好用。"
+story: "「這個服務到底有沒有起來？」可以直接去敲門試試。nc -z 只檢查埠有沒有開，不送任何資料（z = zero-I/O，只探測）；-v 會把結果寫出來。後面可以接一個範圍：\n  nc -zv 127.0.0.1 9200-9210\n每個埠一行結果，開著的會寫 succeeded（成功），關著的是 refused（被拒絕）。"
 goal: "9200 到 9210 之間有一個連接埠開著。找出來，answer 提交埠號。"
 teaches: [nc]
 xp: 35
 hints:
-  - "nc -zv 127.0.0.1 9200-9210"
-  - "只看 succeeded 的那一行：... 2>&1 | grep succeeded"
+  - "打：nc -zv 127.0.0.1 9200-9210"
+  - "輸出每個埠一行，找那行有 succeeded 的。"
+  - "輸出可能走 stderr，過濾要先合併：nc -zv 127.0.0.1 9200-9210 2>&1 | grep succeeded"
 setup: |
   p=$((RANDOM % 11 + 9200))
   mkdir -p /var/lib/lbp && echo "$p" > /var/lib/lbp/answer && chmod 600 /var/lib/lbp/answer

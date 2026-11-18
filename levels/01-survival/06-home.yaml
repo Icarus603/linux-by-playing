@@ -2,13 +2,13 @@ id: "1-06"
 title: 回家
 kind: learn
 cwd: /usr/share
-story: "你被傳送到 /usr/share 了！別慌，~ 代表你的家目錄，不管迷路到哪都能一步回去。"
-goal: 回到你的家目錄（/home/player）。
+story: "你被傳送到 /usr/share 了！別慌，每個使用者都有自己的「家目錄」，放個人檔案的地方，用波浪號 ~ 代表。不管迷路到哪，打 cd ~ 就能一步回家。\n\n（只打 cd 不加任何東西，也會回家。）"
+goal: "回到你的家目錄（/home/player）。"
 teaches: [cd]
 xp: 10
 hints:
-  - "~ 是家目錄的縮寫。"
-  - "cd ~ 或者只打 cd，兩者都會回家。"
+  - "~ 就是家目錄的縮寫。"
+  - "打：cd ~　或者只打 cd，兩種都會回家。"
 setup: ""
 check: |
   [[ "$LBP_CWD" == /home/player ]]

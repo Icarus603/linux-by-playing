@@ -1,13 +1,14 @@
 id: "11-10"
 title: comm 與處理替換
 kind: practice
-story: "comm 比較兩個「已排序」的檔案：-1 -2 -3 分別隱藏只在第一個、只在第二個、兩者共有的行。排序是前提，而 <(指令) 的「處理替換」可以讓你不建暫存檔就把指令輸出當檔案用。"
+story: "comm 比較「兩份已排序」的名單，結果分三欄：只在第一份有的、只在第二份有的、兩份都有的。\n  -1  隱藏第一欄（只在第一份的）\n  -2  隱藏第二欄（只在第二份的）\n  -3  隱藏第三欄（兩份都有的）\n所以 comm -12 就是「只留下兩份都有的」。注意：輸入必須先排序過。\n\n<(指令) 叫「處理替換」：把指令的輸出當成一個檔案用，不必先建暫存檔。例如 <(sort a.txt) 就是「排序好的 a.txt」。"
 goal: "crew-a.txt 與 crew-b.txt 是兩份船員名單（沒有排序）。數出兩份名單「都有」的人數，answer 提交。"
 teaches: [comm, sort]
 xp: 50
 hints:
-  - "comm 需要排序過的輸入：comm -12 <(sort crew-a.txt) <(sort crew-b.txt)"
-  - "-12 的意思是隱藏只在 a、只在 b 的，剩下共有的。接 wc -l 計數。"
+  - "comm 需要排序過的輸入，所以用 <(sort 檔案) 即時排序。"
+  - "兩份都有：comm -12 <(sort crew-a.txt) <(sort crew-b.txt)"
+  - "接 | wc -l 數行數，answer 那個數字。"
 setup: |
   cd /home/player
   shuf -n 12 -e ann bob cat dan eve fay gus hal ivy jon kay lee max nia > crew-a.txt

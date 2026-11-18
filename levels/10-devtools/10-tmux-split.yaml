@@ -1,14 +1,14 @@
 id: "10-10"
 title: tmux：分割窗格
 kind: practice
-story: "一個視窗可以切成多個窗格（pane）：split-window 預設上下分，-h 左右分。互動模式下的快速鍵是前綴鍵 Ctrl-b 再加按鍵（例如 Ctrl-b % 左右分、Ctrl-b \" 上下分、Ctrl-b 方向鍵切換）。"
+story: "一個 tmux 視窗可以切成好幾個「窗格」（pane），同時看到多個終端機，像把螢幕切成上下或左右。\n  tmux split-window -t 工作階段      上下分（預設）\n  tmux split-window -h -t ...        左右分（-h）\n  tmux list-panes -t 工作階段        列出窗格，一行一個\n互動使用時的快速鍵是「前綴鍵 Ctrl-b」再按一個鍵：Ctrl-b % 左右分、Ctrl-b \" 上下分、Ctrl-b 方向鍵切換窗格。"
 goal: "建立背景工作階段 dev，並把它的視窗分成 2 個窗格。"
 teaches: [tmux]
 xp: 40
 hints:
-  - "tmux new -d -s dev"
-  - "tmux split-window -t dev"
-  - "tmux list-panes -t dev 可以數窗格。"
+  - "先建：tmux new -d -s dev"
+  - "再分割：tmux split-window -t dev"
+  - "用 tmux list-panes -t dev 確認，應該有 2 行（兩個窗格）。"
 setup: |
   runuser -u player -- tmux kill-server 2>/dev/null || true
 check: |

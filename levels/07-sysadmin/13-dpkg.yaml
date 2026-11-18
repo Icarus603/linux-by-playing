@@ -1,13 +1,14 @@
 id: "7-13"
 title: dpkg：這個程式來自哪個套件
 kind: practice
-story: "Debian 系的系統用套件管理程式：dpkg 管理本機套件，apt 負責從網路下載安裝（這個學習容器沒有對外網路，所以只練習查詢）。dpkg -S 路徑 能告訴你「這個檔案屬於哪個套件」。"
+story: "在 Linux 裝軟體，不是去網站下載安裝檔，而是用「套件管理程式」。Debian、Ubuntu 這一系用 dpkg（管理本機已安裝的套件）和 apt（從網路下載安裝）。（這個學習容器沒有對外網路，所以只練習查詢。）\n\n  dpkg -S 檔案路徑   問：「這個檔案是哪個套件裝進來的？」"
 goal: "用 dpkg -S 找出 /usr/bin/ssh 屬於哪個套件，answer 提交套件名稱。"
 teaches: [dpkg, apt]
 xp: 25
 hints:
-  - "dpkg -S /usr/bin/ssh"
-  - "冒號前面就是套件名稱。"
+  - "格式：dpkg -S 檔案完整路徑"
+  - "打：dpkg -S /usr/bin/ssh"
+  - "輸出格式是「套件名: 路徑」，冒號前面那段就是套件名稱。"
 setup: ""
 check: |
   exp=$(dpkg -S /usr/bin/ssh 2>/dev/null | head -1 | cut -d: -f1)

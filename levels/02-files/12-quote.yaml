@@ -1,13 +1,14 @@
 id: "2-12"
 title: 引號與空白
 kind: practice
-story: "shell 用空白分隔參數。檔名含空白時要用引號包起來，否則會被當成兩個檔案。"
-goal: 建立一個檔名叫「my notes.txt」（中間有空格）的檔案。
+story: "shell 靠「空白」把一行指令切成一個個詞。所以如果檔名本身含有空格，例如 my notes.txt，shell 會誤以為你說的是 my 和 notes.txt 兩個檔案。\n\n解法是用引號把整個名字包起來，讓它被當成一個整體：touch \"my notes.txt\"。"
+goal: "建立一個檔名叫 my notes.txt（中間有一個空格）的檔案。"
 teaches: [touch, quoting]
 xp: 15
 hints:
-  - "touch \"my notes.txt\""
-  - "也可以用反斜線跳脫：touch my\\ notes.txt"
+  - "用雙引號 \"\" 把整個檔名包起來。"
+  - "打：touch \"my notes.txt\""
+  - "也可以在空格前加反斜線：touch my\\ notes.txt"
 setup: ""
 check: |
   [[ -f "/home/player/my notes.txt" && ! -e /home/player/my && ! -e /home/player/notes.txt ]]

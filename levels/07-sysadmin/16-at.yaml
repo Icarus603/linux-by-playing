@@ -1,12 +1,14 @@
 id: "7-16"
 title: at：只執行一次
 kind: practice
-story: "cron 是週期性的，at 則是「在某個時間點只執行一次」。at now + 1 minute 之後輸入指令，按 Ctrl-D 結束。atq 列出排隊中的工作。"
+story: "cron 是「週期性」的重複排程；如果只想在某個時間點執行「一次」，就用 at：\n  echo '指令' | at now + 1 minute    一分鐘後執行這個指令一次\n  atq                                列出排隊中的一次性工作\n（at 是「在某時」的意思；執行完就消失，不會重複。）"
 goal: "排一個一次性的工作：一分鐘後執行 touch /tmp/at-done。用 atq 確認它排進去了。"
 teaches: [at]
 xp: 25
 hints:
-  - "echo 'touch /tmp/at-done' | at now + 1 minute"
+  - "把要執行的指令用 echo 送給 at：echo '指令' | at 時間"
+  - "打：echo 'touch /tmp/at-done' | at now + 1 minute"
+  - "再打 atq，應該看到排隊中的一筆工作。"
 setup: |
   for j in $(atq 2>/dev/null | awk '{print $1}'); do atrm "$j"; done
 check: |

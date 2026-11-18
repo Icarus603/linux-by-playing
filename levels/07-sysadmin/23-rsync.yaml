@@ -1,13 +1,14 @@
 id: "7-23"
 title: rsync：同步目錄
 kind: practice
-story: "rsync 只傳送「有差異的部分」，所以比 cp 更適合備份與同步。-a 保留屬性並遞迴、-v 顯示過程。重要細節：來源目錄結尾的斜線 src/ 代表「裡面的內容」，沒有斜線則連目錄本身一起複製。"
+story: "rsync 是「同步」工具：只傳送兩邊「有差異的部分」，所以比 cp 更適合備份與同步大量檔案。\n  rsync -av 來源/ 目的/\n  -a  archive，保留權限、時間等屬性並包含子目錄\n  -v  顯示過程\n重要細節：來源結尾的斜線。\n  src/   代表「src 裡面的內容」\n  src    代表「連 src 這個目錄本身」一起複製"
 goal: "把 src 目錄的內容同步到 dst（dst 還不存在）。完成後 dst 要與 src 完全一致。"
 teaches: [rsync]
 xp: 30
 hints:
-  - "rsync -av src/ dst/"
-  - "注意 src 結尾的斜線。"
+  - "格式：rsync -av 來源/ 目的/"
+  - "src 後面要加斜線，這樣複製的是裡面的內容，而不是多包一層。"
+  - "打：rsync -av src/ dst/，再 ls dst 檢查。"
 setup: |
   cd /home/player
   rm -rf src dst

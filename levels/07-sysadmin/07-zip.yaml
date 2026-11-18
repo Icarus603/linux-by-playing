@@ -1,12 +1,14 @@
 id: "7-07"
 title: zip：跨平台壓縮
 kind: practice
-story: "要把檔案寄給用 Windows 或 Mac 的人？zip 是人人都能開的格式。zip 壓縮檔名 要壓的檔案…，加 -r 可以包含整個目錄。"
+story: "要把檔案寄給用 Windows 或 Mac 的人？tar.gz 他們不一定會開，zip 則人人都開得了。\n  zip 壓縮檔名.zip 檔案1 檔案2 ...\n  zip -r 壓縮檔名.zip 目錄    -r 會連目錄和它裡面的內容一起放進去"
 goal: "把 a.txt、b.txt 與 photos 目錄（含內容）壓成 bundle.zip。"
 teaches: [zip]
 xp: 20
 hints:
-  - "zip -r bundle.zip a.txt b.txt photos"
+  - "有目錄要包含，所以要加 -r。"
+  - "格式：zip -r 壓縮檔名.zip 項目1 項目2 項目3"
+  - "打：zip -r bundle.zip a.txt b.txt photos"
 setup: |
   cd /home/player
   echo a > a.txt; echo b > b.txt

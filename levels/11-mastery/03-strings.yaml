@@ -1,12 +1,14 @@
 id: "11-03"
 title: strings：從二進位檔裡撈文字
 kind: practice
-story: "不能 cat 的二進位檔裡，常夾著可讀的文字（錯誤訊息、版本、路徑、有時還有忘記清掉的金鑰）。strings 會把連續的可印字元撈出來，-n 設定最短長度。"
+story: "二進位檔（程式、圖片等）不能直接 cat，會印出一堆亂碼。但裡面常常夾著可以讀的文字：錯誤訊息、版本、路徑，有時甚至有忘記清掉的金鑰。\n\nstrings 檔案 會把檔案裡「連續的可印字元」撈出來（-n 數字 可設定最短長度）。再用 grep 過濾你要找的。"
 goal: "blob.bin 是一段隨機資料，裡面藏著一組以 STRKEY- 開頭的金鑰。把它撈出來，answer 提交完整金鑰。"
 teaches: [strings]
 xp: 40
 hints:
-  - "strings blob.bin | grep STRKEY"
+  - "打：strings blob.bin，會看到從亂碼裡撈出的文字。"
+  - "過濾：strings blob.bin | grep STRKEY"
+  - "answer 整串以 STRKEY- 開頭的金鑰。"
 setup: |
   cd /home/player
   k="STRKEY-$((RANDOM % 9000 + 1000))"

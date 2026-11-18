@@ -1,16 +1,16 @@
 id: "4-24"
 title: "Boss：伺服器日誌分析"
 kind: boss
-story: "網站被打爆了！主管要三個數字：最常訪問的 IP、5xx 錯誤的總數、流量最大的小時。這需要你把 sort、uniq、awk、cut 全部串起來。"
+story: "網站被打爆了！主管要三個數字：最常訪問的 IP、5xx 錯誤的總數、流量最大的小時。（5xx 指狀態碼 500～599，代表伺服器端出錯。）\n\n這需要把整個階段學的串起來：awk 取欄位、cut 切字串、sort | uniq -c | sort -nr 排行榜、wc -l 計數。\n一步一步來，每步先看輸出再接下一段管線，別一次寫完。"
 goal: "分析 access.log，answer 提交三個值，用空白隔開：最常出現的 IP、狀態碼 5xx 的請求總數、請求數最多的小時（兩位數，例如 14）。範例：answer 10.0.0.1 12 09"
 teaches: [awk, sort, uniq, cut]
 xp: 80
 hints:
-  - "每行格式：IP - - [日期:時:分:秒 +0000] \"GET 路徑 HTTP/1.1\" 狀態碼 大小"
-  - "IP 是第 1 欄、時間是第 4 欄、狀態碼是第 9 欄。"
-  - "awk '{print $1}' access.log | sort | uniq -c | sort -nr | head -1"
-  - "小時：awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | head -1"
-  - "5xx：awk '$9 ~ /^5/' access.log | wc -l"
+  - "日誌每行格式：IP - - [日期:時:分:秒 +0000] \"GET 路徑 HTTP/1.1\" 狀態碼 大小。IP 是第 1 欄、時間是第 4 欄、狀態碼是第 9 欄。"
+  - "最常訪問的 IP：awk '{print $1}' access.log | sort | uniq -c | sort -nr | head -1"
+  - "流量最大的小時：awk '{print $4}' access.log | cut -d: -f2 | sort | uniq -c | sort -nr | head -1（第 4 欄用冒號切，第 2 段就是小時）"
+  - "5xx 的總數：awk '$9 ~ /^5/' access.log | wc -l（$9 ~ /^5/ 意思是第 9 欄以 5 開頭）"
+  - "三個結果合起來 answer，例如：answer 10.0.0.1 12 09"
 setup: |
   cd /home/player
   python3 - <<'PY'

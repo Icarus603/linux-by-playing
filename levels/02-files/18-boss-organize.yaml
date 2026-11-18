@@ -1,14 +1,14 @@
 id: "2-18"
 title: "Boss：整理下載區"
 kind: boss
-story: "下載資料夾亂成災難現場。把你學會的 mkdir、mv、萬用字元全部派上用場，依類型分類。"
+story: "下載資料夾亂成災難現場！把你學會的 mkdir、mv、萬用字元全派上用場，依類型分門別類：\n  圖片（.jpg .png）→ images\n  文件（.pdf .txt）→ docs\n  音樂（.mp3）→ music\n.zip 檔先不動。"
 goal: "在 downloads 裡建立 images、docs、music 三個子目錄，把 .jpg/.png 搬進 images，.pdf/.txt 搬進 docs，.mp3 搬進 music。.zip 檔留在原處。"
 teaches: [mkdir, mv, "*"]
 xp: 50
 hints:
-  - "先 cd downloads，再 mkdir images docs music"
-  - "mv *.jpg *.png images/ 可以一次搬多種副檔名。"
-  - "大括號也行：mv *.{jpg,png} images/"
+  - "先 cd downloads，再一次建三個目錄：mkdir images docs music"
+  - "mv 可以一次搬多種：mv *.jpg *.png images/"
+  - "同理：mv *.pdf *.txt docs/　以及　mv *.mp3 music/　最後用 ls 檢查，只剩 .zip 在原處。"
 setup: |
   cd /home/player
   mkdir -p downloads && cd downloads

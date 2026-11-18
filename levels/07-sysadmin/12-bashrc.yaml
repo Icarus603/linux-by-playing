@@ -1,13 +1,14 @@
 id: "7-12"
 title: 讓設定永久生效
 kind: practice
-story: "要讓別名或環境變數在「每次開新終端機」都生效，就寫進 ~/.bashrc。改完用 source ~/.bashrc 立刻套用，不必重開。"
+story: "上一關的別名，關掉終端機就消失了。想讓設定「每次開新終端機」都自動生效，要把它寫進一個啟動時會讀的檔案：~/.bashrc（家目錄裡的隱藏檔）。\n\n改完檔案，目前這個終端機還不知道，用 source ~/.bashrc 叫它重新讀一次，立刻套用，不必重開。\n追加一行到檔案的方式，是你學過的 echo '內容' >> 檔案。"
 goal: "把別名 gs（內容是 git status）永久加進 ~/.bashrc，並用 source 讓它在目前的 shell 生效。"
 teaches: [source, alias]
 xp: 25
 hints:
-  - "echo \"alias gs='git status'\" >> ~/.bashrc"
-  - "source ~/.bashrc"
+  - "要追加一行到 ~/.bashrc，用 >>（不是 >，否則會把原本內容蓋掉）。"
+  - "打：echo \"alias gs='git status'\" >> ~/.bashrc"
+  - "再打：source ~/.bashrc，讓它立刻生效。"
 setup: ""
 check: |
   grep -q "^alias gs=" /home/player/.bashrc && [[ "$LBP_LAST" == source* || "$LBP_LAST" == ". "* ]]

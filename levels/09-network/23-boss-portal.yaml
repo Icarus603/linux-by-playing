@@ -1,16 +1,16 @@
 id: "9-23"
 title: "Boss：入口網站打不開"
 kind: boss
-story: "星網傳來訊號，要求你開啟入口網站 http://portal:8088/。但它打不開。網路排錯要逐層來：名稱解析 → 服務有沒有在聽 → 防火牆有沒有擋。每一層都有問題。"
+story: "星網傳來訊號，要求你開啟入口網站 http://portal:8088/，但它打不開。網路排錯要「逐層」來，由近到遠，一層一層排除：\n  ① 名稱解析：portal 這個名字，電腦知道它是哪個 IP 嗎？（getent hosts、/etc/hosts）\n  ② 服務監聽：目標埠有沒有服務在聽？（ss -tln）\n  ③ 防火牆：有沒有規則擋住？（iptables -S）\n每修好一層，再 curl 一次，錯誤訊息會變成下一層的問題，這是排錯很重要的線索。"
 goal: "讓 curl http://portal:8088/ 能成功取得內容。三個問題都要找出來並修好：名稱 portal 無法解析、沒有服務監聽 8088、防火牆擋住了 8088。（啟動服務可以執行 start-portal。）"
 teaches: [curl, getent, ss, iptables, tee]
 xp: 170
 hints:
-  - "先 curl -v http://portal:8088/，看是卡在哪一步。"
-  - "第一層：getent hosts portal 沒有結果 → 加進 /etc/hosts（127.0.0.1 portal）。"
-  - "第二層：ss -tln 沒有 8088 → 執行 start-portal。"
-  - "第三層：sudo iptables -S 會看到 DROP 8088 的規則 → 用 -D 刪掉。"
-  - "每修好一層就再 curl 一次，錯誤訊息會變。"
+  - "先看是卡在哪一步：curl -v http://portal:8088/"
+  - "第一層：getent hosts portal 沒結果 → 加進 /etc/hosts：echo '127.0.0.1 portal' | sudo tee -a /etc/hosts"
+  - "第二層：ss -tln 看不到 8088 → 執行 start-portal 啟動服務。"
+  - "第三層：sudo iptables -S 會看到 8088 被 DROP 的規則 → 把那條的 -A 換成 -D 照抄刪掉。"
+  - "每修好一層就再 curl 一次，錯誤訊息會改變，直到成功。"
 setup: |
   grep -v ' portal$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
   rm -rf /srv/portal; mkdir -p /srv/portal; echo "PORTAL-OK" > /srv/portal/index.html; chmod -R a+rX /srv/portal

@@ -1,13 +1,14 @@
 id: "6-03"
 title: kill：請它離開
 kind: learn
-story: "kill PID 預設送出 SIGTERM（15），客氣地請程序自己收拾後結束。starlink-daemon 該下班了。"
+story: "kill PID 這個指令的名字很嚇人，其實它做的是「傳訊號給程序」。預設傳的是 SIGTERM（編號 15），意思是「請你收拾一下然後結束」，程序有機會存檔、清理再離開，很客氣。\n\nstarlink-daemon 該下班了：先拿到它的 PID，再 kill 它。"
 goal: "找出 starlink-daemon 並用 kill 結束它。"
 teaches: [kill, pgrep]
 xp: 15
 hints:
-  - "pgrep -x starlink-daemon 取得 PID。"
-  - "kill <PID>"
+  - "先拿 PID：pgrep -x starlink-daemon"
+  - "格式：kill PID（把數字換成上一步得到的）"
+  - "例如 PID 是 1234 就打 kill 1234，再用 pgrep 確認它不見了。"
 setup: |
   cp -f /usr/bin/sleep /usr/local/bin/starlink-daemon
   setsid setpriv --reuid=player --regid=player --init-groups -- starlink-daemon 100000 >/dev/null 2>&1 </dev/null &

@@ -1,13 +1,14 @@
 id: "6-14"
 title: 誰佔了這個 port
 kind: practice
-story: "新服務啟動失敗：「Address already in use」。有人佔了 9000 埠。ss -tlnp 列出所有正在監聽的 TCP 連接埠以及它們的程序（-t TCP、-l 監聽、-n 數字、-p 顯示程序）。"
+story: "新服務啟動失敗，訊息是「Address already in use」，意思是它想用的「埠號」（port，像是電腦上的一個服務窗口編號）被別人佔走了。\n\nss -tlnp 會列出所有正在「監聽」的網路埠，以及是哪個程序佔著：\n  -t 只看 TCP　-l 只看監聽中　-n 用數字顯示　-p 顯示程序\n搭配 | grep 9000 就能查出誰在用 9000 號埠。"
 goal: "找出正在監聽 9000 埠的程序 PID，answer 提交。"
 teaches: [ss, netstat]
 xp: 30
 hints:
-  - "ss -tlnp"
-  - "ss -tlnp | grep 9000，看 users:((... pid=數字 ..."
+  - "打：ss -tlnp"
+  - "只看 9000：ss -tlnp | grep 9000"
+  - "在那行尾端找 users:((\"名字\",pid=數字,...))，answer pid= 後的數字。"
 setup: |
   mkdir -p /usr/local/lib/lbp
   cat > /usr/local/lib/lbp/portd.py <<'PY'

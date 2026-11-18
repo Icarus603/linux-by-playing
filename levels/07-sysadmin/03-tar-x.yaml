@@ -1,14 +1,14 @@
 id: "7-03"
 title: tar：解開
 kind: practice
-story: "x 是解開。-C 目錄 指定解開到哪裡（目錄必須已存在）。收到別人給的壓縮包，第一個動作通常是先看裡面有什麼（t），再解開。"
-goal: "package.tar.gz 裡有一組檔案。把它解開到 ~/restore 目錄（先建立這個目錄）。"
+story: "收到別人給的壓縮包，要把它「解開」：\n  tar -xzf 檔名.tar.gz   x 是 extract（解開），z 表示它是 gzip 壓縮的\n  -C 目錄                指定解開到哪個目錄（C 要大寫，這個目錄必須已經存在）\n  tar -tzf 檔名          t 只列出內容、不解開（先偷看一下是好習慣）"
+goal: "package.tar.gz 裡有一組檔案。先建立 ~/restore 目錄，再把它解開到那裡。"
 teaches: [tar, mkdir]
 xp: 25
 hints:
-  - "mkdir restore"
-  - "tar -xzf package.tar.gz -C restore"
-  - "先用 tar -tzf package.tar.gz 預覽內容。"
+  - "先建目錄：mkdir restore"
+  - "先偷看內容：tar -tzf package.tar.gz"
+  - "解開到指定目錄：tar -xzf package.tar.gz -C restore"
 setup: |
   cd /home/player
   rm -rf pkg && mkdir -p pkg/app

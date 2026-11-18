@@ -1,13 +1,14 @@
 id: "8-13"
 title: 關聯式陣列
 kind: practice
-story: "declare -A 能建立「鍵 → 值」的關聯式陣列（像字典）：declare -A price=([fuel]=250 [food]=90)，取值 ${price[fuel]}，檢查鍵存在 [[ -v price[fuel] ]]。"
+story: "「關聯式陣列」就像一本字典：用「名字」（鍵）查「內容」（值）。\n  declare -A price=([fuel]=250 [food]=90)    建立（-A 一定要加）\n  ${price[fuel]}                              取值 → 250\n  [[ -v price[fuel] ]]                         檢查「這個鍵存在嗎」\n  total=$((total + price[fuel]))              拿來做算術\n適合做「價目表」「對照表」這種查表工作。"
 goal: "寫 cost.sh 品名…：價目表是 fuel=250、oxygen=120、food=90、parts=140。印出所有品名的總價（只印數字）。遇到不認得的品名，在 stderr 印 unknown: 品名 並以結束碼 1 結束。"
 teaches: [declare, bash]
 xp: 45
 hints:
-  - "declare -A price=([fuel]=250 [oxygen]=120 [food]=90 [parts]=140)"
-  - "迴圈裡 [[ -v price[$item] ]] 檢查鍵存在，total=$((total + price[$item]))"
+  - "先建價目表：declare -A price=([fuel]=250 [oxygen]=120 [food]=90 [parts]=140)"
+  - "迴圈 for item in \"$@\" 裡，先用 [[ -v price[$item] ]] 檢查有沒有這個品名，沒有就 echo \"unknown: $item\" >&2; exit 1。"
+  - "有的話 total=$((total + price[$item]))，迴圈結束後 echo $total。（total 要先設 total=0）"
 setup: ""
 check: |
   PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }

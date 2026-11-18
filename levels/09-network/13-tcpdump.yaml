@@ -1,14 +1,14 @@
 id: "9-13"
 title: tcpdump：抓封包
 kind: practice
-story: "tcpdump 直接看網路卡上的封包，是排查「到底有沒有送出去、有沒有收到」的最後手段。-i 指定介面、-nn 不解析名稱、-c 抓幾個就停、-w 存成檔案、後面可加過濾條件如 port 8080。抓封包需要 root。"
+story: "tcpdump 直接「偷聽」網路卡上經過的封包（資料是切成一小包一小包傳送的），是排查「到底有沒有送出去、有沒有收到」的最後手段。常用選項：\n  -i lo      指定介面（lo 是本機迴路）\n  -nn        不把 IP、埠翻成名字\n  -c 6       抓到 6 個封包就停\n  -w 檔名    把抓到的存成檔案\n  port 8080  過濾條件：只要 8080 埠的\n抓封包需要 root，所以前面加 sudo。\n\n這關要同時做兩件事：先讓 tcpdump 在背景（&）開始聽，再發出請求讓它抓到東西。"
 goal: "抓取 lo 介面上 8080 埠的封包，存成 ~/cap.pcap：先在背景用 sudo tcpdump 抓（-c 6 抓六個就停），等它準備好，再用 curl 請求一次 http://127.0.0.1:8080/，最後 wait 等待抓包結束。"
 teaches: [tcpdump, sudo]
 xp: 50
 hints:
-  - "sudo tcpdump -i lo -nn -c 6 -w cap.pcap port 8080 &"
-  - "sleep 1，然後 curl -s http://127.0.0.1:8080/ > /dev/null"
-  - "最後 wait。可以用 sudo tcpdump -nn -r cap.pcap 讀回來看。"
+  - "背景抓包：sudo tcpdump -i lo -nn -c 6 -w cap.pcap port 8080 &"
+  - "等一秒讓它準備好：sleep 1，然後發請求：curl -s http://127.0.0.1:8080/ > /dev/null"
+  - "最後打 wait 等它收到 6 個封包結束。可用 sudo tcpdump -nn -r cap.pcap 讀回來看。"
 setup: |
   rm -rf /srv/site; mkdir -p /srv/site; echo hello > /srv/site/index.html; chmod -R a+rX /srv/site
   rm -f /home/player/cap.pcap

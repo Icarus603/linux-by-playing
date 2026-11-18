@@ -1,13 +1,14 @@
 id: "11-01"
 title: strace：看穿程式在做什麼
 kind: learn
-story: "最後的階段。launch-sys 啟動就失敗，只印出一句沒用的 launch failed。程式不肯說，但核心知道：strace 追蹤程式發出的每一個系統呼叫。-f 連子程序一起追、-e trace=openat 只看開檔動作。失敗的開檔會標示 ENOENT（找不到檔案）。"
+story: "最後的階段。launch-sys 啟動就失敗，只印出一句沒用的 launch failed。程式不肯說，但「核心」（系統最底層的管家）知道：程式想做任何事（開檔、連網路…）都得向核心請求，這種請求叫「系統呼叫」。\n\nstrace 能追蹤並印出程式發出的每一個系統呼叫：\n  -f                連子程序一起追\n  -e trace=openat   只看「開檔」動作\n開檔失敗時會標示 ENOENT（No such file：找不到檔案）。"
 goal: "用 strace 找出 launch-sys 到底想打開哪個 /etc/station/ 底下的檔案卻失敗了，answer 提交完整路徑。"
 teaches: [strace]
 xp: 50
 hints:
-  - "strace -f -e trace=openat launch-sys"
-  - "輸出會有很多雜訊，用 2>&1 | grep station 過濾。"
+  - "打：strace -f -e trace=openat launch-sys"
+  - "輸出有很多雜訊，strace 的輸出走 stderr，用 2>&1 | grep station 過濾。"
+  - "找那行最後有 ENOENT 的，雙引號裡的路徑就是答案。"
 setup: |
   mkdir -p /etc/station /var/lib/lbp
   n=$((RANDOM % 9000 + 1000))

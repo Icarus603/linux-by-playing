@@ -1,14 +1,14 @@
 id: "1-18"
 title: "Boss：失落的密碼"
 kind: boss
-story: "最後的考驗！Vega 把緊急密碼藏在站內某處，只留下線索。把你學會的 pwd、ls、cd、cat、ls -a 全部用上。"
+story: "最後的考驗！Vega 把緊急密碼藏在站內某處，只留下一路線索，每個線索指向下一個。把你學會的全部用上：\n  pwd 看位置、ls 看內容、ls -a 看隱藏檔\n  cd 移動、cat 讀檔\n\n做法很像尋寶：讀一個檔 → 照它說的走 → 再讀下一個。"
 goal: "從 ~/station/START.txt 開始，順著線索找到藏起來的密碼，用 answer 提交。"
 teaches: [ls, cd, cat]
 xp: 50
 hints:
-  - "先 cat station/START.txt 看第一條線索。"
-  - "深入 deck-3，讀那裡的 note.txt。"
-  - "隱藏檔要用 ls -a 才看得到，檔名是 .vault。"
+  - "先打：cat station/START.txt 看第一條線索。"
+  - "照線索走進 deck-3 目錄，用 ls 看有什麼，再 cat 讀裡面的 note.txt。"
+  - "有些檔案是隱藏的，要用 ls -a 才看得到。這次的檔名是 .vault，用 cat .vault 讀。"
 setup: |
   cd /home/player
   mkdir -p station/deck-{1,2,3,4}/room-{a,b,c}

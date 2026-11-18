@@ -1,12 +1,14 @@
 id: "4-07"
 title: 排行榜：uniq -c
 kind: practice
-story: "sort | uniq -c | sort -nr 是文字分析的經典三連招：統計每項出現幾次，再依次數排行。"
-goal: "ips.txt 是訪客 IP 紀錄。找出出現次數最多的 IP，answer 提交。"
+story: "文字分析最經典的三連招，要背起來：\n  sort | uniq -c | sort -nr\n步驟：① sort 讓相同的靠在一起 ② uniq -c 把重複的合併成一行，並在前面印出「出現了幾次」（c = count）③ sort -nr 依次數由多到少排。\n結果就是「排行榜」，再接 head -1 取第一名。"
+goal: "ips.txt 是訪客 IP 紀錄（一行一個）。找出出現次數最多的 IP，answer 提交。"
 teaches: [uniq, sort]
 xp: 25
 hints:
-  - "sort ips.txt | uniq -c | sort -nr | head -1"
+  - "先 sort ips.txt 讓相同 IP 相鄰，再 | uniq -c 統計次數。"
+  - "再 | sort -nr 由多到少排，最後 | head -1 取第一名。"
+  - "打：sort ips.txt | uniq -c | sort -nr | head -1，answer 輸出裡的 IP（不是前面的次數）。"
 setup: |
   cd /home/player
   { for i in 1 2 3 4 5 6 7; do echo 10.0.0.9; done; for i in 1 2 3; do echo 10.0.0.2; done; echo 10.0.0.5; echo 10.0.0.2; for i in 1 2 3 4; do echo 10.0.0.9; done; echo 10.0.0.7; } > ips.txt

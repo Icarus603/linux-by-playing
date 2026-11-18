@@ -1,14 +1,14 @@
 id: "10-19"
 title: 寫一個有依賴的 Makefile
 kind: practice
-story: "規則寫法：目標: 依賴，下一行 Tab 開頭是指令。make 發現依賴比目標新，才會重做。這正是它能「只重建改過的部分」的原理。"
+story: "make 很聰明：它會比對「依賴檔」和「目標檔」的修改時間，只有依賴比目標新（也就是你改過輸入）才會重做，這就是它能「只重建有變動的部分」的原因。寫法：\n  result.txt: input.txt\n  <Tab>tr a-z A-Z < input.txt > result.txt\n意思是：result.txt 靠 input.txt 產生；要產生它，就執行下面這行指令。\n小心：指令前一定是 Tab。用 printf 寫入比較不會搞錯 Tab（\\t 就是 Tab，\\n 是換行）。"
 goal: "寫一個 Makefile：目標 result.txt 依賴 input.txt，指令把 input.txt 轉成大寫寫進 result.txt。然後執行 make。"
 teaches: [make, tr]
 xp: 50
 hints:
   - "Makefile 第一行：result.txt: input.txt"
-  - "第二行以 Tab 開頭：tr a-z A-Z < input.txt > result.txt"
-  - "用 printf 寫入比較不會搞錯 Tab：printf 'result.txt: input.txt\\n\\ttr a-z A-Z < input.txt > result.txt\\n' > Makefile"
+  - "第二行必須以 Tab 開頭：tr a-z A-Z < input.txt > result.txt"
+  - "用 printf 寫入比較不會搞錯 Tab：printf 'result.txt: input.txt\\n\\ttr a-z A-Z < input.txt > result.txt\\n' > Makefile，然後執行 make。"
 setup: |
   cd /home/player
   rm -f Makefile result.txt

@@ -1,12 +1,13 @@
 id: "1-15"
 title: 自我介紹
 kind: practice
-story: "管理員要先搞清楚「我是誰、在哪台機器」。whoami 顯示使用者名稱，hostname 顯示主機名稱。"
-goal: "用 whoami 與 hostname 查出資訊，answer 提交，格式：使用者@主機（例如 answer bob@server1）。"
+story: "管理員接手一台機器，第一件事是搞清楚「我是誰、這是哪台機器」。\n  whoami   印出你現在登入的使用者名稱\n  hostname 印出這台機器的名字（主機名稱）\n兩個都不用加參數，單獨打就好。"
+goal: "分別執行 whoami 和 hostname，把兩個結果合成「使用者@主機」提交，例如 answer bob@server1。"
 teaches: [whoami, hostname]
 xp: 15
 hints:
-  - "分別執行 whoami 和 hostname。"
+  - "先打 whoami，再打 hostname，記下兩行輸出。"
+  - "用 @ 把它們接起來，中間不能有空格。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "player@kernel-7" ]] && exit 0

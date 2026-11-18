@@ -1,15 +1,15 @@
 id: "7-20"
 title: 修好壞掉的服務
 kind: combine
-story: "radar.service 啟動失敗了。這是維運最典型的一天：先看狀態、再讀日誌、找出原因、修好、重新啟動。不要亂猜，日誌會告訴你。"
+story: "radar.service 啟動失敗了。這是維運最典型的一天，標準流程：\n  ① 看狀態（systemctl status）\n  ② 讀日誌找原因（journalctl -u）\n  ③ 修好問題\n  ④ 重新啟動，再確認\n不要亂猜，日誌會老實告訴你哪裡壞了。"
 goal: "讓 radar.service 成功執行（active）。先找出它失敗的原因。"
 teaches: [systemctl, journalctl, sed]
 xp: 45
 hints:
-  - "systemctl status radar，再看 journalctl -u radar。"
-  - "日誌說讀不到設定檔 /etc/radar.cnf——但實際存在的是 /etc/radar.conf（一個字母的差別）。"
-  - "單元檔在 /etc/lbp-systemd/radar.service，需要 sudo 修改。"
-  - "改完再 sudo systemctl start radar。"
+  - "先看：systemctl status radar，再看日誌：journalctl -u radar。"
+  - "日誌說讀不到設定檔 /etc/radar.cnf，但實際存在的是 /etc/radar.conf（只差一個字母）。"
+  - "服務的設定檔（單元檔）在 /etc/lbp-systemd/radar.service，要用 sudo 才能改，把裡面寫錯的路徑改成 /etc/radar.conf。"
+  - "改完再啟動：sudo systemctl start radar，並確認狀態是 active。"
 setup: |
   mkdir -p /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal
   printf '#!/bin/bash\n[ -f "$2" ] || { echo "radard: cannot open config $2" >&2; exit 1; }\nexec /usr/bin/sleep infinity\n' > /usr/local/bin/radard

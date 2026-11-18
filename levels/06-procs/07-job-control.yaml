@@ -1,14 +1,14 @@
 id: "6-07"
 title: 暫停與繼續：Ctrl-Z、bg、fg
 kind: practice
-story: "前景程式可以按 Ctrl-Z 暫停（SIGTSTP），然後用 bg 讓它轉到背景繼續跑，或用 fg 拉回前景。jobs 會列出所有工作。"
+story: "一個程式正在前景執行、卡住了你的終端機時，可以：\n  Ctrl-Z   暫停它（程式凍結但沒有被殺）\n  bg       讓暫停的程式「轉到背景繼續跑」\n  fg       把背景的程式「拉回前景」\n  jobs     列出所有工作與狀態\n這就像把正在做的事先放一邊，讓你可以去做別的。"
 goal: "執行 sleep 300，按 Ctrl-Z 暫停它，再輸入 bg 讓它在背景繼續執行。"
 teaches: [bg, fg, jobs]
 xp: 25
 hints:
-  - "先輸入 sleep 300 並按 Enter。"
-  - "程式執行中按 Ctrl-Z，會回到提示字元，並顯示 Stopped。"
-  - "輸入 bg。用 jobs 確認狀態是 Running。"
+  - "先輸入 sleep 300 並按 Enter，終端機會卡住等它跑完。"
+  - "趁它執行時，同時按住 Ctrl 和 Z，會回到提示字元並顯示 Stopped。"
+  - "輸入 bg 按 Enter，再用 jobs 確認狀態變成 Running。"
 setup: ""
 check: |
   pid=$(pgrep -u player -f '^sleep 300$' | head -1)

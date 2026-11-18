@@ -1,13 +1,14 @@
 id: "9-05"
 title: HTTP 狀態碼
 kind: practice
-story: "HTTP 回應的第一件事是狀態碼：200 成功、301 轉址、403 禁止、404 找不到、500 伺服器錯誤。curl -I 只看標頭，-s -o /dev/null -w '%{http_code}' 可以只印狀態碼。"
-goal: "p1.html、p2.html、p3.html 三個路徑裡，只有一個真的存在（回 200）。找出是哪一個，answer 提交檔名。"
+story: "每個 HTTP 回應的第一件事是「狀態碼」，告訴你請求的結果：\n  200 成功　301 被轉到別處　403 禁止進入\n  404 找不到　500 伺服器自己出錯了\n  curl -I 網址   只看「標頭」（回應的第一部分，第一行有狀態碼）\n  curl -s -o /dev/null -w '%{http_code}\\n' 網址   只印狀態碼這個數字（-o /dev/null 把內容丟掉）"
+goal: "p1.html、p2.html、p3.html 三個路徑（在 http://127.0.0.1:8080/ 底下）裡，只有一個真的存在（回 200）。找出是哪一個，answer 提交檔名。"
 teaches: [curl]
 xp: 30
 hints:
-  - "curl -I http://127.0.0.1:8080/p1.html 看第一行。"
-  - "curl -s -o /dev/null -w '%{http_code}\\n' 網址 只印狀態碼。"
+  - "逐個試：curl -I http://127.0.0.1:8080/p1.html，看第一行是 200 還是 404。"
+  - "p2.html、p3.html 照樣試一次。"
+  - "懶人法：curl -s -o /dev/null -w '%{http_code}\\n' 網址，只印狀態碼。"
 setup: |
   rm -rf /srv/site; mkdir -p /srv/site
   n=$((RANDOM % 3 + 1))

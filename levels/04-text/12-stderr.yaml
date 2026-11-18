@@ -1,12 +1,14 @@
 id: "4-12"
 title: 錯誤輸出 2>
 kind: practice
-story: "程式有兩條輸出管道：標準輸出（1）與標準錯誤（2）。> 只接 1，用 2> 才能把錯誤另外存起來。"
+story: "程式其實有兩條輸出「水管」：\n  1 號：正常輸出（結果）\n  2 號：錯誤輸出（出錯的訊息）\n兩條預設都印在螢幕上。前面學的 > 其實只接 1 號；想把錯誤另外存起來，要用 2>。\n  指令 > 結果檔 2> 錯誤檔\n（find 搜尋時碰到沒權限的目錄會產生錯誤訊息，正好拿來練習。）"
 goal: "執行 find /root /etc -name '*.conf'：把正常結果存進 found.txt，把錯誤訊息存進 errors.txt。"
 teaches: ["2>", find]
 xp: 25
 hints:
-  - "find /root /etc -name '*.conf' > found.txt 2> errors.txt"
+  - "正常結果用 >，錯誤訊息用 2>，各接一個檔名。"
+  - "格式：指令 > found.txt 2> errors.txt"
+  - "打：find /root /etc -name '*.conf' > found.txt 2> errors.txt"
 setup: ""
 check: |
   cd /home/player

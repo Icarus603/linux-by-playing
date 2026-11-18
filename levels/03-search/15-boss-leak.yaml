@@ -1,14 +1,14 @@
 id: "3-15"
 title: "Boss：外洩的金鑰"
 kind: boss
-story: "緊急！有人把正式環境的金鑰 sk_live_ 開頭的字串提交到了專案裡。必須找到它、回報、並移除含金鑰的檔案。把 find 與 grep 全用上。"
+story: "緊急！有人把「正式環境的金鑰」（以 sk_live_ 開頭的字串，是能真的動到線上服務的密碼）提交進了專案裡。必須：找到它、回報、把含有它的檔案刪掉。\n\n用上這階段學的：grep -r 搜內容、-l 只看檔名、rm 刪檔。\n注意：sk_test_ 開頭的是測試用金鑰，沒關係，別誤刪。"
 goal: "在 webapp 專案中找出 sk_live_ 開頭的金鑰（answer 提交完整金鑰），並刪除含有它的那個檔案。"
 teaches: [find, grep]
 xp: 60
 hints:
-  - "grep -r 'sk_live_' webapp"
-  - "-l 只列檔名；找到之後用 rm 刪掉那個檔案。"
-  - "別刪錯！有些檔案只是提到 sk_test_（測試金鑰），不用刪。"
+  - "先打：grep -r 'sk_live_' webapp，看哪個檔案、什麼內容。"
+  - "輸出格式是「檔名:內容」，answer 提交那串完整的 sk_live_… 金鑰。"
+  - "再用 rm 刪掉輸出裡的那個檔案（只刪含 sk_live_ 的，sk_test_ 的別動）。"
 setup: |
   cd /home/player
   mkdir -p webapp/{src/api,src/ui,config,tests,docs}

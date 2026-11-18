@@ -1,13 +1,14 @@
 id: "6-16"
 title: /proc：核心的窗口
 kind: practice
-story: "/proc 是核心動態生成的虛擬目錄，每個程序有自己的 /proc/PID，系統資訊也在裡面（cpuinfo、meminfo…）。讀它就是在直接問核心。"
+story: "/proc 是 Linux 核心「動態產生」的虛擬目錄，裡面其實不是真的檔案，而是核心把系統資訊當成檔案給你看：每個程序有自己的 /proc/PID，CPU 資訊在 /proc/cpuinfo，記憶體在 /proc/meminfo。讀它們，就像直接問核心問題。"
 goal: "用 /proc/cpuinfo 數出這台機器有幾個 processor（CPU 核心），answer 提交數字。"
 teaches: [nproc, cat, grep]
 xp: 25
 hints:
-  - "grep -c ^processor /proc/cpuinfo"
-  - "nproc 也能直接告訴你。"
+  - "/proc/cpuinfo 裡每個核心會有一行開頭是 processor。"
+  - "打：grep -c ^processor /proc/cpuinfo（-c 是只數有幾行符合）"
+  - "或更簡單：nproc 直接印出核心數。"
 setup: ""
 check: |
   exp=$(nproc)

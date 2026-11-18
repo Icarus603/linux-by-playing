@@ -1,12 +1,14 @@
 id: "4-11"
 title: 清掉 Windows 換行
 kind: practice
-story: "從 Windows 傳來的檔案，每行結尾多了 CR 字元（寫成 \\r），在 Linux 上會造成各種怪問題。用 tr -d 刪掉它。"
+story: "從 Windows 傳來的文字檔，每行結尾多了一個看不見的字元 CR（寫成 \\r），在 Linux 上會造成各種奇怪的錯誤。\n\ntr 也能「刪除」字元：tr -d 要刪的字元（d = delete）。所以 tr -d '\\r' 就是把所有 \\r 刪掉。同樣要用 < 餵檔案、用 > 存結果。"
 goal: "dos.txt 含有 CR 字元。刪除所有 CR，結果存成 clean.txt。"
 teaches: [tr]
 xp: 25
 hints:
-  - 'tr -d "\r" < dos.txt > clean.txt'
+  - "用 -d 刪除字元，要刪的是 \\r（記得加引號）。"
+  - "格式：tr -d '\\r' < 輸入檔 > 輸出檔"
+  - "打：tr -d '\\r' < dos.txt > clean.txt"
 setup: |
   cd /home/player
   printf 'line1\r\nline2\r\nline3\r\n' > dos.txt

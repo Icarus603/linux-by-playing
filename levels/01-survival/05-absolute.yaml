@@ -1,13 +1,13 @@
 id: "1-05"
 title: 絕對路徑
 kind: learn
-story: "路徑有兩種寫法。從根目錄 / 開始寫的是「絕對路徑」，無論你在哪裡都有效。系統日誌放在 /var/log。"
-goal: 用絕對路徑進入 /var/log。
+story: "每個檔案和目錄都有自己的「地址」，叫做路徑。就像寄信要寫完整地址，路徑從最頂端的「根目錄」（寫成一條斜線 /）開始一層層往下寫，像 /var/log，意思是：根目錄 → var → log。\n\n從 / 開頭的路徑叫「絕對路徑」，不管你現在站在哪都能用，就像完整地址。系統日誌就放在 /var/log。"
+goal: "用絕對路徑走進 /var/log（cd 空格 /var/log）。"
 teaches: [cd]
 xp: 10
 hints:
   - "絕對路徑一定以 / 開頭。"
-  - "cd /var/log"
+  - "直接打：cd /var/log"
 setup: ""
 check: |
   [[ "$LBP_CWD" == /var/log ]]

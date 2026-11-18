@@ -1,13 +1,14 @@
 id: "5-05"
 title: 目錄的 x 是什麼
 kind: practice
-story: "對目錄來說：r 是能列出內容、x 是能「進入」它。少了 x，cd 就會被拒絕。"
+story: "權限用在「目錄」上，意思有點不同：\n  r：可以列出目錄裡有什麼（ls）\n  x：可以「進入」這個目錄（cd），以及存取裡面的東西\n少了 x，就算有 r，cd 也會被拒絕（Permission denied）。"
 goal: "vault 目錄的權限被設錯，你自己都進不去。修好它，讓擁有者能進入並列出內容。"
 teaches: [chmod, cd]
 xp: 20
 hints:
-  - "先試 cd vault，看錯誤訊息。"
-  - "chmod u+x vault（擁有者需要 r 與 x，也可以用 chmod 700 vault）"
+  - "先試 cd vault，看看錯誤訊息，再用 ls -ld vault 看權限（-d 表示看目錄本身）。"
+  - "擁有者需要 r 和 x，所以要加上 x：chmod u+x vault"
+  - "或者直接用數字：chmod 700 vault（擁有者全部權限）。"
 setup: |
   cd /home/player
   mkdir vault

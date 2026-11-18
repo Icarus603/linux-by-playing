@@ -1,12 +1,14 @@
 id: "8-08"
 title: while read 逐行處理
 kind: practice
-story: "while read line; do ...; done < 檔案 是逐行處理檔案的標準寫法。記得用 IFS= read -r 避免吃掉空白與反斜線。"
-goal: "寫 numbered.sh FILE：把檔案每一行前面加上行號和冒號與空格，例如 1: 第一行。"
+story: "要「一行一行」處理檔案內容，標準寫法是 while read：\n  while IFS= read -r line; do\n    echo \"$line\"\n  done < 檔案\n意思是：「只要還讀得到下一行（read），就把它放進變數 line 並處理」。最後的 < 檔案 把檔案餵給整個迴圈。IFS= 和 -r 是為了不要吃掉行首空白和反斜線，照抄就好。\n\n算術用 $(( )) ：n=$((n+1)) 是「n 加 1」。"
+goal: "寫 numbered.sh FILE：把檔案每一行前面加上行號、冒號與空格，例如 1: 第一行。"
 teaches: [read, bash]
 xp: 35
 hints:
-  - "n=0; while IFS= read -r line; do n=$((n+1)); echo \"$n: $line\"; done < \"$1\""
+  - "先設計數器：n=0，每處理一行就 n=$((n+1))。"
+  - "骨架：n=0; while IFS= read -r line; do n=$((n+1)); echo \"$n: $line\"; done < \"$1\""
+  - "$1 是傳給腳本的檔名；用 ./numbered.sh 某檔案 測試。"
 setup: |
   printf 'alpha\nbeta  gamma\n\ndelta\n' > /home/player/sample.txt
 check: |

@@ -1,13 +1,14 @@
 id: "7-24"
 title: rsync 鏡像
 kind: practice
-story: "備份目錄裡有過期的舊檔案，而來源已經更新。--delete 會讓目的地「完全變成來源的樣子」：來源沒有的檔案，目的地也會被刪掉。這個選項很強大也很危險，建議先加 -n 試跑。"
+story: "備份目錄裡有過期的舊檔案，而來源已經更新了。rsync 加上 --delete 會讓目的地「完全變成來源的樣子」：來源沒有的檔案，目的地也會被刪掉。這是「鏡像」。\n\n它很強大也很危險（路徑寫反就會把資料刪光），建議先加 -n（dry run，只演練不真做）看看會發生什麼，確定沒問題再拿掉 -n。"
 goal: "讓 mirror 完全變成 live 的鏡像（多出來的舊檔案要被移除，新檔案要補上）。"
 teaches: [rsync]
 xp: 35
 hints:
-  - "rsync -av --delete live/ mirror/"
-  - "先用 -n（dry run）預覽會發生什麼。"
+  - "格式：rsync -av --delete 來源/ 目的/，這裡來源是 live，目的是 mirror。"
+  - "先演練：rsync -avn --delete live/ mirror/，看它打算刪什麼、補什麼。"
+  - "沒問題就正式執行：rsync -av --delete live/ mirror/"
 setup: |
   cd /home/player
   rm -rf live mirror

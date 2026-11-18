@@ -1,12 +1,13 @@
 id: "1-11"
 title: 只看結尾
 kind: learn
-story: "tail 是 head 的兄弟，只顯示結尾。看日誌時最常用，因為最新的事件都在最後。"
-goal: "transmission.log 的最後一行有校驗碼（checksum=）。只看結尾，把校驗碼用 answer 提交。"
+story: "tail 是 head 的兄弟，只印出檔案「結尾」的幾行，用法一樣：tail -n 數字 檔名。\n\n看日誌時超常用，因為日誌是一行行往後加的，最新的事件永遠在最後面。"
+goal: "transmission.log 的最後一行有校驗碼（checksum=某字串）。只看結尾，把校驗碼用 answer 提交。"
 teaches: [tail]
 xp: 15
 hints:
-  - "tail -n 1 transmission.log"
+  - "打：tail -n 1 transmission.log（只印最後 1 行）。"
+  - "answer 提交 checksum= 後面的那串字元。"
 setup: |
   cd /home/player
   c=$(printf '%06X' $(( (RANDOM * 32768 + RANDOM) % 16777216 )))

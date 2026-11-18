@@ -1,13 +1,14 @@
 id: "10-04"
 title: vim：刪除與移動
 kind: practice
-story: "vim 的威力在於動作的組合。移動：h j k l（左下上右）、gg 檔頭、G 檔尾、數字 G 跳到某一行。刪除：dd 刪一行、3dd 刪三行、x 刪一個字元。u 復原。"
+story: "vim 的威力在於「動作的組合」。這些都在「一般模式」下按（不用進插入模式）：\n  h j k l    左 下 上 右（方向鍵也可以）\n  gg  跳到檔案開頭　G  跳到檔案結尾　3G  跳到第 3 行\n  dd   刪掉游標所在的整行　3dd  刪三行\n  x    刪掉游標上的一個字元\n  u    復原（undo）\n刪完要存檔：:wq。"
 goal: "tasks.txt 的第 3 行是已取消的任務。用 vim 把第 3 行刪掉，存檔離開。"
 teaches: [vim]
 xp: 35
 hints:
-  - "vim tasks.txt，輸入 3G 跳到第三行，再按 dd。"
-  - "按 :wq 存檔離開。"
+  - "打：vim tasks.txt（剛開啟就是一般模式）。"
+  - "輸入 3G（先 3 再大寫 G）跳到第 3 行，再按 dd 刪掉整行。如果刪錯，按 u 復原。"
+  - "打 :wq 再 Enter，存檔並離開。"
 setup: |
   printf 'task one\ntask two\nCANCELLED task\ntask four\n' > /home/player/tasks.txt
 check: |

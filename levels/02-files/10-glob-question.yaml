@@ -1,13 +1,14 @@
 id: "2-10"
 title: 萬用字元 ? 與 []
 kind: practice
-story: "? 剛好匹配「一個」任意字元；[abc] 匹配括號內任一字元。用它們可以精準挑檔案。"
+story: "除了 * 之外，還有更精準的萬用字元：\n  ?       剛好代表「一個」任意字元。report-?.txt 能配到 report-1.txt，但配不到 report-10.txt（那有兩個字元）。\n  [abc]   代表括號裡「任一個」字元。report-[12].txt 配 report-1.txt 和 report-2.txt。\n\n用它們可以精準挑出一群檔案。"
 goal: "刪除 report-1.txt 到 report-9.txt（單一位數），但 report-10.txt 與 report-final.txt 要保留。"
 teaches: ["?", "[]"]
 xp: 20
 hints:
-  - "report-?.txt 只會匹配單一字元的那些。"
-  - "rm report-?.txt"
+  - "問號 ? 只代表一個字元，所以 report-?.txt 只會配到數字只有一位的檔案。"
+  - "先用 ls report-?.txt 預覽它會配到哪些檔案，確認沒有誤中。"
+  - "確認沒問題再打：rm report-?.txt"
 setup: |
   cd /home/player
   for i in 1 2 3 4 5 6 7 8 9 10; do echo $i > report-$i.txt; done

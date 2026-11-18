@@ -1,13 +1,14 @@
 id: "9-09"
 title: curl 配 jq：處理 API 回應
 kind: practice
-story: "現代 API 都回傳 JSON。curl -s 取回、jq 解析，是工程師每天都在用的組合。jq length 可以數陣列長度。"
+story: "現代 API 幾乎都回傳 JSON 格式的資料（像 [{\"name\":\"Ann\"},{\"name\":\"Bob\"}]）。工程師每天都在用的組合：\n  curl -s 網址 | jq ...\ncurl 取回資料、jq 負責解析（第 4 階段學過）。\njq length 會告訴你「陣列有幾個元素」。"
 goal: "http://127.0.0.1:8080/crew.json 是船員名單（JSON 陣列）。取回它，數出總共有幾位船員，answer 提交。"
 teaches: [curl, jq]
 xp: 35
 hints:
-  - "curl -s http://127.0.0.1:8080/crew.json | jq"
-  - "jq length"
+  - "先看資料：curl -s http://127.0.0.1:8080/crew.json | jq"
+  - "陣列最外層的元素個數就是人數。"
+  - "打：curl -s http://127.0.0.1:8080/crew.json | jq length，answer 那個數字。"
 setup: |
   rm -rf /srv/site; mkdir -p /srv/site
   n=$((RANDOM % 9 + 4))

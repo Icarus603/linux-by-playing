@@ -1,13 +1,14 @@
 id: "6-05"
 title: SIGKILL：強制終止
 kind: practice
-story: "有些程序會攔截 SIGTERM 假裝沒聽到。這時要用 kill -9（SIGKILL），它無法被攔截，核心直接收掉程序。這是最後手段，因為程序沒機會做清理。"
+story: "有些程序會「攔截」SIGTERM，假裝沒聽到，一般的 kill 對它沒用。\n\n這時用 kill -9（SIGKILL，編號 9）：這個訊號無法被攔截，核心直接把程序收掉。它是最後手段，因為程序完全沒機會存檔、清理。\n  pkill -9 -f 關鍵字   依「指令全文」找到程序，用 -9 強制結束"
 goal: "stubborn.sh 不理會一般的 kill。想辦法把它結束。"
 teaches: [kill, pkill]
 xp: 25
 hints:
-  - "先試 pkill -f stubborn.sh，看看它還在不在。"
-  - "pkill -9 -f stubborn.sh，或 kill -9 <PID>"
+  - "先試普通的 pkill -f stubborn.sh，再用 pgrep -f stubborn.sh 看它還在不在。"
+  - "還在就要用 -9 強制：pkill -9 -f stubborn.sh"
+  - "或者先 pgrep -f stubborn.sh 取得 PID，再 kill -9 PID。"
 setup: |
   mkdir -p /usr/local/lib/lbp
   printf '#!/bin/bash\ntrap "" TERM\nwhile :; do sleep 1; done\n' > /usr/local/lib/lbp/stubborn.sh

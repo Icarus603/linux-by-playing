@@ -1,13 +1,14 @@
 id: "2-16"
 title: 誰佔了空間
 kind: practice
-story: "磁碟快滿了！du -sh 顯示目錄大小（-s 總計、-h 人類可讀）；df -h 顯示各磁碟的剩餘空間。"
+story: "磁碟快滿了！要找是誰佔了空間：\n  du -sh 目錄   算出目錄佔多少（du = disk usage；-s 只給總數，-h 用 MB、GB 這種好讀的單位）\n  df -h         看各個磁碟還剩多少空間\n\ndu -sh * 的 * 會展開成這裡的所有項目，一次看到每個的大小。"
 goal: "找出 storage 底下哪個子目錄最大，answer 提交它的名稱。"
 teaches: [du, df]
 xp: 20
 hints:
-  - "cd storage 之後執行 du -sh *"
-  - "du -sh storage/* | sort -h 會把最大的排在最後（sort 之後會學到）。"
+  - "先 cd storage 進去。"
+  - "打：du -sh *，每個項目後面會顯示大小。"
+  - "比較大小（K < M < G），最大的那個目錄名就是答案。"
 setup: |
   cd /home/player
   mkdir -p storage/{videos,photos,docs,music}

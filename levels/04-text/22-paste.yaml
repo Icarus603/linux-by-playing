@@ -1,12 +1,14 @@
 id: "4-22"
 title: paste 與其他小工具
 kind: practice
-story: "paste 把多個檔案「橫向」合併。還有 nl（加行號）、column -t（對齊成表格）、rev（反轉每行）、fold（斷行），都是好用的小工具。"
+story: "paste 把多個檔案「橫著」併起來：第一個檔的第 1 行接上第二個檔的第 1 行，以此類推（中間用 Tab 隔開）。像把兩欄資料並排貼成一張表。\n\n另外還有幾個小工具：nl 加行號、column -t 把資料對齊成表格、rev 把每行反過來、fold 把長行折斷。"
 goal: "把 names.txt 與 ages.txt 用 paste 橫向合併，存成 people.tsv。"
 teaches: [paste, nl, column, rev, fold]
 xp: 20
 hints:
-  - "paste names.txt ages.txt > people.tsv"
+  - "格式：paste 檔案1 檔案2"
+  - "合併結果用 > 存成檔案。"
+  - "打：paste names.txt ages.txt > people.tsv"
 setup: |
   cd /home/player
   printf 'ann\nbob\ncat\n' > names.txt

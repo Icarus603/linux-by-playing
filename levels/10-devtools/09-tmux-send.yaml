@@ -1,14 +1,14 @@
 id: "10-09"
 title: tmux：對背景視窗下指令
 kind: practice
-story: "tmux send-keys -t 工作階段 '指令' Enter 能對背景裡的工作階段「打字」，就像你坐在那裡一樣。這讓你能用腳本遙控長時間執行的工作。"
+story: "tmux send-keys 能對背景裡的工作階段「幫你打字」，就像你坐在那個終端機前一樣：\n  tmux send-keys -t 工作階段 '指令' Enter\n-t 指定對象，'指令' 是要打的字，最後的 Enter 是「按下 Enter 鍵」（不是文字 Enter）。這讓你能用腳本遙控長時間執行的工作。"
 goal: "建立背景工作階段 ops，然後用 send-keys 讓它在家目錄建立檔案 sent.txt（touch ~/sent.txt）。"
 teaches: [tmux]
 xp: 40
 hints:
-  - "tmux new -d -s ops"
-  - "tmux send-keys -t ops 'touch ~/sent.txt' Enter"
-  - "給它一點時間（sleep 1）再檢查。"
+  - "先建工作階段：tmux new -d -s ops"
+  - "再讓它執行指令：tmux send-keys -t ops 'touch ~/sent.txt' Enter"
+  - "給它一點時間（sleep 1）再用 ls ~ 確認 sent.txt 出現了。"
 setup: |
   runuser -u player -- tmux kill-server 2>/dev/null || true
   rm -f /home/player/sent.txt

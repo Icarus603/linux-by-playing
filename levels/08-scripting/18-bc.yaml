@@ -1,12 +1,14 @@
 id: "8-18"
 title: bc：小數運算
 kind: practice
-story: "bash 的 $(( )) 只能算整數。要算小數就交給 bc：echo \"scale=2; 7/3\" | bc 會得到 2.33，scale 指定小數位數。"
+story: "bash 的 $(( )) 只能算「整數」，7/3 會得到 2。要算小數就交給 bc（一個計算機程式）：\n  echo \"scale=2; 7/3\" | bc\n輸出 2.33。其中 scale=2 指定「小數點後留兩位」。把算式用 echo 送進 bc 的標準輸入就行。\n（注意：除數 0 當然會出錯。）"
 goal: "寫 avg.sh 數字…：印出平均值，固定兩位小數。例如 ./avg.sh 1 2 4 印 2.33。"
 teaches: [bc, bash]
 xp: 40
 hints:
-  - "先加總，再 echo \"scale=2; $total/$#\" | bc"
+  - "先算總和（像上一關的 while + shift，或 for 迴圈），並用 $# 得知個數。"
+  - "總和除以個數：echo \"scale=2; $total/$#\" | bc"
+  - "注意 $# 要在 shift 之前取（不然已經被減少了），可以先存進變數 n=$#。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

@@ -2,13 +2,14 @@ id: "1-07"
 title: 相對路徑與 ..
 kind: practice
 cwd: /home/player/station/deck-2/engine/core
-story: "相對路徑從「目前位置」出發。.. 代表上一層，. 代表這裡。你現在深入引擎核心，要往上退。"
-goal: 只用相對路徑，從 core 退回上兩層，到 deck-2 目錄。
+story: "除了從 / 開始的絕對路徑，還有「相對路徑」：從你「現在站的位置」出發。\n\n兩個特殊符號：\n  .   代表「這裡」（目前目錄）\n  ..  代表「上一層」（外面那個目錄）\n\n例如你在 /a/b/c，cd .. 會到 /a/b；cd ../.. 會一次退兩層到 /a。你現在深入引擎核心，要往外退。"
+goal: "不要用 / 開頭的路徑，只用 .. 從 core 退回上兩層，到 deck-2 目錄。"
 teaches: [cd]
 xp: 15
 hints:
-  - ".. 是上一層，../.. 是上兩層。"
-  - "cd ../.."
+  - ".. 是上一層，所以要退兩層就連著寫兩個：../.."
+  - "打：cd ../..（中間用斜線隔開）"
+  - "打完用 pwd 確認，結尾應該是 deck-2。"
 setup: |
   mkdir -p /home/player/station/deck-2/engine/core
 check: |

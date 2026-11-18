@@ -1,13 +1,14 @@
 id: "8-02"
 title: 變數與指令替換
 kind: learn
-story: "變數用 NAME=值（等號兩邊不能有空格），用 $NAME 取值。$(指令) 會執行指令並把輸出換進來，這叫指令替換。"
+story: "「變數」是給一個值取名字、存起來備用：\n  name=Ada          設定（等號兩邊「不能」有空格）\n  echo \"Hi $name\"   用 $name 取出值\n\n「指令替換」$(指令)：先執行括號裡的指令，再把它印出的結果塞回來。例如：\n  n=$(ls crew | wc -l)   把「crew 裡有幾個檔案」的結果存進變數 n\n  echo \"Crew: $n\"       印出 Crew: 7（假設有 7 個）\n\n腳本寫法複習：第一行 #!/bin/bash，寫好用 chmod +x 加執行權限。"
 goal: "crew/ 目錄裡有若干檔案。寫 crew-count.sh，把檔案數量存進變數，印出 Crew: 數量（例如 Crew: 7）。"
 teaches: [echo, ls, wc]
 xp: 25
 hints:
-  - "n=$(ls crew | wc -l)"
-  - "echo \"Crew: $n\""
+  - "腳本內容共三行：#!/bin/bash、n=$(ls crew | wc -l)、echo \"Crew: $n\"。"
+  - "用 cat > crew-count.sh << 'EOF' 寫檔，再 chmod +x crew-count.sh。"
+  - "執行 ./crew-count.sh 檢查輸出。"
 setup: |
   cd /home/player
   rm -rf crew; mkdir crew

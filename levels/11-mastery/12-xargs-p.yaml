@@ -1,13 +1,14 @@
 id: "11-12"
 title: xargs -P：平行處理
 kind: practice
-story: "xargs -P N 同時最多跑 N 個工作。八件各需 1 秒的工作，循序要 8 秒，開 8 個平行只要約 1 秒。-n 1 讓每個工作一次只吃一個參數。這是不寫腳本就榨出多核心效能的最簡單方法。"
+story: "xargs 預設一個一個依序處理。加上 -P N 就能「同時最多跑 N 個」，也就是平行處理，能用上多個 CPU 核心：\n  seq 8 | xargs -P 8 -n 1 指令\n  -P 8   最多同時 8 個\n  -n 1   每個工作一次只吃 1 個參數\n八件各需 1 秒的工作，循序要 8 秒，開 8 個平行只要約 1 秒。這是不用寫腳本就榨出多核心效能的最簡單方法。"
 goal: "slow-task 每次要 1 秒，並把完成時間記到 ~/stamps.log。用 xargs 平行執行 slow-task 1 到 8（-P 8），讓八筆紀錄的完成時間相差不到 2.5 秒。"
 teaches: [xargs, seq]
 xp: 60
 hints:
-  - "seq 8 | xargs -P 8 -n 1 slow-task"
-  - "如果先循序跑了，要用 /restart 重來（它會清掉紀錄）。"
+  - "先產生 1 到 8：seq 8，再用管線交給 xargs。"
+  - "打：seq 8 | xargs -P 8 -n 1 slow-task"
+  - "如果不小心先循序跑過了，紀錄會不對，輸入 /restart 重新開始這關（會清掉紀錄）。"
 setup: |
   rm -f /home/player/stamps.log
   printf '#!/bin/bash\nsleep 1\necho "$(date +%%s.%%N) $1" >> /home/player/stamps.log\n' > /usr/local/bin/slow-task

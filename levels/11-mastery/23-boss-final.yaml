@@ -1,16 +1,16 @@
 id: "11-23"
 title: "最終 Boss：整座壞掉的站"
 kind: boss
-story: "警報響徹 Kernel-7。Vega 的回程訊號即將抵達，但站上同時出了五種故障：磁碟被一個失控的日誌塞爆、CPU 被吃光、閘道服務起不來、共用目錄的權限錯亂、還有防火牆擋著閘道的埠。每一種你都學過怎麼處理。這是最後一戰。"
+story: "警報響徹 Kernel-7。Vega 的回程訊號即將抵達，但站上同時出了五種故障：磁碟被一個失控的日誌塞爆、CPU 被吃光、閘道服務起不來、共用目錄的權限錯亂、還有防火牆擋著閘道的埠。\n\n每一種你都學過怎麼處理，這是最後一戰。建議一個一個來，修好一個確認一個：\n  ① 磁碟爆 → 找出大檔案、清空它\n  ② CPU 爆 → 找出並結束吃 CPU 的程序\n  ③ 服務壞 → systemctl status / journalctl 找原因\n  ④ 權限亂 → chgrp + chmod（setgid）\n  ⑤ 網路不通 → ss、iptables"
 goal: "全部修好：① /var/log/station/audit.log 暴長，把它清空（檔案要留著）。② 結束吃光 CPU 的 cpu-hog。③ 讓 gateway.service 成功執行。④ /srv/shared 要讓群組 ops 可寫，且新檔案自動屬於 ops（群組 ops、權限 2775）。⑤ 讓 curl http://127.0.0.1:9700/ 能取得 GATEWAY-OK。"
 teaches: [find, kill, systemctl, journalctl, chmod, iptables, sudo]
 xp: 300
 hints:
-  - "一個一個來。① find /var/log -size +100M 或 ls -lS 找最大的檔案；truncate -s 0 清空。"
-  - "② ps aux --sort=-%cpu 或 pkill cpu-hog。"
-  - "③ systemctl status gateway、journalctl -u gateway：設定檔路徑差一個字母。修單元檔後 start。"
+  - "① 找最大的檔案：sudo ls -lS /var/log/station；清空但保留檔案：sudo truncate -s 0 /var/log/station/audit.log"
+  - "② 找出吃 CPU 的程序：ps aux --sort=-%cpu | head，然後 pkill cpu-hog。"
+  - "③ systemctl status gateway、journalctl -u gateway：通常是設定檔路徑差一個字母。修好單元檔（/etc/lbp-systemd/ 底下，要 sudo）後 sudo systemctl start gateway。"
   - "④ sudo chgrp ops /srv/shared && sudo chmod 2775 /srv/shared"
-  - "⑤ 服務好了還連不上？sudo iptables -S，刪除擋 9700 的規則。"
+  - "⑤ 服務好了還連不上？sudo iptables -S 找到擋 9700 的規則，把 -A 換成 -D 刪掉，再 curl http://127.0.0.1:9700/。"
 setup: |
   mkdir -p /var/log/station /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal /srv/shared /usr/local/lib/lbp
   truncate -s 300M /var/log/station/audit.log

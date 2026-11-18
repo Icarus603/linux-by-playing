@@ -1,13 +1,14 @@
 id: "6-13"
 title: lsof：誰開著這個檔案
 kind: practice
-story: "在 Linux，「一切皆檔案」：磁碟、socket、裝置都是。lsof 列出程序開啟的檔案，反過來也能問「誰正在用這個檔案」。ledger.log 好像被某個程序鎖著。"
+story: "在 Linux 裡「一切皆檔案」：連網路連線、裝置都被當成檔案。lsof（list open files）列出「程序目前開著哪些檔案」，也能反過來問：「這個檔案現在被誰開著？」\n\n用途：想刪除或卸載某個東西卻被告知「正在使用中」時，就用它抓出是哪個程序。\nledger.log 好像被某個程序一直占著。"
 goal: "找出正在開啟 ledger.log 的程序 PID，answer 提交。"
 teaches: [lsof]
 xp: 25
 hints:
-  - "lsof /home/player/ledger.log"
-  - "PID 在第二欄。"
+  - "格式：lsof 檔案路徑"
+  - "打：lsof /home/player/ledger.log"
+  - "輸出的第 2 欄（PID）就是答案。"
 setup: |
   cd /home/player
   echo "ledger start" > ledger.log

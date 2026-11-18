@@ -1,15 +1,15 @@
 id: "8-23"
 title: "Boss：Warden 的第一支腳本"
 kind: boss
-story: "Warden 決定自己寫備份腳本。它說它想把每一件事做對：檢查參數、處理錯誤、留下紀錄。你來幫它把規格落實。這是對你整個階段所學的總驗收。"
+story: "Warden 決定自己寫備份腳本。它說它想把每一件事做對：檢查參數、處理錯誤、留下紀錄。你來幫它把規格落實。這是對整個階段所學的總驗收。\n\n拆成小步驟，一步一步加：\n  ① 解析選項 -v（getopts），再 shift 掉選項\n  ② 檢查參數個數\n  ③ 檢查來源是不是目錄\n  ④ 建立目的目錄（mkdir -p）\n  ⑤ 用 tar 打包\n  ⑥ 印出結果\n每加一步就測一次，別一次寫完。"
 goal: "寫 backup.sh [-v] SRC DEST：沒有參數印 Usage: backup.sh [-v] SRC DEST 結束碼 1；SRC 不是目錄就在 stderr 印 error: SRC not found 結束碼 2；DEST 不存在要建立；把 SRC 打包成 DEST/backup-年月日.tar.gz（年月日 = date +%Y%m%d）並印 OK 檔案路徑；加 -v 時最前面多印 Backing up SRC -> DEST。"
 teaches: [getopts, tar, mkdir, set, trap]
 xp: 150
 hints:
-  - "先處理選項（getopts \"v\"），再 shift $((OPTIND-1))。"
-  - "參數不夠：[ $# -lt 2 ]；SRC 檢查：[ ! -d \"$src\" ]。"
-  - "mkdir -p \"$dest\"，再 tar -czf \"$dest/backup-$(date +%Y%m%d).tar.gz\" -C \"$(dirname \"$src\")\" \"$(basename \"$src\")\"。"
-  - "輸出用 echo \"OK $file\"。"
+  - "先處理選項：while getopts \"v\" opt; do case $opt in v) verbose=1;; *) exit 1;; esac; done; shift $((OPTIND-1))（shift 掉選項，剩下的 $1 是 SRC、$2 是 DEST）。"
+  - "參數不夠：[ $# -lt 2 ] 就印 Usage 並 exit 1；SRC 檢查：[ ! -d \"$src\" ] 就在 stderr 印 error 並 exit 2。"
+  - "建目的目錄與打包：mkdir -p \"$dest\"；tar -czf \"$dest/backup-$(date +%Y%m%d).tar.gz\" -C \"$(dirname \"$src\")\" \"$(basename \"$src\")\"。"
+  - "最後輸出：echo \"OK $file\"（$file 是壓縮檔的路徑）；有 -v 時在最前面印 Backing up SRC -> DEST。"
 setup: ""
 check: |
   PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }

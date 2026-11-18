@@ -1,12 +1,14 @@
 id: "10-05"
 title: vim：在結尾新增
 kind: practice
-story: "快速進入插入模式的幾種方式：i 在游標前、a 在游標後、o 在下方新開一行、O 在上方新開一行、A 跳到行尾再插入。寫日誌最常用 o。"
+story: "進入插入模式有好幾種方式（都在一般模式下按）：\n  i   在游標前面開始輸入　　　a   在游標後面\n  o   在目前這行「下方」新開一行並進入輸入　　O   在上方新開一行\n  A   跳到這行最後面再開始輸入\n寫日誌要在檔尾新增一行，最常用的就是：按 G 跳到檔尾，再按 o。"
 goal: "在 log.txt 最後新增一行：mission complete，存檔離開。"
 teaches: [vim]
 xp: 30
 hints:
-  - "vim log.txt，按 G 跳到檔尾，按 o 新開一行，輸入文字，Esc，:wq。"
+  - "打：vim log.txt，按 G（大寫）跳到檔案最後一行。"
+  - "按 o 會在下方新開一行並進入插入模式，打：mission complete，再按 Esc。"
+  - "打 :wq 再 Enter 存檔離開。用 tail log.txt 確認。"
 setup: |
   printf 'boot ok\nsystems nominal\n' > /home/player/log.txt
 check: |

@@ -1,14 +1,14 @@
 id: "7-14"
 title: cron：排程
 kind: practice
-story: "cron 讓系統定時執行工作。格式是五個欄位加指令：分 時 日 月 星期。例如 30 3 * * * 是每天凌晨 3:30。crontab -l 看目前排程，crontab 檔案 則安裝一份排程。"
+story: "cron 是系統的「鬧鐘」，讓電腦定時自動執行工作（備份、清理……）。排程每行的格式是五個時間欄位加一個指令：\n  分  時  日  月  星期  指令\n  *  代表「每一個」\n例如 30 3 * * * 表示「每天 3 點 30 分」。\n  crontab -l      看目前的排程\n  crontab 檔案    安裝排程檔（內容會取代原本的）\n可以用管線送內容進去：echo '排程' | crontab -"
 goal: "安裝一筆排程：每天凌晨 3:30 執行 /home/player/backup.sh。"
 teaches: [crontab, cron]
 xp: 30
 hints:
-  - "排程的寫法：30 3 * * * /home/player/backup.sh"
-  - "echo '30 3 * * * /home/player/backup.sh' | crontab -"
-  - "用 crontab -l 確認。"
+  - "排程的寫法：30 3 * * * /home/player/backup.sh（分 時 日 月 星期 指令）"
+  - "用 echo 加管線送進去：echo '30 3 * * * /home/player/backup.sh' | crontab -"
+  - "用 crontab -l 確認排程已經裝上。"
 setup: |
   crontab -r -u player 2>/dev/null || true
   printf '#!/bin/bash\necho backup >> /home/player/backup.log\n' > /home/player/backup.sh

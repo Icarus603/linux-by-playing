@@ -1,13 +1,14 @@
 id: "6-08"
 title: nohup：登出也不死
 kind: practice
-story: "關掉終端機時，系統會送 SIGHUP 給底下的程序，通常它們就跟著結束了。nohup 讓程序忽略 SIGHUP，常配合 & 用在長時間任務。"
+story: "當你關掉終端機（或斷線），系統會送一個叫 SIGHUP（「掛斷」）的訊號給底下的程式，它們通常就跟著結束了。\n\n如果你要跑一個長時間的任務，又想關掉終端機也不要中斷，就在指令前加 nohup（no hang up，不要被掛斷）。通常再配上 & 丟到背景：\n  nohup 指令 &\n輸出會被自動存進 nohup.out。"
 goal: "用 nohup 在背景執行 sleep 500。"
 teaches: [nohup]
 xp: 20
 hints:
-  - "nohup sleep 500 &"
-  - "輸出會寫進 nohup.out；也可以重導向：nohup sleep 500 > /dev/null 2>&1 &"
+  - "nohup 加在指令最前面，& 加在最後面。"
+  - "打：nohup sleep 500 &"
+  - "輸出會寫進 nohup.out；想丟掉輸出可以用：nohup sleep 500 > /dev/null 2>&1 &"
 setup: ""
 check: |
   pgrep -u player -f '^sleep 500$' >/dev/null && [[ "$LBP_LAST" == *nohup* ]]

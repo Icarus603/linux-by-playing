@@ -1,12 +1,14 @@
 id: "4-09"
 title: cut：切出欄位
 kind: practice
-story: "cut 從每一行中取出指定的欄位：-d 指定分隔符號，-f 指定第幾欄。"
-goal: "users.csv 格式是 名字,Email,部門。把第 2 欄（Email）取出，存成 emails.txt。"
+story: "cut 像一把裁紙刀，從每一行切出你要的「欄」：\n  -d,   告訴它欄位用逗號分隔（d = delimiter，分隔符號）\n  -f2   取第 2 欄（f = field）\n例如一行 Bob,bob@mail.com,ops，用 cut -d, -f2 就會得到 bob@mail.com。"
+goal: "users.csv 每行格式是 名字,Email,部門。把第 2 欄（Email）取出，存成 emails.txt。"
 teaches: [cut]
 xp: 20
 hints:
-  - "cut -d, -f2 users.csv > emails.txt"
+  - "Email 是第 2 欄，欄位用逗號分隔。"
+  - "格式：cut -d分隔符號 -f欄號 檔名"
+  - "打：cut -d, -f2 users.csv > emails.txt"
 setup: |
   cd /home/player
   printf 'ann,ann@kernel7.io,ops\nbob,bob@kernel7.io,dev\ncat,cat@kernel7.io,ops\n' > users.csv

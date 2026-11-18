@@ -1,13 +1,14 @@
 id: "9-20"
 title: SSH 隧道
 kind: practice
-story: "ssh -L 本機埠:目標主機:目標埠 會在本機開一個埠，把流量經由 SSH 轉送到遠端那一側能連到的地方。-N 不執行遠端指令、-f 放到背景。這是穿越防火牆與安全存取內部服務的經典招式。內部服務只聽 127.0.0.1:9500。"
+story: "SSH 隧道：在本機開一個埠，把送到它的流量「經由 SSH 加密後轉送」到遠端那一側才連得到的地方。常用來穿過防火牆、安全地使用內部服務。\n  ssh -L 本機埠:目標主機:目標埠 登入的主機\n    -L   建立轉送（本機埠 → 目標）\n    -N   不執行遠端指令，只維持隧道\n    -f   放到背景\n內部服務只聽 127.0.0.1:9500（外面連不到），但經由 vaultkeeper 那邊就連得到。"
 goal: "建立一條 SSH 隧道，讓本機的 9600 埠轉送到 127.0.0.1:9500（透過 vaultkeeper@127.0.0.1 的 2222 埠）。完成後 curl http://127.0.0.1:9600/secret.txt 要能取得內容。"
 teaches: [ssh]
 xp: 65
 hints:
-  - "ssh -fN -L 9600:127.0.0.1:9500 -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1"
-  - "-fN 讓它在背景持續運作。"
+  - "要轉送：本機 9600 → 遠端看到的 127.0.0.1:9500，寫成 -L 9600:127.0.0.1:9500。"
+  - "打：ssh -fN -L 9600:127.0.0.1:9500 -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1"
+  - "-fN 讓它在背景持續運作。接著 curl http://127.0.0.1:9600/secret.txt 驗證。"
 setup: |
   # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
   id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper

@@ -1,14 +1,14 @@
 id: "7-10"
 title: PATH：指令從哪裡來
 kind: practice
-story: "你打 ls，shell 怎麼知道它在哪？靠 PATH：一串用冒號隔開的目錄，shell 會依序在裡面找可執行檔。把你自己的工具目錄加進去，就能像內建指令一樣呼叫它。"
+story: "你打 ls，shell 怎麼知道 ls 這個程式放在哪？靠一個叫 PATH 的環境變數：它是用冒號隔開的一串目錄，shell 會依序到這些目錄裡找你打的指令。\n\n把你自己的工具目錄加進 PATH，就能像內建指令一樣直接呼叫它，不用每次寫完整路徑。\n  echo $PATH                       看目前的 PATH\n  export PATH=$PATH:新目錄         在原本的後面再加一個目錄"
 goal: "~/tools 裡有個可執行檔 hello。讓你可以直接輸入 hello（不加路徑）就執行成功。"
 teaches: [export, which]
 xp: 25
 hints:
-  - "echo $PATH 先看目前的 PATH。"
-  - "export PATH=$PATH:$HOME/tools"
-  - "設好之後輸入 hello。"
+  - "先看目前的 PATH：echo $PATH"
+  - "把 tools 目錄加進去：export PATH=$PATH:$HOME/tools（$HOME 就是你的家目錄）"
+  - "設好之後直接輸入 hello 試試看。"
 setup: |
   cd /home/player
   mkdir -p tools

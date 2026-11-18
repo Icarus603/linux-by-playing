@@ -1,12 +1,14 @@
 id: "2-04"
 title: 備份一份
 kind: learn
-story: "動手改重要檔案前先備份是好習慣。cp 來源 目的 複製檔案。"
-goal: 把 blueprint.txt 複製成 blueprint.bak（原檔要保留）。
+story: "動手改重要檔案之前，先備份是好習慣。cp（copy，複製）的格式是：cp 來源 目的地。\n\n原檔不會被動，會多出一份一模一樣的。如果目的地寫的是新檔名，就是「複製並取新名字」。"
+goal: "把 blueprint.txt 複製成 blueprint.bak（原檔要保留）。"
 teaches: [cp]
 xp: 10
 hints:
-  - "cp blueprint.txt blueprint.bak"
+  - "格式：cp 來源檔 新檔名"
+  - "打：cp blueprint.txt blueprint.bak"
+  - "用 ls 看，兩個檔案應該都在。"
 setup: |
   echo "reactor blueprint v3" > /home/player/blueprint.txt
 check: |

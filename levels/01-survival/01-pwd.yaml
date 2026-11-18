@@ -1,13 +1,14 @@
 id: "1-01"
 title: 我在哪裡？
 kind: learn
-story: "歡迎登艙，我是 Pip！Kernel-7 號空間站只剩這一台終端機還亮著，前任管理員 Vega 失蹤了。想找到他，先學會看清自己站在哪：終端機就像站內走廊，你永遠站在某個目錄裡。"
-goal: 輸入 pwd，印出你目前所在的目錄。
+story: "歡迎登艙，我是 Pip！Kernel-7 號空間站只剩這台終端機還亮著，前任管理員 Vega 失蹤了。\n\n你現在看到的黑底畫面叫「終端機」：你打一行文字（叫做「指令」），按 Enter，電腦就照做並回覆你。就像用文字跟電腦傳訊息。\n\n電腦裡的檔案都放在一層層的「資料夾」裡（Linux 稱為「目錄」），你永遠「站」在其中一個目錄裡。第一個指令 pwd 就是問：「我現在站在哪？」"
+goal: "在最下面的輸入列打 pwd（三個小寫字母），按 Enter。"
 teaches: [pwd]
 xp: 10
 hints:
-  - pwd 是 print working directory 的縮寫。
-  - 直接輸入 pwd 然後按 Enter。
+  - "pwd 是 print working directory（印出目前工作目錄）的縮寫。"
+  - "只要打 pwd 這三個字母，不用加別的，然後按 Enter。"
+  - "輸入列看起來像 player@kernel-7:~$ 的地方，就是你打字的位置。"
 setup: ""
 check: |
   [[ "$LBP_LAST" == "pwd" ]]

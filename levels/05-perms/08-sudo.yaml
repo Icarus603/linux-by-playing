@@ -1,13 +1,14 @@
 id: "5-08"
 title: sudo：借用 root 的力量
 kind: learn
-story: "root 是系統的超級管理員，什麼都能做，所以平常不要用 root 登入。需要時用 sudo 指令 臨時以 root 身分執行單一指令。"
+story: "root 是系統裡的超級管理員，什麼都能做，也能不小心把整個系統弄壞，所以平常不要用 root 登入。\n\n需要做管理工作時，在指令前面加 sudo（superuser do），就能「臨時用 root 的身分執行這一個指令」，做完就恢復普通使用者。\n  sudo 指令"
 goal: "/root/mission.txt 只有 root 能讀。用 sudo cat 讀出內容，answer 提交 MISSION: 後面的代號。"
 teaches: [sudo]
 xp: 20
 hints:
-  - "先試 cat /root/mission.txt，會被拒絕。"
-  - "sudo cat /root/mission.txt"
+  - "先打 cat /root/mission.txt，你會看到 Permission denied（沒權限）。"
+  - "在同一個指令前面加 sudo：sudo cat /root/mission.txt"
+  - "找到 MISSION: 後面的代號，answer 它。"
 setup: |
   echo "MISSION: AURORA-5" > /root/mission.txt
   chmod 600 /root/mission.txt

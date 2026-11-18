@@ -1,12 +1,14 @@
 id: "3-08"
 title: grep -i -n
 kind: practice
-story: "-i 忽略大小寫，-n 顯示行號。管理設定檔時，常需要知道某個設定在第幾行。"
+story: "grep 常用的兩個選項：\n  -i   忽略大小寫（Password、PASSWORD、password 都算）\n  -n   在每行前面印出「行號」\n兩個可以合寫成 -in。管理設定檔時，常常需要知道某個設定在第幾行。"
 goal: "server.conf 裡有一行含有 password（大小寫不確定）。用 grep -in 找出它在第幾行，answer 提交行號。"
 teaches: [grep]
 xp: 20
 hints:
-  - "grep -in password server.conf"
+  - "格式：grep -in 關鍵字 檔名"
+  - "打：grep -in password server.conf"
+  - "輸出開頭「數字:」那個數字就是行號，answer 它。"
 setup: |
   cd /home/player
   { for i in $(seq 1 36); do echo "option$i=on"; done; echo "DB_Password=hunter2"; for i in $(seq 38 80); do echo "option$i=off"; done; } > server.conf

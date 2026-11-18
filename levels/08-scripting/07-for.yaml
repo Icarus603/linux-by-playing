@@ -1,12 +1,14 @@
 id: "8-07"
 title: for 迴圈
 kind: practice
-story: "for 迴圈對一串東西逐一處理。可以遍歷清單（for x in a b c）、萬用字元（for f in *.txt）或數字範圍（seq 或 {1..5}）。"
+story: "for 迴圈：「對一串東西，每個都做一遍」。\n  for x in a b c; do echo \"$x\"; done     對清單裡每個\n  for f in *.txt; do ...; done            對每個符合的檔案\n  for i in $(seq 1 5); do ...; done       對數字範圍\nseq 起 迄 會印出一串數字；seq 5 -1 1 則是從 5 倒數到 1（中間的 -1 是「每次減 1」）。"
 goal: "寫 countdown.sh N：從 N 倒數到 1，每個數字一行，最後印 Liftoff!。"
 teaches: [seq, bash]
 xp: 30
 hints:
-  - "for i in $(seq \"$1\" -1 1); do echo \"$i\"; done"
+  - "seq \"$1\" -1 1 會產生 N 到 1 的倒數數字。"
+  - "骨架：for i in $(seq \"$1\" -1 1); do echo \"$i\"; done"
+  - "迴圈結束後，再加一行 echo \"Liftoff!\"。測試 ./countdown.sh 3 應印 3、2、1、Liftoff!。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

@@ -1,12 +1,14 @@
 id: "7-08"
 title: unzip
 kind: practice
-story: "unzip 解開 zip 檔，-d 指定解開到哪個目錄（會自動建立），-l 只列出內容。"
+story: "收到 zip 檔，用 unzip 解開：\n  unzip 檔案.zip            解開到目前目錄\n  unzip 檔案.zip -d 目錄    解開到指定目錄（目錄不存在會自動建立）\n  unzip -l 檔案.zip         只列出內容、不解開"
 goal: "把 inbox.zip 解開到 extracted 目錄。"
 teaches: [unzip]
 xp: 15
 hints:
-  - "unzip inbox.zip -d extracted"
+  - "用 -d 指定要解開到哪個目錄。"
+  - "格式：unzip 檔案.zip -d 目錄"
+  - "打：unzip inbox.zip -d extracted，再用 ls extracted 確認。"
 setup: |
   cd /home/player
   mkdir -p z && echo "hello" > z/greeting.txt && echo "bye" > z/farewell.txt

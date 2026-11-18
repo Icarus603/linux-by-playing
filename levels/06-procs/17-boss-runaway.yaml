@@ -1,15 +1,15 @@
 id: "6-17"
 title: "Boss：暴走的引擎室"
 kind: boss
-story: "警報大作！cpu-hog 吃光了 CPU，而且有個服務賴著 9000 埠不放，一般的 kill 對它沒用。但別誤傷 starlink-daemon，那是站上唯一的通訊程式。"
+story: "警報大作！cpu-hog 吃光了 CPU，而且有個服務賴著 9000 埠不放，一般的 kill 對它沒用。但別誤傷 starlink-daemon，那是站上唯一的通訊程式。\n\n用上這階段學的：pkill 依名字殺、ss -tlnp 找誰占埠、kill -9 強制終止。\n原則：只動該動的程序，先確認 PID 再下手。"
 goal: "結束 cpu-hog，讓 9000 埠不再被監聽，同時保持 starlink-daemon 繼續執行。"
 teaches: [ps, ss, kill, pkill]
 xp: 80
 hints:
-  - "pkill cpu-hog 可以處理 CPU 暴走的程序。"
-  - "ss -tlnp | grep 9000 找到佔埠的 PID。"
-  - "那個程序忽略一般 kill，要用 kill -9。"
-  - "千萬不要 killall / pkill 沒指定名字的範圍太大。"
+  - "cpu-hog 可以直接：pkill cpu-hog"
+  - "找占 9000 埠的 PID：ss -tlnp | grep 9000，看 pid= 後面的數字。"
+  - "那個程序無視一般 kill，要強制：kill -9 PID。"
+  - "不要亂用範圍太大的指令（例如沒指定名字的 killall），會把 starlink-daemon 一起殺掉。"
 setup: |
   mkdir -p /usr/local/lib/lbp
   cp -f /usr/bin/yes /usr/local/bin/cpu-hog

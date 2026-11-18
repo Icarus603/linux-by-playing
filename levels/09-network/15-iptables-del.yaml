@@ -1,14 +1,14 @@
 id: "9-15"
 title: 移除錯誤的規則
 kind: practice
-story: "規則設錯了怎麼辦？-D 依內容刪除、或 -D 鏈 編號 依序號刪除（iptables -L --line-numbers 看序號）。-F 清空整條鏈，但那會連正確的規則一起殺掉，要小心。"
+story: "規則設錯了怎麼辦？要把它刪掉：\n  sudo iptables -S                    列出規則（-A 開頭的每一行就是一條）\n  sudo iptables -D 規則內容           -D 是 Delete，把 -S 列出來的那條「-A」改成「-D」就能刪\n  sudo iptables -D INPUT 序號         或依序號刪（先用 iptables -L --line-numbers 看序號）\n  -F                                  清空整條鏈，連正確的規則一起殺掉，要非常小心"
 goal: "有人誤封了 9400 埠，但 9401 是刻意封鎖的。只刪掉 9400 的規則，讓 9400 恢復可連，同時 9401 仍被封鎖。"
 teaches: [iptables]
 xp: 55
 hints:
-  - "sudo iptables -S"
-  - "sudo iptables -D INPUT -p tcp --dport 9400 -j REJECT"
-  - "不要用 -F，那會把 9401 的規則也清掉。"
+  - "先列規則：sudo iptables -S，找到 9400 那條（-A INPUT ... --dport 9400 -j REJECT）。"
+  - "把它的 -A 換成 -D 照抄：sudo iptables -D INPUT -p tcp --dport 9400 -j REJECT"
+  - "不要用 -F，那會把 9401 的規則也清掉。刪完用 sudo iptables -S 確認只剩 9401。"
 setup: |
   iptables -F INPUT
   for p in 9400 9401; do

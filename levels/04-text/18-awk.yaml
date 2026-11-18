@@ -1,12 +1,14 @@
 id: "4-18"
 title: awk：按欄位計算
 kind: learn
-story: "awk 把每行切成欄位（$1 $2 $3…），可以做計算。awk '{s+=$3} END{print s}' 把第 3 欄加總，END 在讀完全部資料後執行。"
-goal: "sales.txt 每行是 品名 數量 金額。算出金額（第 3 欄）的總和，answer 提交。"
+story: "awk 擅長處理「一行一筆、一行有好幾欄」的資料。它自動把每一行用空白切成欄位：第 1 欄叫 $1，第 2 欄叫 $2，依此類推。\n\n  awk '{s+=$3} END{print s}' 檔名\n意思是：每讀一行，就把第 3 欄的數字加到變數 s 裡（s+=$3）；全部讀完（END）之後，印出 s。這樣就算出總和了。"
+goal: "sales.txt 每行是「品名 數量 金額」。算出金額（第 3 欄）的總和，answer 提交。"
 teaches: [awk]
 xp: 30
 hints:
-  - "awk '{s+=$3} END{print s}' sales.txt"
+  - "金額是第 3 欄，所以用 $3。"
+  - "格式：awk '{s+=$3} END{print s}' 檔名"
+  - "打：awk '{s+=$3} END{print s}' sales.txt，answer 印出的數字。"
 setup: |
   cd /home/player
   printf 'fuel 10 250\noxygen 5 120\nfood 20 90\nparts 2 140\n' > sales.txt

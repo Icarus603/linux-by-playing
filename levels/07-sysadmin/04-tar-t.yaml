@@ -1,13 +1,14 @@
 id: "7-04"
 title: 不解開，先偷看
 kind: practice
-story: "tar -t 列出壓縮包的內容而不解開，確認它裡面有什麼再動手，是個好習慣（也能避免「tar bomb」把一堆檔案炸在目前目錄）。"
+story: "收到來路不明的壓縮包，先別急著解開。tar -t 可以「只列出內容、不解開」，確認裡面有什麼再動手（也能避免所謂的 tar bomb：一解開就噴出一大堆檔案，弄亂目前的目錄）。\n  tar -tf 檔名.tar   列出內容（沒壓縮的 .tar 不用加 z）"
 goal: "mystery.tar 裡到底有幾個項目（檔案與目錄都算）？不解開它，用 tar 列出並數一數，answer 提交。"
 teaches: [tar, wc]
 xp: 20
 hints:
-  - "tar -tf mystery.tar"
-  - "接上 | wc -l 就能數。"
+  - "列出內容：tar -tf mystery.tar"
+  - "每個項目印成一行，數行數就是答案。"
+  - "打：tar -tf mystery.tar | wc -l，answer 那個數字。"
 setup: |
   cd /home/player
   rm -rf m && mkdir -p m/x/y m/z

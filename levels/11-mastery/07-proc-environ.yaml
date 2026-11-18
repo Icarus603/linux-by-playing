@@ -1,13 +1,14 @@
 id: "11-07"
 title: /proc：偷看別的程序
 kind: practice
-story: "每個程序在 /proc/PID/ 底下都有一堆「虛擬檔案」：cmdline 是啟動指令、environ 是環境變數、fd/ 是開啟的檔案、status 是狀態。環境變數以 NUL 字元分隔，要用 tr 轉成換行才好讀。"
+story: "每個程序在 /proc/PID/ 底下都有一堆「虛擬檔案」，可以讀出它的內情：\n  cmdline   它是怎麼被啟動的\n  environ   它帶著的環境變數\n  fd/       它開著的檔案\n  status    它的狀態\n注意：environ 裡的環境變數是用「NUL 字元」（看不見的分隔）隔開的，直接 cat 會黏在一起，要用 tr '\\0' '\\n' 把 NUL 換成換行才好讀。"
 goal: "hidden-proc 這個程序啟動時帶了環境變數 LBP_SECRET。從 /proc 讀出它的值，answer 提交。"
 teaches: [tr, cat]
 xp: 55
 hints:
-  - "pgrep -x hidden-proc 取得 PID。"
-  - 'tr "\0" "\n" < /proc/PID/environ | grep LBP_SECRET'
+  - "先拿 PID：pgrep -x hidden-proc"
+  - "把 PID 代進去：tr \"\\0\" \"\\n\" < /proc/PID/environ | grep LBP_SECRET"
+  - "answer = 後面的值（不含 LBP_SECRET=）。"
 setup: |
   cp -f /usr/bin/sleep /usr/local/bin/hidden-proc
   s="SEC-$((RANDOM % 9000 + 1000))"

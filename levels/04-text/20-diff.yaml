@@ -1,12 +1,14 @@
 id: "4-20"
 title: diff：找差異
 kind: practice
-story: "diff 比較兩個檔案。< 開頭是第一個檔案的內容，> 開頭是第二個。-u 是更易讀的統一格式。"
+story: "diff 比較兩個檔案，告訴你哪裡不一樣：\n  diff 舊檔 新檔\n輸出裡 < 開頭的行是「第一個檔案」的內容，> 開頭是「第二個檔案」的內容。改了設定、想知道到底改了什麼時超好用。（加 -u 則是更像 git 風格、易讀的格式。）"
 goal: "old.conf 與 new.conf 只有一行不同。用 diff 找出來，answer 提交新檔案（new.conf）裡 port= 的值。"
 teaches: [diff]
 xp: 20
 hints:
-  - "diff old.conf new.conf"
+  - "格式：diff 舊檔 新檔"
+  - "打：diff old.conf new.conf"
+  - "找出以 > 開頭的那行（屬於 new.conf），answer 它的 port= 後面的值。"
 setup: |
   cd /home/player
   printf 'host=a\nport=8080\nmode=x\n' > old.conf

@@ -1,12 +1,14 @@
 id: "7-01"
 title: tar：打包
 kind: learn
-story: "tar 把多個檔案與目錄打包成一個檔案。-c 建立、-f 指定檔名（f 一定要放最後）、-v 顯示過程。備份的第一步就是打包。"
+story: "要備份一整個資料夾時，一個個檔案傳很麻煩。tar 能把許多檔案和目錄「打包」成一個檔案（像把東西裝進一個箱子，只是打包，還沒變小）。\n  tar -cf 箱子檔名 要打包的東西\n選項：c 是 create（建立）、f 是 file（指定檔名，f 後面一定要馬上接檔名）；想看過程再加 v（verbose）。"
 goal: "把 docs 目錄打包成 archive.tar。"
 teaches: [tar]
 xp: 20
 hints:
-  - "tar -cf archive.tar docs"
+  - "格式：tar -cf 打包後的檔名 要打包的目錄"
+  - "打：tar -cf archive.tar docs"
+  - "用 ls 確認 archive.tar 出現了。"
 setup: |
   cd /home/player
   mkdir -p docs/sub

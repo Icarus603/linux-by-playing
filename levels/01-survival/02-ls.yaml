@@ -1,12 +1,13 @@
 id: "1-02"
 title: 看看四周
 kind: learn
-story: 知道位置後，要看看這間艙房有什麼。ls 會列出目錄內容。我在這裡留了幾個東西。
-goal: 用 ls 列出目前目錄的內容。
+story: "知道自己在哪之後，要看看四周有什麼。ls 這個指令會「列出」目前這個目錄裡的所有東西（檔案和子目錄），就像打開資料夾看裡面有什麼。\n\n我在這裡放了幾樣東西，輸入 ls 就能看到它們的名字。"
+goal: "輸入 ls（小寫 L 加 S），按 Enter，列出目前目錄的內容。"
 teaches: [ls]
 xp: 10
 hints:
-  - 輸入 ls，不需要任何參數。
+  - "ls 是 list（列出）的縮寫。"
+  - "只要打 ls，後面什麼都不用加，然後按 Enter。"
 setup: |
   cd /home/player
   mkdir -p logbook tools

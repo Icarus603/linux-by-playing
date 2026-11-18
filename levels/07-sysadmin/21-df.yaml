@@ -1,13 +1,14 @@
 id: "7-21"
 title: 磁碟與掛載
 kind: practice
-story: "df -h 看各檔案系統的使用量，加 -T 還會顯示類型。mount 列出所有掛載點。想知道「這個目錄放在哪個磁碟、什麼格式」就靠它們。"
+story: "硬碟（或分割區）要先「格式化」成某種「檔案系統」（像 ext4、xfs 這些，決定資料怎麼擺），再「掛載」到某個目錄，你才能存取。\n  df -h        各個檔案系統用了多少、還剩多少\n  df -T 路徑   -T 會多顯示「檔案系統類型」\n  mount        列出所有掛載點（哪個磁碟掛在哪個目錄）"
 goal: "用 df -T 查出根目錄 / 的檔案系統類型，answer 提交。"
 teaches: [df, mount, lsblk]
 xp: 20
 hints:
-  - "df -T /"
-  - "第二欄是 Type。"
+  - "格式：df -T 路徑"
+  - "打：df -T /"
+  - "輸出的第 2 欄（Type）就是檔案系統類型，answer 它。"
 setup: ""
 check: |
   exp=$(df -T / | awk 'NR==2{print $2}')

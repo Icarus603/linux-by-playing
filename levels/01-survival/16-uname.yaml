@@ -1,12 +1,13 @@
 id: "1-16"
 title: 系統身分證
 kind: practice
-story: "uname 顯示系統資訊。-s 是作業系統名稱，-r 是核心版本，-a 是全部。date 則顯示現在時間。"
+story: "uname 會印出這台電腦的系統資訊（uname = Unix name）。不同選項問不同問題：\n  uname -s   作業系統名稱\n  uname -r   核心（系統最底層的部分）版本\n  uname -a   以上全部一次列出\n另外 date 會印出現在的日期時間。"
 goal: "用 uname -s 查出作業系統名稱，answer 提交。"
 teaches: [uname, date]
 xp: 10
 hints:
-  - "uname -s"
+  - "打：uname -s（注意 -s 是小寫）"
+  - "answer 後面貼上它印出的那個詞。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "Linux" ]] && exit 0

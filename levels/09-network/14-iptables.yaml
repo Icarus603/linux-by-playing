@@ -1,13 +1,14 @@
 id: "9-14"
 title: iptables：防火牆規則
 kind: practice
-story: "iptables 依「鏈」裡的規則逐條比對封包。INPUT 鏈管進來的封包。-A 追加規則、-p 協定、--dport 目的埠、-j 動作（ACCEPT / DROP / REJECT）。規則依序比對，先符合先生效。iptables -S 列出所有規則。"
+story: "防火牆像大樓的警衛，決定哪些封包能進來。Linux 的防火牆工具 iptables 依「鏈」裡的規則一條條比對封包，INPUT 鏈管「進來的」封包。規則依序比對，先符合的先生效。\n  sudo iptables -S                列出所有規則\n  sudo iptables -A INPUT -p tcp --dport 9300 -j DROP\n    -A INPUT   追加一條規則到 INPUT 鏈（Append）\n    -p tcp     協定是 TCP\n    --dport 9300   目的埠是 9300\n    -j DROP    動作：直接丟掉（也可以是 ACCEPT 放行、REJECT 拒絕並回覆）"
 goal: "9300 與 9301 兩個埠都有服務在聽。只封鎖 9300（丟棄進來的 TCP 封包），9301 要保持可連。"
 teaches: [iptables]
 xp: 50
 hints:
-  - "sudo iptables -S 看目前規則。"
-  - "sudo iptables -A INPUT -p tcp --dport 9300 -j DROP"
+  - "先看目前規則：sudo iptables -S"
+  - "要封鎖的是 9300 這個目的埠，動作用 DROP。"
+  - "打：sudo iptables -A INPUT -p tcp --dport 9300 -j DROP，再用 nc -zv 試 9300 和 9301。"
 setup: |
   iptables -F INPUT
   for p in 9300 9301; do

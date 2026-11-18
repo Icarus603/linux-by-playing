@@ -1,13 +1,14 @@
 id: "5-12"
 title: 帳號資料庫
 kind: practice
-story: "使用者資料存在 /etc/passwd，每行以冒號分七欄：帳號:密碼:uid:gid:說明:家目錄:登入 shell。getent passwd 帳號 是查詢帳號的標準做法。"
+story: "所有使用者的資料存在 /etc/passwd 這個文字檔，每行一個帳號，用冒號分成七欄：\n  帳號:密碼:uid:gid:說明:家目錄:登入shell\n查某個帳號最標準的做法是 getent passwd 帳號。「登入 shell」就是他登入後預設使用的殼層程式（最後一欄，例如 /bin/bash）。"
 goal: "查出使用者 quartermaster 的登入 shell，answer 提交（例如 /bin/xxx）。"
 teaches: [getent, cut]
 xp: 20
 hints:
-  - "getent passwd quartermaster"
-  - "最後一欄就是登入 shell。"
+  - "打：getent passwd quartermaster"
+  - "輸出用冒號分成七欄，最後一欄就是登入 shell。"
+  - "answer 那一欄的內容（以 / 開頭的路徑）。"
 setup: |
   id quartermaster >/dev/null 2>&1 || useradd -m -s /bin/dash quartermaster
 check: |

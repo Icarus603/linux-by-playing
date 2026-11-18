@@ -1,13 +1,14 @@
 id: "10-13"
 title: git log：翻歷史
 kind: practice
-story: "git log 列出提交歷史。--oneline 一行一筆、--grep 依訊息搜尋、--author 依作者。每筆提交有個唯一的雜湊（hash），前 7 碼就夠辨識。"
+story: "git log 列出過去所有的提交紀錄，從新到舊。每筆提交有個獨一無二的「雜湊」（一長串英數字，像身分證號碼），通常只看前 7 碼就夠辨識。\n  git log --oneline          每筆一行：「短雜湊 訊息」\n  git log --grep=\"關鍵字\"    只列出訊息裡含關鍵字的提交\n  git log --author=\"名字\"    只列出某人提交的"
 goal: "~/repo 的歷史裡有一筆訊息含 fix reactor 的提交。找出它的簡短雜湊（7 碼），answer 提交。"
 teaches: [git]
 xp: 40
 hints:
-  - "cd repo && git log --oneline"
-  - "git log --oneline --grep=\"fix reactor\""
+  - "先進去：cd repo，再打 git log --oneline，每行最前面那串就是短雜湊。"
+  - "歷史太長就過濾：git log --oneline --grep=\"fix reactor\""
+  - "answer 那一行最前面的 7 個字元。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

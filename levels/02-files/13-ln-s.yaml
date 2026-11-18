@@ -1,13 +1,14 @@
 id: "2-13"
 title: 軟連結（捷徑）
 kind: learn
-story: "ln -s 目標 連結名 建立軟連結，類似捷徑。常見用法：讓 latest.log 永遠指向最新的日誌。"
-goal: 建立軟連結 latest.log，指向 logs/2024-05.log。
+story: "「軟連結」就像 Windows 的捷徑：它自己是個小檔案，內容只是「指向另一個檔案的路徑」。打開它就等於打開目標。\n\n格式：ln -s 目標 連結名稱（-s 是 symbolic，符號的）。常見用法：讓 latest.log 永遠指向最新的那份日誌，每次只要改指向就好。"
+goal: "建立軟連結 latest.log，讓它指向 logs/2024-05.log。"
 teaches: [ln]
 xp: 15
 hints:
-  - "ln -s 目標 連結名稱"
-  - "ln -s logs/2024-05.log latest.log"
+  - "格式：ln -s 目標 連結名稱，目標在前、新名字在後。"
+  - "打：ln -s logs/2024-05.log latest.log"
+  - "用 ls -l 看，latest.log 那行會顯示 -> logs/2024-05.log。"
 setup: |
   cd /home/player
   mkdir -p logs

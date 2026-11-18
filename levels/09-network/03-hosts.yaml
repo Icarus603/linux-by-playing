@@ -1,14 +1,14 @@
 id: "9-03"
 title: 名稱解析與 /etc/hosts
 kind: practice
-story: "電腦只認得 IP，名字要靠解析。最先查的是 /etc/hosts：每行「IP 名稱」。getent hosts 名稱 能模擬系統解析名字的結果。"
-goal: "讓名稱 hub 解析到 127.0.0.1：在 /etc/hosts 加一行（需要 root）。用 getent hosts hub 確認。"
+story: "電腦其實只認得 IP，名字（像 google.com）要靠「名稱解析」翻成 IP。系統最先查的是本機檔案 /etc/hosts，每行寫「IP 空格 名稱」，像一本私人通訊錄。\n  getent hosts 名稱   模擬系統解析名字，看它得到什麼 IP\n\n要新增一行，需要 root 權限。但 sudo echo ... >> 檔案 沒用（重導向是你自己的 shell 在做，不是 sudo）。解法是用 tee：\n  echo '內容' | sudo tee -a /etc/hosts\n其中 -a 是追加（不加 -a 會把整個檔案覆蓋掉！）。"
+goal: "讓名稱 hub 解析到 127.0.0.1：在 /etc/hosts 加一行。用 getent hosts hub 確認。"
 teaches: [getent, tee, sudo]
 xp: 30
 hints:
-  - "先試 getent hosts hub，目前應該沒有結果。"
-  - "echo '127.0.0.1 hub' | sudo tee -a /etc/hosts"
-  - "tee -a 是追加；不加 -a 會把整個檔案覆蓋掉！"
+  - "先試 getent hosts hub，目前應該沒有任何輸出。"
+  - "要追加一行：echo '127.0.0.1 hub' | sudo tee -a /etc/hosts"
+  - "再打 getent hosts hub，應該看到 127.0.0.1 hub。（tee 一定要加 -a，否則整個檔案被覆蓋！）"
 setup: |
   grep -v ' hub$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
 check: |

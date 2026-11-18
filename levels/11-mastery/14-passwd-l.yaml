@@ -1,13 +1,14 @@
 id: "11-14"
 title: 鎖定帳號
 kind: practice
-story: "發現可疑帳號時，先鎖住它而不是急著刪除（保留證據）。passwd -l 帳號 鎖定密碼、passwd -S 帳號 查看狀態（L 是鎖定、P 是有密碼可用）。"
+story: "發現可疑帳號時，先「鎖住」它，而不是急著刪除，因為刪了就沒有證據可查。\n  passwd -S 帳號   查看帳號狀態（L = 已鎖定、P = 有密碼可用）\n  passwd -l 帳號   鎖定（l = lock）：讓這個帳號無法用密碼登入\n這些都需要 root，要加 sudo。"
 goal: "使用者 mallory 的行為可疑。把他的帳號鎖定（不要刪除）。"
 teaches: [passwd]
 xp: 40
 hints:
-  - "sudo passwd -S mallory 看目前狀態。"
-  - "sudo passwd -l mallory"
+  - "先看目前狀態：sudo passwd -S mallory（P 表示可正常登入）。"
+  - "鎖定：sudo passwd -l mallory"
+  - "再看一次 sudo passwd -S mallory，狀態應該變成 L。"
 setup: |
   id mallory >/dev/null 2>&1 || useradd -m -s /bin/bash mallory
   echo 'mallory:Secret123' | chpasswd

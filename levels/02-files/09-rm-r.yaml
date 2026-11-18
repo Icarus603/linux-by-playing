@@ -1,13 +1,14 @@
 id: "2-09"
 title: 拆除舊艙
 kind: practice
-story: "刪目錄要用 rm -r。空目錄也可以用 rmdir（它只刪空目錄，所以更安全）。"
-goal: 刪除 old-station 目錄（含內容）和空目錄 empty，保留 keep 目錄。
+story: "刪「目錄」有兩種方式：\n  rm -r 目錄   連同裡面所有東西一起刪（-r 同樣是遞迴，威力強，要小心）\n  rmdir 目錄   只能刪「空」的目錄，不是空的會拒絕，所以更安全\n\n新手建議：能用 rmdir 就先用 rmdir。"
+goal: "刪除 old-station 目錄（裡面有東西）和空目錄 empty，保留 keep 目錄。"
 teaches: [rm, rmdir]
 xp: 15
 hints:
-  - "rm -r old-station"
-  - "rmdir empty"
+  - "有內容的目錄用 rm -r，空目錄用 rmdir。"
+  - "打：rm -r old-station"
+  - "再打：rmdir empty"
 setup: |
   cd /home/player
   mkdir -p old-station/deck1 empty keep

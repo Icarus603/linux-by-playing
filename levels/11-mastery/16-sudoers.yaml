@@ -1,14 +1,14 @@
 id: "11-16"
 title: sudoers：最小權限授權
 kind: practice
-story: "不要把完整的 root 給所有人。sudoers 能精確規定「誰、在哪、以誰的身分、能執行哪些指令」。格式：使用者或 %群組 主機=(身分) NOPASSWD: 指令。放在 /etc/sudoers.d/ 底下，權限必須是 440，並用 visudo -c 檢查語法，改壞 sudoers 可能讓你鎖死自己。"
+story: "不要把完整的 root 權限給所有人。sudoers 能精確規定「誰、能以誰的身分、執行哪些指令」。一條規則長這樣：\n  %ops ALL=(root) NOPASSWD: /usr/bin/apt\n  %ops           對象是群組 ops（前面的 % 代表群組；沒有 % 就是個人）\n  ALL            在任何主機上\n  (root)         可以變成 root 身分\n  NOPASSWD:      不用輸入密碼\n  /usr/bin/apt  只能執行這個指令\n規則放在 /etc/sudoers.d/ 下的檔案裡，權限必須是 440；改完用 visudo -c 檢查語法，因為改壞 sudoers 可能讓你把自己鎖死。"
 goal: "給群組 ops 一個最小授權：成員可以免密碼、以 root 身分只執行 /usr/bin/apt，其他指令一概不行。寫進 /etc/sudoers.d/ops，權限 440。"
 teaches: [visudo, sudo, tee]
 xp: 80
 hints:
-  - "規則：%ops ALL=(root) NOPASSWD: /usr/bin/apt"
-  - "echo '規則' | sudo tee /etc/sudoers.d/ops"
-  - "sudo chmod 440 /etc/sudoers.d/ops，再用 sudo visudo -cf /etc/sudoers.d/ops 檢查。"
+  - "規則是：%ops ALL=(root) NOPASSWD: /usr/bin/apt"
+  - "要寫進需要 root 的檔案：echo '%ops ALL=(root) NOPASSWD: /usr/bin/apt' | sudo tee /etc/sudoers.d/ops"
+  - "設權限：sudo chmod 440 /etc/sudoers.d/ops，再用 sudo visudo -cf /etc/sudoers.d/ops 檢查語法。"
 setup: |
   getent group ops >/dev/null || groupadd ops
   id opsuser >/dev/null 2>&1 || useradd -m -s /bin/bash -G ops opsuser

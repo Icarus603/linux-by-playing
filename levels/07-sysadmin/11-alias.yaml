@@ -1,13 +1,14 @@
 id: "7-11"
 title: alias：自訂捷徑
 kind: practice
-story: "常用的長指令可以取個短名字：alias 名字='指令'。別名只存在於目前的 shell，關掉就沒了。"
+story: "常用的長指令，可以幫它取個短短的「別名」（alias）：\n  alias 別名='指令'\n之後打別名，就等於打整串指令。\n注意：這樣設的別名只存在目前這個 shell，關掉終端機就沒了（下一關會教怎麼永久保存）。"
 goal: "建立別名 ll，內容是 ls -la，然後輸入 ll 執行它。"
 teaches: [alias]
 xp: 20
 hints:
-  - "alias ll='ls -la'"
-  - "建立後輸入 ll。"
+  - "格式：alias 別名='指令'，等號兩邊不能有空格。"
+  - "打：alias ll='ls -la'"
+  - "建好後輸入 ll，應該會看到跟 ls -la 一樣的結果。"
 setup: ""
 check: |
   [[ "$LBP_LAST" == "ll" && "$LBP_RC" == "0" ]]

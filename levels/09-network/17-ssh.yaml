@@ -1,12 +1,14 @@
 id: "9-17"
 title: ssh：遠端登入
 kind: practice
-story: "ssh 使用者@主機 登入遠端機器，後面加指令就只執行那個指令再回來。-p 指定連接埠。第一次連線會問你是否信任主機指紋（-o StrictHostKeyChecking=accept-new 自動接受新的）。vaultkeeper 的保管室在本機 2222 埠，你的公鑰已經放好了。"
+story: "ssh 讓你登入遠端機器：\n  ssh 使用者@主機            登入，得到遠端的終端機\n  ssh 使用者@主機 指令       不登入，只在遠端執行那個指令，印出結果後就回來\n  -p 埠號                    指定連接埠（預設 22）\n第一次連線會問你是否信任這台主機的指紋；加 -o StrictHostKeyChecking=accept-new 會自動接受新的主機。\nvaultkeeper 的保管室在本機 2222 埠，你的公鑰已經放好了。"
 goal: "用 ssh 以 vaultkeeper 的身分連到 127.0.0.1 的 2222 埠，讀出 ~/note.txt 的內容，answer 提交。"
 teaches: [ssh]
 xp: 45
 hints:
-  - "ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt"
+  - "格式：ssh -p 埠號 使用者@主機 指令（指令就是 cat note.txt）。"
+  - "加上 -o StrictHostKeyChecking=accept-new 避免卡在確認指紋的詢問。"
+  - "打：ssh -p 2222 -o StrictHostKeyChecking=accept-new vaultkeeper@127.0.0.1 cat note.txt，answer 內容。"
 setup: |
   # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
   id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper

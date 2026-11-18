@@ -1,13 +1,14 @@
 id: "4-05"
 title: sort 與 uniq 去重
 kind: practice
-story: "uniq 只會去掉「相鄰」的重複行，所以通常要先 sort 讓相同的行靠在一起。"
+story: "uniq 能去掉重複的行，但它只會去掉「緊鄰」的重複，不相鄰的它看不出來。所以通常先用 sort（排序）讓相同的行排在一起，再用 uniq：\n  sort 檔 | uniq\n兩個指令用管線接起來，最後再用 > 存進檔案。\n（另一個寫法：sort -u 一步就做完排序加去重。）"
 goal: "names.txt 有重複的名字。排序並去重後，存成 unique.txt。"
 teaches: [sort, uniq]
 xp: 20
 hints:
-  - "sort names.txt | uniq > unique.txt"
-  - "sort -u 也能一步完成。"
+  - "先 sort 排序，讓重複的靠在一起。"
+  - "再用 | uniq 去重，最後用 > 存檔。"
+  - "打：sort names.txt | uniq > unique.txt（或 sort -u names.txt > unique.txt）"
 setup: |
   cd /home/player
   printf 'zoe\nbob\nann\nbob\nzoe\ncat\nann\nann\n' > names.txt

@@ -1,13 +1,14 @@
 id: "10-18"
 title: make：自動化建置
 kind: learn
-story: "make 讀取 Makefile，依「目標: 依賴」的規則決定要執行什麼。它會比對檔案時間，只重做有變動的部分。Makefile 裡的指令行必須以 Tab 字元縮排（不是空格）。"
+story: "make 是自動化「建置」的老牌工具：你把要做的事寫在一個叫 Makefile 的檔案裡，之後只要 make 目標名，它就照做。Makefile 的規則長這樣：\n  目標: 依賴的檔案\n  <Tab>要執行的指令\n要特別注意：指令那行必須以 Tab 字元縮排，不能用空格。\n這個目錄裡已經有 Makefile 了，裡面有 build 與 clean 兩個目標。"
 goal: "目錄裡已有一個 Makefile，裡面有 build 與 clean 兩個目標。執行 make build 產生 app.out。"
 teaches: [make]
 xp: 30
 hints:
-  - "cat Makefile 看看有哪些目標。"
-  - "make build"
+  - "先看 Makefile 的內容：cat Makefile（看有哪些目標、會做什麼）。"
+  - "打：make build"
+  - "用 ls 確認 app.out 出現了。"
 setup: |
   cd /home/player
   rm -f app.out Makefile

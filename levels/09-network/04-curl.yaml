@@ -1,13 +1,14 @@
 id: "9-04"
 title: curl：發出 HTTP 請求
 kind: learn
-story: "curl 是命令列的瀏覽器，-s 靜音（不顯示進度條）。本機的 8080 埠上有個網站，首頁的標題藏著一個呼號。"
+story: "curl 是「命令列的瀏覽器」：給它一個網址，它把網頁內容抓下來印在終端機上。網頁其實就是一段 HTML 文字，像 <h1>標題</h1>，<h1> 和 </h1> 是「標籤」，夾在中間的是標題內容。\n  curl 網址        抓取並印出\n  curl -s 網址     -s 是靜音（不顯示進度條，輸出比較乾淨）\n本機 8080 埠上有個網站，首頁的標題藏著一個呼號。"
 goal: "用 curl 抓取 http://127.0.0.1:8080/，找出 <h1> 標籤裡的呼號，answer 提交。"
 teaches: [curl]
 xp: 25
 hints:
-  - "curl -s http://127.0.0.1:8080/"
-  - "輸出是 HTML，找 <h1>呼號</h1>。"
+  - "打：curl -s http://127.0.0.1:8080/"
+  - "輸出是 HTML 文字，找 <h1> 和 </h1> 之間的內容。"
+  - "answer 那段內容（不含標籤）。"
 setup: |
   rm -rf /srv/site; mkdir -p /srv/site
   c="VEGA-$((RANDOM % 9000 + 1000))"

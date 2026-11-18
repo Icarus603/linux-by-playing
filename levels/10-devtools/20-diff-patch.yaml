@@ -1,12 +1,14 @@
 id: "10-20"
 title: 製作修補檔
 kind: practice
-story: "diff -u 舊 新 產生統一格式的差異，能儲存成修補檔（patch），發給別人套用。這是開源專案最古老的協作方式之一。"
+story: "「修補檔」（patch）是一份「從舊版變成新版需要怎麼改」的說明書，可以發給別人套用，是開源專案最古老的協作方式之一。\n  diff -u 舊檔 新檔     -u 產生「統一格式」的差異（- 是被刪的行、+ 是新增的行）\n  diff -u 舊檔 新檔 > fix.patch   把差異存成修補檔"
 goal: "old.txt 與 new.txt 是同一份設定的兩個版本。產生修補檔 fix.patch（diff -u old.txt new.txt），讓別人把 old.txt 套用它就能變成 new.txt。"
 teaches: [diff, patch]
 xp: 40
 hints:
-  - "diff -u old.txt new.txt > fix.patch"
+  - "格式：diff -u 舊檔 新檔"
+  - "舊檔是 old.txt、新檔是 new.txt（順序不能顛倒）。"
+  - "打：diff -u old.txt new.txt > fix.patch，再 cat fix.patch 看內容。"
 setup: |
   cd /home/player
   printf 'host=a\nport=80\nmode=safe\n' > old.txt

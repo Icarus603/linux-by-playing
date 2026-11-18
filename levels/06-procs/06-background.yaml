@@ -1,12 +1,14 @@
 id: "6-06"
 title: 背景執行 &
 kind: learn
-story: "在指令最後加上 & 會讓它在背景執行，你的終端機立刻就能繼續用。jobs 列出背景工作。"
+story: "平常你執行一個指令，要等它跑完才能打下一個，這叫「前景」執行。在指令最後加上一個 &，它就會丟到「背景」去跑，終端機立刻還給你繼續用。\n\njobs 指令可以列出你放在背景的工作。\n（sleep 600 是「睡 600 秒」，什麼都不做，很適合用來練習。）"
 goal: "在背景啟動 sleep 600（指令結尾加 &）。"
 teaches: ["&", jobs]
 xp: 15
 hints:
-  - "sleep 600 &"
+  - "& 要加在指令的最後面。"
+  - "打：sleep 600 &"
+  - "再打 jobs，應該看到它正在 Running。"
 setup: ""
 check: |
   pgrep -u player -f '^sleep 600$' >/dev/null && [[ "$LBP_LAST" == *"&" ]]

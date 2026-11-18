@@ -1,13 +1,14 @@
 id: "5-13"
 title: 以別人的身分執行
 kind: practice
-story: "sudo -u 使用者 指令 可以用指定使用者的身分執行指令，常用來測試「那個人實際看得到什麼」。ghost 的家目錄只有他自己進得去。"
+story: "有時你想知道「某個使用者實際看得到什麼」。sudo -u 使用者 指令 可以用「指定使用者的身分」執行單一指令（-u 是 user）。\n\nghost 的家目錄只有他自己進得去，你直接讀會被拒絕，但借用他的身分就可以。"
 goal: "用 sudo -u ghost 讀出 /home/ghost/note.txt，answer 提交內容裡的暗號。"
 teaches: [sudo, su]
 xp: 25
 hints:
-  - "直接 cat /home/ghost/note.txt 會被拒絕。"
-  - "sudo -u ghost cat /home/ghost/note.txt"
+  - "先試 cat /home/ghost/note.txt，會被拒絕。"
+  - "格式：sudo -u 使用者 指令"
+  - "打：sudo -u ghost cat /home/ghost/note.txt，answer 內容裡的暗號。"
 setup: |
   id ghost >/dev/null 2>&1 || useradd -m -s /bin/bash ghost
   echo "SIGNAL: ECHO-LIMA" > /home/ghost/note.txt

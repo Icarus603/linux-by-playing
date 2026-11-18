@@ -1,14 +1,14 @@
 id: "10-11"
 title: git：建立第一筆提交
 kind: learn
-story: "git 記錄檔案的每一次變化。git init 建立版本庫、git add 把變更放進暫存區、git commit -m 訊息 正式留下一筆紀錄。git 的使用者名稱與信箱已經替你設定好了。"
+story: "git 是「版本控制」工具：它幫你記錄檔案的每一次變化，像遊戲的存檔點，隨時可以回到過去、看誰在什麼時候改了什麼。基本流程三步：\n  git init               把這個目錄變成一個「版本庫」（開始被 git 追蹤）\n  git add 檔案           把檔案放進「暫存區」（挑出這次要記錄的變更，像放進購物籃）\n  git commit -m \"訊息\"   正式留下一筆紀錄（結帳），訊息說明這次改了什麼\ngit 的使用者名稱與信箱已經替你設定好了。"
 goal: "把 ~/station 目錄變成 git 版本庫，將裡面的 core.conf 加入，提交一筆訊息為 initial commit 的紀錄。"
 teaches: [git]
 xp: 40
 hints:
-  - "cd station && git init"
-  - "git add core.conf"
-  - "git commit -m \"initial commit\""
+  - "先進目錄並初始化：cd station，再 git init"
+  - "把檔案放進暫存區：git add core.conf"
+  - "提交：git commit -m \"initial commit\"（用 git log 可以看到這筆紀錄）。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

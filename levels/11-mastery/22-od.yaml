@@ -1,13 +1,14 @@
 id: "11-22"
 title: od：解讀二進位數值
 kind: practice
-story: "二進位檔裡的數字不是文字。od（octal dump）能依指定格式解讀：-An 不顯示位移、-t u4 當作 4 位元組無號整數、-N 限制讀幾個位元組。hexdump -C 則是同時顯示十六進位與 ASCII。"
+story: "二進位檔裡的數字不是文字（不是寫成 \"1234\" 這樣的字元），而是直接以位元組存放。od（octal dump）能依指定格式「解讀」它們：\n  -An        不顯示位移（左邊的位址欄）\n  -t u4      當作「4 位元組的無號整數」來解讀（u = unsigned，4 = 4 個位元組）\n  -N 4       只讀前 4 個位元組\n（hexdump -C 則是同時顯示十六進位與文字。）\n「小端序」是指低位的位元組放在前面，常見電腦（x86、ARM）都是小端序，od 預設就是依本機的順序解讀。"
 goal: "num.bin 的前 4 個位元組是一個小端序（little-endian）的 32 位元整數。用 od 解讀它，answer 提交那個十進位數字。"
 teaches: [od, hexdump]
 xp: 55
 hints:
-  - "od -An -t u4 -N 4 num.bin"
-  - "x86 與 ARM 都是小端序，od 預設用本機的位元組序，剛好符合。"
+  - "格式：od -An -t u4 -N 4 檔案"
+  - "打：od -An -t u4 -N 4 num.bin"
+  - "answer 印出的那個十進位數字（前面的空白不用管）。"
 setup: |
   cd /home/player
   n=$((RANDOM * 32768 + RANDOM))

@@ -1,13 +1,14 @@
 id: "6-02"
 title: 程序屬於誰
 kind: practice
-story: "ps aux 的第一欄是擁有者，也就是這個程序用誰的權限在跑。ledger-writer 是個背景服務，查查它是用哪個使用者在執行。"
+story: "ps aux 輸出的第一欄 USER 是程序的「擁有者」，也就是它用誰的權限在跑。權限和身分很重要：跑在 root 底下的程式出事，影響比普通使用者大得多。\n\nledger-writer 是個背景服務，查查它是用哪個使用者在執行。"
 goal: "找出 ledger-writer 程序的擁有者，answer 提交使用者名稱。"
 teaches: [ps]
 xp: 20
 hints:
-  - "ps aux | grep ledger"
-  - "ps -o user= -p <PID> 只印擁有者。"
+  - "打：ps aux | grep ledger"
+  - "看那一行的第 1 欄，就是擁有者。"
+  - "進階：先用 pgrep 取得 PID，再 ps -o user= -p PID 只印擁有者。"
 setup: |
   cp -f /usr/bin/sleep /usr/local/bin/ledger-writer
   setsid setpriv --reuid=nobody --regid=nogroup --init-groups -- ledger-writer 100000 >/dev/null 2>&1 </dev/null &

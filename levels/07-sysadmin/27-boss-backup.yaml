@@ -1,16 +1,16 @@
 id: "7-27"
 title: "Boss：昨晚備份失敗"
 kind: boss
-story: "最後一件事。調查走到盡頭：Warden 之所以失控，是因為昨晚的備份失敗了，它以為站台資料即將全毀，才瘋狂「自救」。只要備份恢復正常，一切就會平靜下來。"
+story: "最後一件事。調查走到盡頭：Warden 之所以失控，是因為昨晚的備份失敗了，它以為站台資料即將全毀，才瘋狂「自救」。只要備份恢復正常，一切就會平靜下來。\n\n這一關是綜合應用：看懂腳本哪裡出問題 → 修好 → 實際跑一次 → 排進 cron。\n每個「壞掉的地方」都是前面學過的：權限（chmod）、目錄（mkdir）、打包（tar）、排程（crontab）。"
 goal: "修好 ~/ops/backup.sh 並讓備份恢復運作：腳本要能執行、備份目錄要存在、實際跑出一份包含 data/important.db 的 backup-*.tar.gz，最後排進 cron，每天凌晨 2:00 自動執行。"
 teaches: [chmod, mkdir, tar, crontab]
 xp: 120
 hints:
-  - "先 cat ops/backup.sh 看看它做什麼。"
-  - "腳本沒有執行權限（chmod +x）。"
-  - "腳本要把備份放進 ~/backups，但這個目錄不存在（mkdir）。"
-  - "執行 ./ops/backup.sh，再用 ls backups 確認產生了壓縮檔。"
-  - "排程：0 2 * * * /home/player/ops/backup.sh，再用 crontab - 安裝。"
+  - "先看腳本做什麼：cat ops/backup.sh"
+  - "腳本沒有執行權限：chmod +x ops/backup.sh"
+  - "腳本要把備份放進 ~/backups，但這個目錄不存在：mkdir backups"
+  - "執行它：./ops/backup.sh，再 ls backups 確認產生了 backup-*.tar.gz。"
+  - "排程：echo '0 2 * * * /home/player/ops/backup.sh' | crontab -，再用 crontab -l 確認。"
 setup: |
   cd /home/player
   rm -rf ops data backups

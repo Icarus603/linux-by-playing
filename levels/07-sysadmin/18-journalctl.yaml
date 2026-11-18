@@ -1,13 +1,14 @@
 id: "7-18"
 title: journalctl：看服務日誌
 kind: practice
-story: "服務出狀況時，答案通常在日誌裡。journalctl -u 服務名 看該服務的日誌，-n 20 只看最後 20 行，-f 持續追蹤，-p err 只看錯誤。"
+story: "服務出狀況時，答案通常在「日誌」（它自己寫下的紀錄）裡。systemd 管理的服務，用 journalctl 看日誌：\n  journalctl -u 服務名         看這個服務的日誌（-u 是 unit，單元）\n  journalctl -u 服務名 -n 20   只看最後 20 行\n  journalctl -u 服務名 -f      持續追蹤新的（按 Ctrl-C 結束）\n  journalctl -u 服務名 -p err  只看「錯誤」等級的紀錄"
 goal: "reactor.service 剛剛發出了警報。用 journalctl 找到錯誤那一行，answer 提交錯誤代碼（R- 開頭）。"
 teaches: [journalctl]
 xp: 30
 hints:
-  - "journalctl -u reactor"
-  - "journalctl -u reactor -p err 只看錯誤。"
+  - "打：journalctl -u reactor"
+  - "日誌很多的話，只看錯誤：journalctl -u reactor -p err"
+  - "在錯誤那行找 R- 開頭的代碼，answer 它。"
 setup: |
   mkdir -p /etc/lbp-systemd /run/lbp-systemd /var/log/lbp-journal
   printf '[Unit]\nDescription=Station Reactor\n[Service]\nExecStart=/usr/bin/sleep infinity\n' > /etc/lbp-systemd/reactor.service

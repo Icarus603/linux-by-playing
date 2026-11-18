@@ -1,14 +1,14 @@
 id: "5-11"
 title: 群組管理
 kind: practice
-story: "群組讓你一次替多個人設定權限。groupadd 建立群組，usermod -aG 把使用者加進群組（-a 是追加，千萬不能漏，否則會把他原本的群組全部踢掉）。"
+story: "「群組」是一群使用者的集合。把權限設給群組，就等於一次設給群組裡的所有人，不用一個個設。\n  sudo groupadd 群組名            建立群組\n  sudo usermod -aG 群組名 帳號    把使用者加進群組\n重要：usermod 的 -aG 裡 a（append，追加）絕對不能漏，漏了會把他原本所屬的其他群組全部踢掉。"
 goal: "建立群組 engineers，並把使用者 cadet 加進去。"
 teaches: [groupadd, usermod, groups]
 xp: 25
 hints:
-  - "sudo groupadd engineers"
-  - "sudo usermod -aG engineers cadet"
-  - "用 id cadet 或 groups cadet 確認結果。"
+  - "先建群組：sudo groupadd engineers"
+  - "再把人加進去：sudo usermod -aG engineers cadet"
+  - "用 id cadet 或 groups cadet 確認，應該看到 engineers。"
 setup: |
   getent group engineers >/dev/null && groupdel engineers || true
   id cadet >/dev/null 2>&1 || useradd -m -s /bin/bash cadet

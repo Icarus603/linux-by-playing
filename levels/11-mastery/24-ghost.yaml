@@ -2,14 +2,15 @@ id: "11-24"
 title: "隱藏終章：Vega 的錄音"
 kind: boss
 cwd: /var/lib/ghost
-story: "站上燈全亮了。Pip 卻注意到 /var/lib/ghost 這個目錄：裡面有 11 份你一路都沒讀過的日誌，是 Vega 失蹤前後以 ghost 帳號留下的。每份最後一行都有一個單字。把它們依序拼起來，就是他想說的話。這一關是隱藏的，不想做可以直接 /skip。"
+story: "站上的燈全亮了。Pip 卻注意到 /var/lib/ghost 這個目錄：裡面有 11 份你一路都沒讀過的日誌，是 Vega 失蹤前後以 ghost 帳號留下的。每份最後都有一行「fragment 編號: 單字」。把這些單字依序拼起來，就是他想說的話。\n\n這一關是隱藏的，不想做可以直接 /skip。\n你要做的是：從 11 個檔案各撈出一行 → 去掉前綴只留單字 → 把 11 行接成同一行。"
 goal: "讀出 /var/lib/ghost 裡 11 份日誌的 fragment 單字，依檔案順序用空白串成一句話，用 answer 提交（例如 answer WORD1 WORD2 ...）。"
 teaches: [cat, grep, sed, tr, answer]
 xp: 200
 hints:
-  - "ls /var/lib/ghost 看有哪些檔案，cat 一份來看格式。"
-  - "每份都有一行「fragment NN: 單字」。grep -h '^fragment' /var/lib/ghost/*.log 一次撈出來。"
-  - "用 sed 's/.*: //' 去掉前綴，再 tr '\\n' ' ' 把換行換成空白，最後去掉結尾空白。"
+  - "先看有哪些檔案、其中一份長怎樣：ls /var/lib/ghost，再 cat 其中一份。"
+  - "一次把所有 fragment 行撈出來：grep -h '^fragment' /var/lib/ghost/*.log（-h 不顯示檔名）。"
+  - "去掉前綴：| sed 's/.*: //'（只留冒號後的單字）；再把換行換成空白：| tr '\\n' ' '"
+  - "最後把輸出整句 answer 出來（結尾多的空白可以去掉）。"
 setup: |
   mkdir -p /var/lib/ghost
 check: |

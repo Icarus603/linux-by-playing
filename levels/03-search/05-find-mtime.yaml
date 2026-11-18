@@ -1,13 +1,14 @@
 id: "3-05"
 title: 依時間找並刪除
 kind: practice
-story: "-mtime +30 是「修改時間超過 30 天前」。配上 -delete 就能自動清掉過期檔案。小心：-delete 要放在最後面。"
+story: "-mtime 依「最後修改是幾天前」篩選：\n  -mtime +30   超過 30 天前修改的（舊檔）\n  -mtime -3    3 天內修改的（新檔）\n再配上 -delete 就能把符合條件的檔案直接刪掉，是自動清理過期檔案的利器。\n\n警告：-delete 一定要寫在最後面，而且一刪就沒了。新手請先不加 -delete 預覽清單，確認沒錯再加。"
 goal: "刪除 tmp 底下超過 30 天沒修改的檔案，近期的檔案要保留。"
 teaches: [find]
 xp: 25
 hints:
-  - "find tmp -type f -mtime +30"
-  - "先不加 -delete 預覽，確認清單沒錯再加。"
+  - "先預覽（不刪）：find tmp -type f -mtime +30，看清單是不是你要刪的。"
+  - "確認清單沒問題，再把同一行最後加上 -delete。"
+  - "打：find tmp -type f -mtime +30 -delete"
 setup: |
   cd /home/player
   mkdir -p tmp

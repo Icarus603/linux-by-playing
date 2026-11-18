@@ -1,13 +1,14 @@
 id: "10-14"
 title: git branch：平行的世界線
 kind: practice
-story: "分支讓你在不影響主線的情況下嘗試新東西。git branch 名稱 建立、git switch 名稱（或 checkout）切換、git switch -c 名稱 建立並切換。"
+story: "「分支」是平行的世界線：你可以在分支上嘗試新功能、改壞也沒關係，完全不影響主線（通常叫 main）。\n  git branch 名稱         建立分支\n  git switch 名稱         切換到那個分支\n  git switch -c 名稱     建立並立刻切換（-c = create）\n在分支上提交的紀錄，只屬於那個分支。"
 goal: "在 ~/repo 建立並切換到分支 feature-x，在上面提交一筆新紀錄（任意檔案、任意訊息）。"
 teaches: [git]
 xp: 45
 hints:
-  - "git switch -c feature-x"
-  - "echo hi > new.txt && git add new.txt && git commit -m \"work on feature\""
+  - "先進去：cd repo，然後建立並切換：git switch -c feature-x"
+  - "做一個變更：echo hi > new.txt"
+  - "放進暫存區並提交：git add new.txt，再 git commit -m \"work on feature\"。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

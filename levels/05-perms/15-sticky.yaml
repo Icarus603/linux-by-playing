@@ -1,13 +1,14 @@
 id: "5-15"
 title: Sticky bit
 kind: practice
-story: "公用的暫存目錄（像 /tmp）人人可寫，但你不希望別人刪掉你的檔案。sticky bit（t）讓目錄裡的檔案「只有擁有者能刪」。數字寫法是在前面加 1，例如 1777。"
+story: "像 /tmp 這種公用的暫存目錄，人人可寫。但這樣有個問題：別人也能刪掉你放在裡面的檔案！\n\nsticky bit（黏滯位，ls -l 裡顯示成最後的 t）解決它：目錄裡的檔案「只有擁有者（和 root）才能刪」。\n設法：chmod +t 目錄，或用數字，在原本權限前面加 1，例如 1777。"
 goal: "/srv/drop 是人人可寫的收件匣（777），但沒有 sticky bit。把它設成 1777。"
 teaches: [chmod]
 xp: 25
 hints:
-  - "sudo chmod +t /srv/drop"
-  - "或 sudo chmod 1777 /srv/drop"
+  - "sticky bit 的符號是 t。"
+  - "打：sudo chmod +t /srv/drop"
+  - "或者直接用數字：sudo chmod 1777 /srv/drop，再用 ls -ld /srv/drop 看，最後會出現 t。"
 setup: |
   rm -rf /srv/drop
   mkdir -p /srv/drop

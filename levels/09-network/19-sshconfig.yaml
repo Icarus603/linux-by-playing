@@ -1,13 +1,14 @@
 id: "9-19"
 title: ~/.ssh/config：幫連線取小名
 kind: practice
-story: "每次都打一長串 -p 2222 -o ... 太累。~/.ssh/config 讓你替每台主機取別名並預設選項，之後 ssh 別名 就能連。每個 Host 區塊裡寫 HostName、Port、User、StrictHostKeyChecking 等。"
+story: "每次都打一長串 -p 2222 -o ... 太累了。~/.ssh/config 這個設定檔讓你替每台主機取「別名」並預設好選項，之後只要 ssh 別名。格式（每行一個選項，縮排的）：\n  Host vault\n      HostName 127.0.0.1\n      Port 2222\n      User vaultkeeper\n      StrictHostKeyChecking accept-new\n這個檔案的權限不能太寬鬆：chmod 600 ~/.ssh/config。"
 goal: "在 ~/.ssh/config 定義一個叫 vault 的主機（HostName 127.0.0.1、Port 2222、User vaultkeeper、StrictHostKeyChecking accept-new），然後用 ssh vault cat note.txt 讀出紙條內容，answer 提交。"
 teaches: [ssh, nano]
 xp: 55
 hints:
-  - "設定檔格式：Host vault 換行 縮排 HostName 127.0.0.1 …，每個選項一行。"
-  - "chmod 600 ~/.ssh/config（權限不能太寬鬆）。"
+  - "用 Here Document 寫設定：cat >> ~/.ssh/config << 'EOF'，貼上上面那 5 行，最後 EOF 結束。"
+  - "設定檔權限：chmod 600 ~/.ssh/config"
+  - "然後：ssh vault cat note.txt，answer 讀到的內容。"
 setup: |
   # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
   id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper

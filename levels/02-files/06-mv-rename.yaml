@@ -1,12 +1,14 @@
 id: "2-06"
 title: 改名
 kind: learn
-story: "Linux 沒有專門的改名指令，mv（move）同時負責「搬移」與「改名」，因為改名就是搬到同目錄的新名字。"
-goal: 把 draft.txt 改名成 final.txt。
+story: "Linux 沒有獨立的「改名」指令。mv（move，移動）同時負責搬移和改名，因為改名其實就是「搬到同一個位置的新名字」。\n\n格式：mv 舊名 新名。注意：搬過去後舊的就不見了（這點跟 cp 不同）。"
+goal: "把 draft.txt 改名成 final.txt。"
 teaches: [mv]
 xp: 10
 hints:
-  - "mv 舊名 新名"
+  - "格式：mv 舊名 新名"
+  - "打：mv draft.txt final.txt"
+  - "用 ls 確認 draft.txt 消失、final.txt 出現。"
 setup: |
   echo "launch plan" > /home/player/draft.txt
 check: |

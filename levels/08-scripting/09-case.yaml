@@ -1,12 +1,14 @@
 id: "8-09"
 title: case 分支
 kind: practice
-story: "case 適合「依一個值分流」，比一長串 if/elif 清楚。每個分支以 ) 開頭、;; 結尾，* 是預設分支。"
+story: "當你要「依一個值分流」（例如命令是 start、stop、status 各做不同的事），用 case 比一長串 if/elif 清楚：\n  case \"$1\" in\n    start)  echo ...;;\n    stop)   echo ...;;\n    *)      echo ...; exit 2;;\n  esac\n每個分支以 ) 開頭、;; 結尾；* 代表「其他所有情況」（預設分支）；esac 是 case 倒過來，代表結束。"
 goal: "寫 ship.sh ACTION：start 印 Engines on、stop 印 Engines off、status 印 Engines idle；其他任何值印 Usage: ship.sh start|stop|status 並以結束碼 2 結束。"
 teaches: [bash]
 xp: 35
 hints:
-  - "case \"$1\" in start) echo ...;; stop) ...;; *) ... exit 2;; esac"
+  - "用 case \"$1\" in ... esac，三個分支加一個 * 預設分支。"
+  - "骨架：case \"$1\" in start) echo \"Engines on\";; stop) echo \"Engines off\";; status) echo \"Engines idle\";; *) echo \"Usage: ship.sh start|stop|status\"; exit 2;; esac"
+  - "分別測試三個動作，以及亂打一個詞（應印 Usage 且結束碼 2，可用 echo $? 查）。"
 setup: ""
 check: |
   PR() { runuser -u player -- bash -c "cd /home/player && $1; echo RC=\$?" 2>&1; }

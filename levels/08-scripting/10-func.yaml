@@ -1,13 +1,14 @@
 id: "8-10"
 title: 函式與 local
 kind: practice
-story: "函式把重複的邏輯包起來。函式裡用 local 宣告的變數只在函式內有效，避免污染全域。函式用 return 回傳狀態碼，用 echo 回傳資料。"
+story: "「函式」把一段會重複用的邏輯包起來、取個名字：\n  max() {\n    local m=$1      # local：變數只在函式裡有效，不會弄亂外面\n    shift           # 把參數往左移一位（原本的 $2 變成 $1）\n    for x in \"$@\"; do\n      [ \"$x\" -gt \"$m\" ] && m=$x\n    done\n    echo \"$m\"       # 用 echo 把結果「印出來」當作回傳值\n  }\n呼叫：result=$(max 3 9 2)。\n其中 A && B 的意思是「A 成功才做 B」，所以那行是「如果 x 比 m 大，就 m=x」。"
 goal: "寫 stats.sh 數字…：印出 max=最大值 min=最小值（用函式實作至少其中一個）。例如 ./stats.sh 3 9 2 7 印 max=9 min=2。"
 teaches: [function, local, bash]
 xp: 40
 hints:
-  - "max() { local m=$1; shift; for x in \"$@\"; do [ \"$x\" -gt \"$m\" ] && m=$x; done; echo \"$m\"; }"
-  - "呼叫：echo \"max=$(max \"$@\")\""
+  - "定義函式 max（見上面骨架），再仿照寫一個 min（把 -gt 換成 -lt）。"
+  - "呼叫：echo \"max=$(max \"$@\") min=$(min \"$@\")\"（函式要先定義在前面）。"
+  - "測試 ./stats.sh 3 9 2 7，應印 max=9 min=2。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

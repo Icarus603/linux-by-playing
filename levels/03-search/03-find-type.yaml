@@ -1,12 +1,14 @@
 id: "3-03"
 title: 依類型找
 kind: practice
-story: "-type f 只找檔案，-type d 只找目錄，-type l 找軟連結。可與 -name 組合。"
-goal: "在 archive 底下，有幾個「目錄」的名字叫 backup？answer 提交數量（檔案不算）。"
+story: "find 還能依「類型」篩選，用 -type：\n  -type f   只要檔案（file）\n  -type d   只要目錄（directory）\n  -type l   只要軟連結（link）\n可以跟 -name 一起用，兩個條件都要符合才會被找出來。"
+goal: "在 archive 底下，有幾個「目錄」的名字叫 backup？answer 提交數量（名字叫 backup 的檔案不算）。"
 teaches: [find]
 xp: 15
 hints:
-  - "find archive -type d -name backup"
+  - "兩個條件一起寫：-type d（只要目錄）加 -name backup。"
+  - "打：find archive -type d -name backup"
+  - "數一下印出幾行（或後面加 | wc -l），answer 那個數字。"
 setup: |
   cd /home/player
   mkdir -p archive/{x,y,z}/backup archive/w/data

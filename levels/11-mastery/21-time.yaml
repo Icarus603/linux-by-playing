@@ -1,13 +1,14 @@
 id: "11-21"
 title: time：誰最慢
 kind: practice
-story: "time 指令 會在指令結束後回報花了多少時間：real 是牆上時鐘、user 與 sys 是 CPU 時間。比較不同做法的效能，最簡單的方法就是 time。"
+story: "想比較不同做法的速度？在指令前面加 time，指令結束後它會回報花了多久：\n  real   實際經過的時間（牆上時鐘）\n  user   花在你程式本身的 CPU 時間\n  sys    花在核心的 CPU 時間\n比較效能最簡單的方法，就是對每個做法 time 一下，看 real。"
 goal: "a.sh、b.sh、c.sh 三支腳本的執行時間不同。用 time 量一量，找出最慢的那一支，answer 提交檔名（例如 a.sh）。"
 teaches: [time]
 xp: 40
 hints:
-  - "time ./a.sh"
-  - "看 real 那一行。"
+  - "格式：time ./腳本名"
+  - "分別量三支：time ./a.sh、time ./b.sh、time ./c.sh"
+  - "比較每次輸出裡 real 那一行，最大的就是最慢的。"
 setup: |
   cd /home/player
   slow=$(shuf -n1 -e a.sh b.sh c.sh)

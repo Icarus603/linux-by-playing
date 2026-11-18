@@ -1,12 +1,14 @@
 id: "5-03"
 title: chmod：讓腳本可執行
 kind: learn
-story: "新建的檔案預設不能執行。chmod 改權限：u 是擁有者、g 群組、o 其他人、a 全部；+ 加、- 減；r w x 是權限。"
+story: "新建的檔案預設不能執行（沒有 x），腳本要先「加上執行權限」才能跑。chmod（change mode）就是改權限的指令：\n  chmod 誰 動作 權限 檔名\n誰：u（擁有者）、g（群組）、o（其他人）、a（全部人）\n動作：+ 加上、- 拿掉\n權限：r 讀、w 寫、x 執行\n例如 chmod u+x 檔名 = 「擁有者，加上，執行」。"
 goal: "script.sh 沒有執行權限。用 chmod 讓擁有者（你）可以執行它。"
 teaches: [chmod]
 xp: 15
 hints:
-  - "chmod u+x script.sh"
+  - "擁有者是 u，加上是 +，執行是 x。"
+  - "格式：chmod u+x 檔名"
+  - "打：chmod u+x script.sh，再用 ls -l 看，權限字串前段會多出 x。"
 setup: |
   cd /home/player
   printf '#!/bin/bash\necho ready\n' > script.sh

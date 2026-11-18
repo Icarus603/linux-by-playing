@@ -1,12 +1,14 @@
 id: "4-08"
 title: 依欄位排序
 kind: practice
-story: "CSV 這類表格資料，可以用 -t 指定分隔符號、-k 指定依哪一欄排序。"
-goal: "crew.csv 格式是 名字,職位,分數。找出分數最高的人，answer 提交名字。"
+story: "CSV 是一種常見的表格格式：每行一筆資料，欄位之間用逗號隔開，例如：\n  Alice,pilot,92\n用 sort 排序這種資料時要告訴它兩件事：\n  -t,    欄位分隔符號是逗號（t = field separator）\n  -k3    依「第 3 欄」排序（k = key）\n再加 -nr 讓分數由大到小。"
+goal: "crew.csv 每行格式是 名字,職位,分數。找出分數最高的人，answer 提交他的名字。"
 teaches: [sort]
 xp: 25
 hints:
-  - "sort -t, -k3 -nr crew.csv | head -1"
+  - "分數在第 3 欄，所以用 -k3；欄位用逗號分隔，所以用 -t,"
+  - "要比數字大小且由大到小，再加 -nr。"
+  - "打：sort -t, -k3 -nr crew.csv | head -1，answer 那一行最前面的名字。"
 setup: |
   cd /home/player
   printf 'ann,pilot,88\nbob,medic,92\ncat,cook,75\ndan,engineer,97\neve,gunner,60\n' > crew.csv

@@ -1,13 +1,14 @@
 id: "6-15"
 title: timeout 與結束碼
 kind: practice
-story: "每個指令結束時都會留下「結束碼」：0 代表成功，非 0 代表失敗，$? 讀得到上一個指令的結果。timeout 秒數 指令 會在時間到時中止它，並回傳特殊結束碼 124。"
-goal: "執行 timeout 1 sleep 5，再用 echo $? 查看結束碼，answer 提交那個數字。"
+story: "每個指令結束時，都會留下一個「結束碼」（exit code）：0 代表成功，其他數字代表失敗或特殊情況。緊接著用 echo $? 就能看到「上一個指令」的結束碼（$? 是一個特殊變數，裝著它）。\n\ntimeout 秒數 指令：給指令一個時間上限，時間到就強制中止它，並回傳特殊的結束碼 124。很適合防止程式卡死。"
+goal: "執行 timeout 1 sleep 5（5 秒的任務卻只給 1 秒），再立刻用 echo $? 查看結束碼，answer 提交那個數字。"
 teaches: [timeout, sleep, time]
 xp: 20
 hints:
-  - "timeout 1 sleep 5"
-  - "緊接著輸入 echo $?"
+  - "先打：timeout 1 sleep 5，會等約 1 秒後被中止。"
+  - "緊接著打：echo $?（中間不要再執行別的指令，不然看的是別人的結果）。"
+  - "answer 印出的數字。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "124" ]] && exit 0

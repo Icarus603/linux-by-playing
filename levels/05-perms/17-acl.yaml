@@ -1,13 +1,14 @@
 id: "5-17"
 title: ACL：更細緻的授權
 kind: practice
-story: "傳統權限只有「擁有者、群組、其他人」三組。ACL 能替「任意使用者或群組」單獨授權。setfacl -m 修改，getfacl 檢視。"
+story: "傳統權限只有「擁有者、群組、其他人」三組，不夠細。ACL（存取控制清單）可以替「任何一個指定的使用者或群組」單獨授權：\n  setfacl -m u:使用者:權限 檔案   新增或修改（-m = modify；u 表示使用者）\n  getfacl 檔案                    查看目前設定\n例如 u:cadet:rw 就是「使用者 cadet，給 rw」。"
 goal: "/srv/acl/report.txt 屬於 root、權限 640。用 setfacl 讓使用者 cadet 擁有讀寫權限（rw），不要改動其他人的權限。"
 teaches: [setfacl, getfacl]
 xp: 30
 hints:
-  - "sudo setfacl -m u:cadet:rw /srv/acl/report.txt"
-  - "用 getfacl /srv/acl/report.txt 檢查。"
+  - "格式：sudo setfacl -m u:使用者:權限 檔案"
+  - "權限是 rw，使用者是 cadet。"
+  - "打：sudo setfacl -m u:cadet:rw /srv/acl/report.txt，再用 getfacl /srv/acl/report.txt 檢查。"
 setup: |
   id cadet >/dev/null 2>&1 || useradd -m -s /bin/bash cadet
   rm -rf /srv/acl

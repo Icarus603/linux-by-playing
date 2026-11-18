@@ -1,12 +1,14 @@
 id: "6-11"
 title: 啟動時就禮讓
 kind: practice
-story: "nice -n 數字 指令 讓程式一開始就用較低的優先權。備份、壓縮這類不趕時間的工作很適合。"
+story: "上一關是調整「已經在跑」的程式。如果一開始就想讓它客氣一點，啟動時就加 nice：\n  nice -n 數字 指令\n備份、壓縮這類不趕時間的大工作很適合這樣跑，才不會拖慢其他事情。"
 goal: "用 nice 把 nice 值設為 15，在背景執行 sleep 200。"
 teaches: [nice]
 xp: 20
 hints:
-  - "nice -n 15 sleep 200 &"
+  - "格式：nice -n 數字 指令"
+  - "要在背景，結尾別忘了加 &。"
+  - "打：nice -n 15 sleep 200 &"
 setup: ""
 check: |
   pid=$(pgrep -u player -f '^sleep 200$' | head -1)

@@ -1,12 +1,14 @@
 id: "2-05"
 title: 連資料夾一起備份
 kind: practice
-story: "cp 預設只能複製檔案。要複製整個目錄（含內容），要加 -r（recursive 遞迴）。"
-goal: 把 config 目錄整個複製成 config-backup。
+story: "cp 預設只能複製「檔案」，遇到目錄會拒絕。要複製整個目錄（連同裡面所有東西），要加選項 -r（recursive，遞迴，意思是「一層一層往裡面都做」）：cp -r 目錄 新目錄名。"
+goal: "把 config 目錄整個複製成 config-backup。"
 teaches: [cp]
 xp: 15
 hints:
-  - "cp -r config config-backup"
+  - "直接 cp config config-backup 會失敗，因為 config 是目錄。"
+  - "加上 -r：cp -r 來源目錄 新目錄名"
+  - "打：cp -r config config-backup"
 setup: |
   cd /home/player
   mkdir -p config/net

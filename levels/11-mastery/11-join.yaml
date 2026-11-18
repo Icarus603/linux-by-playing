@@ -1,12 +1,14 @@
 id: "11-11"
 title: join：像資料庫一樣合併
 kind: practice
-story: "join 依「共同的欄位」把兩個檔案合併成一行，就像資料庫的 JOIN。輸入必須依該欄位排序。-t 指定分隔符號、-1 -2 指定各檔案用第幾欄當鍵。"
+story: "join 依「共同的欄位」把兩個檔案合併成一行，就像資料庫的 JOIN：兩個檔案都有「編號」，就把同編號的資料接在一起。\n  join 檔案1 檔案2   預設用「第 1 欄」當共同欄位，欄位以空白分隔\n  -t,              改用逗號分隔\n  -1 2 -2 1        檔案1 用第 2 欄、檔案2 用第 1 欄當鍵\n注意：兩個檔案都必須先依該欄位排序。"
 goal: "ids.txt（編號 名字）與 scores.txt（編號 分數）都依編號排序。把它們合併，存成 merged.txt（每行：編號 名字 分數）。"
 teaches: [join]
 xp: 45
 hints:
-  - "join ids.txt scores.txt > merged.txt"
+  - "兩個檔案都以編號（第 1 欄）當共同欄位，正好是 join 預設值。"
+  - "格式：join 檔案1 檔案2 > 輸出"
+  - "打：join ids.txt scores.txt > merged.txt，再 cat merged.txt 檢查。"
 setup: |
   cd /home/player
   printf '1 ann\n2 bob\n3 cat\n4 dan\n' > ids.txt

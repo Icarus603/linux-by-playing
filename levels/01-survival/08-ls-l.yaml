@@ -1,13 +1,14 @@
 id: "1-08"
 title: 詳細清單
 kind: learn
-story: "ls 加上 -l 會顯示詳細資訊：權限、擁有者、大小、修改時間。貨艙管理員問你 report.dat 的大小，每次的數字都不同。"
-goal: "用 ls -l 查出 report.dat 的大小（位元組），用 answer 數字 提交。"
+story: "指令後面可以加「選項」來改變它的行為，選項通常是一個減號加一個字母。ls 單獨用只顯示名字，加上 -l（小寫 L，long 的意思）就會變成「詳細清單」，每個檔案一行，像這樣：\n  -rw-r--r-- 1 player player 2048 Jan 5 10:00 report.dat\n其中那個 2048 就是檔案大小（單位 bytes，位元組）；最後是檔名。\n\n貨艙管理員想知道 report.dat 的大小，而每次登艙數字都不同。"
+goal: "用 ls -l 查出 report.dat 的大小，用 answer 數字 提交。"
 teaches: [ls]
 xp: 15
 hints:
-  - "ls -l 的第 5 欄是檔案大小（bytes）。"
-  - "ls -l report.dat 只看那一個檔案。"
+  - "先打 ls -l（注意 ls 和 -l 之間有空格）。"
+  - "在 report.dat 那一行，檔名左邊有一串數字，緊接在 player player 後面的那個就是大小。"
+  - "想只看這一個檔案，可以打 ls -l report.dat。"
 setup: |
   cd /home/player
   n=$((RANDOM % 9000 + 1000))

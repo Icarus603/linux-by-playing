@@ -1,12 +1,14 @@
 id: "10-22"
 title: python3：隨身計算機
 kind: practice
-story: "python3 -c '程式碼' 直接執行一小段 Python，不用建檔案，是拿來快速計算、處理文字、解析 JSON 的好幫手。大整數運算也輕而易舉。"
+story: "python3 是一個很常用的程式語言，而 python3 -c '程式碼' 能「直接執行一小段程式」，不必先建檔案，是拿來當計算機、處理文字、解析 JSON 的好幫手。\n  print(…)   把括號裡的東西印出來\n  2**10      代表 2 的 10 次方（** 是次方）\nPython 處理很大的整數也毫無壓力。"
 goal: "用 python3 -c 算出 2 的 64 次方，answer 提交結果。"
 teaches: [python3]
 xp: 25
 hints:
-  - "python3 -c 'print(2**64)'"
+  - "格式：python3 -c '程式碼'（程式碼用單引號包起來）。"
+  - "程式碼：print(2**64)"
+  - "打：python3 -c 'print(2**64)'，answer 印出的那個很長的數字。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "18446744073709551616" ]] && exit 0

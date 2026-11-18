@@ -1,13 +1,14 @@
 id: "5-16"
 title: Setgid 目錄
 kind: practice
-story: "團隊共用目錄有個老問題：每個人建立的檔案，群組都是自己的主要群組。對目錄設 setgid（g+s）後，新檔案會自動繼承「目錄的群組」。數字寫法是前面加 2。"
+story: "團隊共用目錄有個老問題：每個人建立的檔案，所屬群組都是自己的主要群組，同事反而讀不了。\n\n對目錄設 setgid（符號 g+s），之後在裡面新建的檔案會自動繼承「這個目錄的群組」。\n設法：chmod g+s 目錄，或用數字，在前面加 2，例如 2770。"
 goal: "/srv/team 屬於群組 crew、權限 770。加上 setgid，變成 2770。"
 teaches: [chmod, chgrp]
 xp: 25
 hints:
-  - "sudo chmod g+s /srv/team"
-  - "或 sudo chmod 2770 /srv/team"
+  - "setgid 的符號是 g+s。"
+  - "打：sudo chmod g+s /srv/team"
+  - "或者直接：sudo chmod 2770 /srv/team，再用 ls -ld /srv/team 看，群組那組會出現 s。"
 setup: |
   getent group crew >/dev/null || groupadd crew
   rm -rf /srv/team

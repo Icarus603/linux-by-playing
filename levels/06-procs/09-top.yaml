@@ -1,13 +1,14 @@
 id: "6-09"
 title: 誰在吃 CPU
 kind: practice
-story: "引擎過熱了，有個程序吃光 CPU。top 會即時顯示（按 q 離開，按 P 依 CPU 排序）；ps aux --sort=-%cpu 則是一次性的排行榜。"
+story: "引擎過熱了，有個程序把 CPU（電腦的運算大腦）吃光。怎麼找出是誰？\n  top   即時畫面，會一直更新，按 q 離開；預設最耗 CPU 的排在最上面\n  ps aux --sort=-%cpu   一次性的排行榜，--sort=-%cpu 是「依 CPU 使用率由高到低排」\n加上 | head -5 只看前五名。"
 goal: "找出 CPU 使用率最高的程序名稱，answer 提交。"
 teaches: [top, htop, ps]
 xp: 25
 hints:
-  - "top，然後看最上面的程序，按 q 離開。"
-  - "ps aux --sort=-%cpu | head -5"
+  - "打：top，看最上面的那個程序，看完按 q 離開。"
+  - "或打：ps aux --sort=-%cpu | head -5，第一筆（標題下面那行）就是最耗 CPU 的。"
+  - "answer 它最後一欄（COMMAND）的名稱。"
 setup: |
   cp -f /usr/bin/yes /usr/local/bin/cpu-hog
   setsid setpriv --reuid=player --regid=player --init-groups -- bash -c 'exec cpu-hog > /dev/null' >/dev/null 2>&1 </dev/null &

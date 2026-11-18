@@ -1,13 +1,14 @@
 id: "11-06"
 title: nm：函式庫匯出了什麼
 kind: practice
-story: "nm 列出目的檔與函式庫裡的符號。-D 看動態符號、--defined-only 只看這個檔案自己定義（匯出）的。objdump -T 能得到類似的資訊。想知道一個函式庫「提供」哪些函式，這就是工具。"
+story: "「符號」是程式裡函式、變數的名字。nm 能列出一個函式庫裡有哪些符號：\n  nm -D 檔案             看動態符號\n  nm -D --defined-only   只看這個檔案「自己定義」（也就是它提供給別人用）的\n想知道一個函式庫「提供」哪些函式，這就是工具。\n要找函式庫的路徑，可用 ldconfig -p | grep 名稱。"
 goal: "找出系統上的 libz.so.1（zlib 壓縮函式庫，用 ldconfig -p 可以查到路徑），用 nm -D --defined-only 數它匯出了幾個符號，answer 提交那個數字。"
 teaches: [nm, objdump]
 xp: 50
 hints:
-  - "ldconfig -p | grep libz.so.1"
-  - "nm -D --defined-only 路徑 | wc -l"
+  - "先找路徑：ldconfig -p | grep libz.so.1，輸出最後的 => 後面就是路徑。"
+  - "把路徑代進去：nm -D --defined-only 路徑"
+  - "接 | wc -l 數行數，answer 那個數字。"
 setup: ""
 check: |
   lib=$(ldconfig -p | awk '/libz.so.1 /{print $NF; exit}')

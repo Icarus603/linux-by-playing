@@ -1,12 +1,14 @@
 id: "2-15"
 title: 偵探：file 與 stat
 kind: practice
-story: "副檔名不可信。file 會看檔案內容判斷真實類型，stat 則顯示詳細的元資料。"
-goal: "mystery 這個檔案沒有副檔名。用 file 查出它是哪種壓縮格式，answer 提交（gzip、bzip2 或 zip）。"
+story: "副檔名（像 .txt）只是檔名的一部分，可以亂改，不一定可信。要知道檔案「真正」是什麼，用 file 檔名：它會偷看檔案內容來判斷類型。\n（另有 stat 檔名，可以看大小、時間等更詳細的資料。）"
+goal: "mystery 這個檔案沒有副檔名。用 file mystery 查它是哪種壓縮格式，answer 提交（gzip、bzip2 或 zip 其中一個）。"
 teaches: [file, stat]
 xp: 20
 hints:
-  - "file mystery"
+  - "格式：file 檔名"
+  - "打：file mystery"
+  - "輸出的第一個詞或接近的詞就是格式，把它 answer 出來（小寫）。"
 setup: |
   cd /home/player
   echo "top secret" > s.txt

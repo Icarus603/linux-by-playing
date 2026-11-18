@@ -1,13 +1,14 @@
 id: "6-10"
 title: nice 與 renice
 kind: practice
-story: "不想殺掉吃 CPU 的程序，只想讓它「禮讓」？nice 值越大優先權越低（範圍 -20 到 19）。renice 調整執行中的程序，nice 指令則在啟動時設定。"
+story: "不想殺掉吃 CPU 的程序，只想叫它「禮讓」一點？可以調整它的 nice 值：\n  nice 值範圍是 -20 到 19，數字越大，越客氣、優先權越低（越容易讓別人先用 CPU）\n  renice -n 數字 -p PID   調整「已經在跑」的程序"
 goal: "把 cpu-hog 的 nice 值調到 10 以上（降低它的優先權）。"
 teaches: [renice, nice]
 xp: 25
 hints:
-  - "pgrep -x cpu-hog 取得 PID。"
-  - "renice -n 10 -p <PID>"
+  - "先拿 PID：pgrep -x cpu-hog"
+  - "格式：renice -n 數字 -p PID"
+  - "例如：renice -n 10 -p 剛才的PID。"
 setup: |
   cp -f /usr/bin/yes /usr/local/bin/cpu-hog
   setsid setpriv --reuid=player --regid=player --init-groups -- bash -c 'exec cpu-hog > /dev/null' >/dev/null 2>&1 </dev/null &

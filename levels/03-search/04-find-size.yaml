@@ -1,12 +1,14 @@
 id: "3-04"
 title: 依大小找
 kind: practice
-story: "-size 能依檔案大小篩選：+1M 大於 1MB，-10k 小於 10KB。清理磁碟時超好用。"
+story: "-size 可以依檔案大小篩選：\n  -size +1M   大於 1 MB（+ 表示「超過」）\n  -size -10k  小於 10 KB（- 表示「不到」）\n單位 k 是 KB、M 是 MB、G 是 GB。清理磁碟、找肥檔案時超好用。"
 goal: "在 cargo 底下找出大於 1MB 的那個檔案，answer 提交檔名。"
 teaches: [find]
 xp: 20
 hints:
-  - "find cargo -size +1M"
+  - "要「大於」就在數字前面加 +。"
+  - "打：find cargo -size +1M"
+  - "answer 它印出的路徑最後那個檔名。"
 setup: |
   cd /home/player
   mkdir -p cargo/{a,b,c}

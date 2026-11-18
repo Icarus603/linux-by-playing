@@ -1,14 +1,14 @@
 id: "5-18"
 title: "Boss：團隊共用目錄"
 kind: boss
-story: "開發團隊需要共用目錄 /srv/project：alice 和 bob（群組 dev）可以讀寫，新檔案要自動屬於 dev，彼此不能刪對方的檔案，外人 carol 完全不能進入。把這學期學到的權限技巧組合起來。"
+story: "開發團隊需要共用目錄 /srv/project，要求：\n  ① alice 和 bob（都在 dev 群組）可以讀寫\n  ② 新檔案自動屬於 dev 群組（setgid，數字 2）\n  ③ 彼此不能刪對方的檔案（sticky，數字 1）\n  ④ 外人 carol 完全不能進入（其他人權限 0）\n\n組合起來：特殊位 3（= 2+1）加上 770（擁有者與群組完全控制）= 3770。\n步驟：建目錄 → 把群組改成 dev → 設權限。"
 goal: "建立 /srv/project：群組設為 dev、權限 3770（setgid + sticky + 群組完全控制、其他人零權限）。"
 teaches: [mkdir, chgrp, chmod, sudo]
 xp: 70
 hints:
-  - "sudo mkdir /srv/project"
-  - "sudo chgrp dev /srv/project"
-  - "sudo chmod 3770 /srv/project：3 = setgid(2) + sticky(1)。"
+  - "先建目錄：sudo mkdir /srv/project"
+  - "再把所屬群組改成 dev：sudo chgrp dev /srv/project（chgrp 是 change group）"
+  - "最後設權限：sudo chmod 3770 /srv/project（開頭的 3 = setgid 2 + sticky 1）。"
 setup: |
   getent group dev >/dev/null || groupadd dev
   for u in alice bob carol; do id $u >/dev/null 2>&1 || useradd -m -s /bin/bash $u; done

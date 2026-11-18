@@ -1,13 +1,14 @@
 id: "11-18"
 title: awk 進階：統計
 kind: practice
-story: "awk 有關聯式陣列，一行就能做分組統計：awk -F: '{c[$7]++} END{for (s in c) print c[s], s}'。這種「依欄位分組計數」，是資料分析最常見的操作之一。"
+story: "awk 裡有「關聯式陣列」（像字典），一行就能做「依欄位分組計數」，這是資料分析最常見的操作之一：\n  awk -F: '{c[$7]++} END{for (s in c) print c[s], s}'\n拆開來看：\n  -F:           欄位用冒號分隔\n  c[$7]++       以「第 7 欄的值」當名字，每遇到一次就把對應的計數加 1\n  END{for (s in c) print c[s], s}   全部讀完後，把每個名字和它的計數印出來"
 goal: "users.txt 是仿照 /etc/passwd 的名單（冒號分隔，第 7 欄是登入 shell）。找出「最多人使用」的 shell，answer 提交（例如 /bin/xxx）。"
 teaches: [awk, sort]
 xp: 55
 hints:
-  - "awk -F: '{c[$7]++} END{for (s in c) print c[s], s}' users.txt"
-  - "再接 sort -nr | head -1。"
+  - "先分組計數：awk -F: '{c[$7]++} END{for (s in c) print c[s], s}' users.txt"
+  - "用 sort -nr 把計數由大到小排，再 head -1 取第一名。"
+  - "完整：awk -F: '{c[$7]++} END{for (s in c) print c[s], s}' users.txt | sort -nr | head -1，answer 那行的 shell 路徑（不是前面的數字）。"
 setup: |
   cd /home/player
   { for i in 1 2 3 4 5; do echo "u$i:x:100$i:100$i::/home/u$i:/bin/bash"; done

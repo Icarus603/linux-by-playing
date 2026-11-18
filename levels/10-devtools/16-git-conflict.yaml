@@ -1,15 +1,15 @@
 id: "10-16"
 title: git：解決合併衝突
 kind: combine
-story: "兩條分支改了同一行，git 不知道要留誰的，於是停下來請你決定。衝突的檔案裡會有 <<<<<<<、=======、>>>>>>> 標記。你編輯成想要的最終內容、移除標記，再 git add 與 git commit 完成合併。"
+story: "兩條分支改了「同一個地方」，git 不知道該留誰的，就停下來請你決定，這叫「衝突」。衝突的檔案裡，git 會留下標記：\n  <<<<<<< HEAD\n  （目前這邊的內容）\n  =======\n  （要合併進來的那邊的內容）\n  >>>>>>> feature\n處理步驟：\n  ① 用編輯器打開檔案，決定最終內容\n  ② 把三行標記（<<<<<<<、=======、>>>>>>>）和不要的內容刪掉\n  ③ git add 檔案　④ git commit 完成合併"
 goal: "把 feature 合併進 main 時會衝突：config.ini 的 mode 一邊是 fast、另一邊是 safe。合併它，把最終內容解決成 mode=balanced，然後完成合併提交。"
 teaches: [git, nano, vim]
 xp: 70
 hints:
-  - "git merge feature（會說有衝突）"
-  - "用編輯器開啟 config.ini，刪掉衝突標記，改成一行 mode=balanced。"
-  - "git add config.ini，然後 git commit（可以直接 git commit --no-edit）。"
-  - "git status 能看到合併進行到哪一步。"
+  - "先進 repo、切到 main，執行 git merge feature，它會告訴你 config.ini 有衝突。"
+  - "用編輯器（nano config.ini）打開，刪掉所有標記行和兩邊內容，只留下一行：mode=balanced。"
+  - "git add config.ini，然後 git commit --no-edit 完成合併。"
+  - "不確定進行到哪，用 git status 查看。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

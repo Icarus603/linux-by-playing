@@ -1,13 +1,14 @@
 id: "9-02"
 title: ping：通不通
 kind: learn
-story: "ping 對目標送出 ICMP 封包，看對方有沒有回應。-c 次數 限制送幾個（不加會一直 ping 到你按 Ctrl-C）。網路排錯的第一步通常就是 ping。"
+story: "ping 是網路排錯的第一步：它對目標送出一個小封包，看對方有沒有回應，像在喊「喂，你在嗎？」\n  ping 目標            一直 ping，要按 Ctrl-C 才停\n  ping -c 3 目標       只送 3 個就停（c = count）\n結尾的統計會寫「3 packets transmitted, 3 received」，也就是送出 3 個、收到 3 個回應。"
 goal: "對 127.0.0.1 送出 3 個 ping，數一數收到幾個回應，answer 提交那個數字。"
 teaches: [ping]
 xp: 15
 hints:
-  - "ping -c 3 127.0.0.1"
-  - "輸出結尾的統計有 received。"
+  - "打：ping -c 3 127.0.0.1"
+  - "最後的統計行有 received 這個字。"
+  - "answer 它前面的數字。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "3" ]] && exit 0

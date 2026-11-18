@@ -1,12 +1,14 @@
 id: "8-14"
 title: 參數展開
 kind: practice
-story: "${var%模式} 從結尾去掉最短符合的部分，${var#模式} 從開頭去掉，${var/舊/新} 取代，${var:-預設} 在空值時給預設值。批次改檔名超好用。"
+story: "「參數展開」能在取變數的同時加工它：\n  ${var%模式}      從結尾去掉最短符合的部分\n  ${var#模式}      從開頭去掉\n  ${var/舊/新}     取代\n  ${var:-預設}     變數是空的就用預設值\n例如 f=a.txt，${f%.txt} 就是 a；再加 .md → ${f%.txt}.md = a.md。\n批次改檔名時超好用：配上 for f in *.txt 迴圈逐個處理。"
 goal: "寫 to-md.sh：把「目前目錄」裡所有 .txt 檔改名為 .md（a.txt 變 a.md）。notes/ 目錄有些檔案可以讓你測試。"
 teaches: [mv, bash]
 xp: 40
 hints:
-  - "for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done"
+  - "用迴圈遍歷所有 .txt：for f in *.txt; do ...; done"
+  - "每個檔案改名：mv \"$f\" \"${f%.txt}.md\"（${f%.txt} 是去掉結尾的 .txt）"
+  - "完整：for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done。記得先 cd notes 再執行腳本測試。"
 setup: |
   cd /home/player
   rm -rf notes; mkdir notes

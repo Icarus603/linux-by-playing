@@ -1,15 +1,15 @@
 id: "10-23"
 title: "Boss：從零建立專案"
 kind: boss
-story: "站台需要一個全新的『任務』專案，要有版本控制、自動化建置與發行標記。這是你把編輯器、git、make 串起來的總驗收。"
+story: "站台需要一個全新的『任務』專案：要有版本控制、自動化建置、與發行標記。這是你把編輯器、git、make 串起來的總驗收。\n\n拆成小步驟，一步步做：\n  ① 建專案目錄、git init\n  ② 寫 README.md（專案說明）並提交\n  ③ 寫 Makefile（test 目標）並提交\n  ④ 建立 release 分支\n  ⑤ 用 git tag 在最新提交上做一個標記 v1.0（標籤像書籤，常用來標示發行版本）\n  ⑥ make test 驗證"
 goal: "在 ~/mission 建立專案：git 版本庫；有 README.md；有 Makefile，其中 test 目標會印出 tests passed；至少兩筆提交；建立分支 release；並在最新提交上打上標籤 v1.0（git tag v1.0）。最後 make test 要能成功。"
 teaches: [git, make, nano, vim]
 xp: 180
 hints:
-  - "mkdir mission && cd mission && git init"
-  - "README.md 隨便寫幾個字；Makefile 的 test 目標：@echo tests passed（前面是 Tab）"
-  - "兩筆提交：先提交 README，再提交 Makefile。"
-  - "git branch release、git tag v1.0"
+  - "建立並初始化：mkdir mission && cd mission && git init"
+  - "README.md 隨便寫幾個字（echo hello > README.md）；Makefile 的 test 目標：test: 換行，Tab 開頭的 @echo tests passed（可用 printf 'test:\\n\\t@echo tests passed\\n' > Makefile）。"
+  - "兩筆提交：先 git add README.md && git commit -m \"readme\"，再 git add Makefile && git commit -m \"makefile\"。"
+  - "最後：git branch release、git tag v1.0，用 make test 驗證會印出 tests passed。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

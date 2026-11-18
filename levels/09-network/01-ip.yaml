@@ -1,13 +1,14 @@
 id: "9-01"
 title: ip：我的位址
 kind: learn
-story: "後日談第二幕。Kernel-7 要接上星網。學習容器只有本機迴路（loopback），不過位址、連接埠、請求的觀念完全一樣。ip addr（簡寫 ip a）列出每個網路介面與它的 IP。"
-goal: "用 ip 指令查出 lo（本機迴路）介面的 IPv4 位址，answer 提交（只要數字，不含 /8）。"
+story: "後日談第二幕。Kernel-7 要接上星網。\n\n網路上每台電腦都需要一個「IP 位址」，像門牌號碼，別人靠它找到你（例如 192.168.1.5）。一台電腦可能有好幾個「網路介面」（像網路卡），每個介面各有自己的位址。\n\nip addr（可簡寫 ip a）列出每個介面和它的 IP。學習容器只有「本機迴路」lo（loopback，自己連自己，位址固定是 127.0.0.1），但觀念完全一樣。"
+goal: "用 ip 指令查出 lo（本機迴路）介面的 IPv4 位址，answer 提交（只要數字，不含後面的 /8）。"
 teaches: [ip]
 xp: 20
 hints:
-  - "ip addr show lo"
-  - "ip -br addr 會把每個介面濃縮成一行。"
+  - "打：ip addr show lo（只看 lo 這個介面）"
+  - "找 inet 開頭的那一行，後面像 127.0.0.1/8。"
+  - "/8 是網段大小，不用管；answer 只提交斜線前面的位址。"
 setup: ""
 check: |
   exp=$(ip -4 -o addr show lo | awk '{print $4}' | cut -d/ -f1 | head -1)

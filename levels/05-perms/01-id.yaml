@@ -1,13 +1,14 @@
 id: "5-01"
 title: 我是誰
 kind: learn
-story: "Linux 是多人系統，每個使用者有一個數字編號 uid。id 指令會顯示你的 uid、gid 與所屬群組。"
+story: "Linux 是多人共用的系統，每個使用者（帳號）都有一個數字編號，叫 uid（user id）；每個群組也有編號 gid。系統其實是用這些數字在辨認「誰是誰」。\n\nid 指令會顯示你的身分資料，輸出像這樣：\n  uid=1000(player) gid=1000(player) groups=1000(player)\n其中括號外的數字是編號，括號內是名稱。"
 goal: "用 id 查出你的使用者編號（uid），answer 提交那個數字。"
 teaches: [id, whoami, groups]
 xp: 10
 hints:
-  - "直接輸入 id，找 uid= 後面的數字。"
-  - "id -u 只印 uid。"
+  - "直接輸入 id，不用加任何東西。"
+  - "找 uid= 後面、括號前面的那個數字。"
+  - "想只印出 uid，可以打 id -u。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "1000" ]] && exit 0

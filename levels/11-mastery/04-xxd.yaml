@@ -1,13 +1,14 @@
 id: "11-04"
 title: xxd：十六進位檢視
 kind: practice
-story: "xxd 把檔案顯示成十六進位加對照的文字。檔案開頭的幾個位元組（魔術數字）能告訴你它真正的格式。-l 限制長度、-p 輸出純十六進位。"
+story: "電腦底層存的是 0 和 1，用「十六進位」（0-9 加 a-f，每兩位代表一個位元組）來讀比較方便。xxd 把檔案顯示成「十六進位 + 對照的文字」。\n\n很多檔案類型開頭的幾個位元組是固定的「魔術數字」，像身分證：只要看開頭，就知道它真正是什麼格式（PNG、ZIP…）。\n  xxd -l 4 檔案      只看開頭 4 個位元組（-l = length）\n  xxd -l 4 -p 檔案   -p 輸出連續的純十六進位，不含空格"
 goal: "magic.bin 開頭 4 個位元組是這個檔案的識別碼。用 xxd 讀出來，answer 提交（8 個小寫十六進位字元，不含空格）。"
 teaches: [xxd, hexdump]
 xp: 40
 hints:
-  - "xxd -l 4 magic.bin"
-  - "xxd -l 4 -p magic.bin 直接得到連續的十六進位。"
+  - "打：xxd -l 4 magic.bin，看開頭 4 個位元組。"
+  - "想直接得到連續的字串：xxd -l 4 -p magic.bin"
+  - "answer 那 8 個字元（小寫、不要空格）。"
 setup: |
   cd /home/player
   h=$(openssl rand -hex 4)

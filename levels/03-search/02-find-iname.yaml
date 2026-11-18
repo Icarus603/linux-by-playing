@@ -1,13 +1,14 @@
 id: "3-02"
 title: 不分大小寫
 kind: practice
-story: "Linux 區分大小寫：README 和 readme 是不同檔案。-iname 讓你忽略大小寫搜尋。"
-goal: "在 docs 底下，找出所有名字是 readme（不分大小寫、不含副檔名）的檔案，answer 提交總數。"
+story: "Linux 區分大小寫：README、Readme、readme 是三個不同的檔案。如果不確定大小寫，把 -name 換成 -iname（i = ignore，忽略），它就不管大小寫了。\n\n另外，要數有幾個結果，可以在後面接 | wc -l（| 是把前面的輸出交給後面處理，wc -l 數行數，每個結果一行，行數就是數量）。"
+goal: "在 docs 底下，找出所有名字是 readme（不分大小寫、沒有副檔名）的檔案，answer 提交總共有幾個。"
 teaches: [find]
 xp: 15
 hints:
-  - "find docs -iname readme"
-  - "數量可以用 find ... | wc -l 算。"
+  - "把 -name 換成 -iname：find docs -iname readme"
+  - "數量：在後面加 | wc -l，就會得到一個數字。"
+  - "打：find docs -iname readme | wc -l，然後 answer 那個數字。"
 setup: |
   cd /home/player
   mkdir -p docs/{a,b,c,d}

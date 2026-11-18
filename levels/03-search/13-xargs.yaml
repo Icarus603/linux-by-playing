@@ -1,13 +1,14 @@
 id: "3-13"
 title: xargs：把結果接給別人
 kind: practice
-story: "管線把「輸出」接到「輸入」，但有些指令（如 rm）不讀標準輸入，要用 xargs 把輸入轉成參數。"
+story: "管線 | 是把前一個指令的「輸出」，當成後一個指令的「輸入」。但有些指令（例如 rm）不從輸入讀東西，它只看你寫在後面的「檔名」。\n\nxargs 就是翻譯員：它把收到的輸入，變成後面指令的「檔名參數」。所以：\n  find work -name '*.bak' | xargs rm\n意思是「找出所有 .bak 檔，然後把它們全部交給 rm 去刪」。"
 goal: "刪除 work 底下所有 .bak 檔案，其他檔案要保留。用 find 配 xargs 完成。"
 teaches: [xargs, find]
 xp: 25
 hints:
-  - "find work -name '*.bak' | xargs rm"
-  - "檔名可能含空白時，用 find -print0 | xargs -0 比較安全。"
+  - "先單獨打 find work -name '*.bak'，確認找到的就是要刪的檔案。"
+  - "在後面接：| xargs rm"
+  - "完整：find work -name '*.bak' | xargs rm"
 setup: |
   cd /home/player
   mkdir -p work/a work/b

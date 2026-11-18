@@ -1,13 +1,14 @@
 id: "6-12"
 title: 記憶體與負載
 kind: practice
-story: "free 看記憶體、uptime 看開機多久與平均負載、vmstat 看整體資源概況。watch -n 秒數 指令 可以每隔幾秒自動重跑一次，做簡易監控。"
-goal: "用 free -m 查出這台機器的記憶體總量（MB，Mem: 那行第一個數字），answer 提交。"
+story: "幾個看系統「健康狀況」的指令：\n  free -m     看記憶體（RAM）用量，-m 表示用 MB 為單位\n  uptime      開機多久，以及系統「平均負載」（越高越忙）\n  vmstat      整體資源概況\n  watch -n 秒數 指令   每隔幾秒自動重跑一次指令，做簡單的即時監控"
+goal: "用 free -m 查出這台機器的記憶體總量（MB，Mem: 那行的第一個數字），answer 提交。"
 teaches: [free, uptime, vmstat]
 xp: 20
 hints:
-  - "free -m"
-  - "total 欄位就是總量。"
+  - "打：free -m"
+  - "找到開頭是 Mem: 的那行。"
+  - "total 那一欄（Mem: 後的第一個數字）就是總量，answer 它。"
 setup: ""
 check: |
   exp=$(free -m | awk '/^Mem:/{print $2}')

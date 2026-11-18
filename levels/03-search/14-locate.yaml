@@ -1,12 +1,14 @@
 id: "3-14"
 title: locate：全系統快速搜尋
 kind: practice
-story: "locate 靠預先建好的索引資料庫，比 find 快得多，但索引需要定期更新（updatedb）。"
+story: "find 每次都要真的走一遍目錄，大範圍會很慢。locate 則是事先把全系統的檔名做成一本「索引目錄」，查起來幾乎瞬間完成：locate 檔名。\n\n缺點是索引需要定期更新（用 updatedb），所以太新的檔案可能還查不到。"
 goal: "星圖檔案 starmap.dat 藏在系統某處。用 locate 找出完整路徑，answer 提交。"
 teaches: [locate, whereis]
 xp: 20
 hints:
-  - "locate starmap.dat"
+  - "格式：locate 檔名"
+  - "打：locate starmap.dat"
+  - "answer 印出的那整串路徑。"
 setup: |
   mkdir -p /opt/astro/deep/charts
   echo data > /opt/astro/deep/charts/starmap.dat

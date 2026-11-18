@@ -2,13 +2,14 @@ id: "1-04"
 title: 讀取日誌
 kind: learn
 cwd: /home/player/logbook
-story: "你已經在日誌室了。cat 會把檔案內容印在螢幕上。前任管理員 Vega 在日誌裡留了通行碼，而且這組密碼每次登艙都會換。"
-goal: "用 cat 讀 entry-001.txt，找到「通行碼」，再輸入 answer 通行碼 提交（例如 answer ABC-123）。"
+story: "你已經在日誌室了。cat 會把一個檔案的內容直接「印」在螢幕上，格式：cat 檔名。（它的名字來自 concatenate，連接，但新手只要記得它是「讀檔」就好。）\n\n前任管理員 Vega 在日誌裡留了「通行碼」，而且這組密碼每次登艙都會換，所以你得真的去讀。\n\n另外，遊戲裡要提交答案時，輸入 answer 加一個空格再加答案，例如 answer ABC-123。"
+goal: "先用 cat entry-001.txt 讀日誌，找到寫著「通行碼：」的那一行，再打 answer 通行碼 提交（只要冒號後面那段）。"
 teaches: [cat, answer]
 xp: 15
 hints:
-  - "cat entry-001.txt"
-  - "找到那行「通行碼：」後面的文字，然後輸入 answer 加上那段文字。"
+  - "先打：cat entry-001.txt，檔名要完整，包含 .txt。"
+  - "在印出來的文字裡找「通行碼：」，把冒號後面那串字元抄下來。"
+  - "最後打 answer 空格 那串字元。例如通行碼是 XYZ-789，就打 answer XYZ-789。"
 setup: |
   code="NOVA-$((RANDOM % 9000 + 1000))"
   mkdir -p /home/player/logbook /var/lib/lbp

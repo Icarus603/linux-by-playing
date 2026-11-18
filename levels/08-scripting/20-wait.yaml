@@ -1,12 +1,14 @@
 id: "8-20"
 title: 背景工作與 wait
 kind: practice
-story: "腳本裡用 & 把工作丟到背景平行執行，wait 會等所有背景工作結束。三件各要 1 秒的工作，平行做只要 1 秒，循序做要 3 秒。"
+story: "在腳本裡，指令後面加 & 會丟到背景同時執行，不用等它做完；wait 則會「等所有背景工作都結束」才繼續。\n三件各要 1 秒的工作：一件接一件做要 3 秒，但三件同時做只要 1 秒。這就是「平行處理」。\n  cmd1 &\n  cmd2 &\n  wait"
 goal: "寫 parallel.sh：用背景方式同時執行三個 sleep 1，用 wait 等它們全部完成，最後印 all done。整支腳本要在 2.5 秒內結束。"
 teaches: [wait, bash]
 xp: 45
 hints:
-  - "sleep 1 & 三次，再單獨一行 wait。"
+  - "寫三行 sleep 1 &，每行結尾都有 &。"
+  - "接著單獨一行 wait，然後 echo \"all done\"。"
+  - "用 time ./parallel.sh 計時，應該約 1 秒就結束。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

@@ -1,13 +1,14 @@
 id: "5-14"
 title: umask：預設權限
 kind: practice
-story: "新建檔案的預設權限由 umask 決定：它是「要拿掉的權限」。檔案預設 666、目錄預設 777，減去 umask 就是結果。umask 022 → 檔案 644。"
+story: "新建的檔案，一開始的權限由 umask 決定。umask 是一個「要拿掉的權限」的遮罩：\n  檔案起點是 666（rw-rw-rw-），目錄起點是 777\n  再減去 umask，就是實際權限\n例如 umask 022：檔案 666−022 = 644；umask 077：檔案 666−077 = 600（只有自己能讀寫）。\n直接打 umask 數字 就能設定（只影響目前這個 shell）。"
 goal: "在這個 shell 執行 umask 077，然後 touch 一個新檔案，用 ls -l 或 stat -c %a 看它的權限，answer 提交那個數字。"
 teaches: [umask]
 xp: 25
 hints:
-  - "umask 077"
-  - "touch test.txt && stat -c %a test.txt"
+  - "先打：umask 077"
+  - "再建檔：touch test.txt"
+  - "用 stat -c %a test.txt 印出權限數字，answer 它。"
 setup: ""
 check: |
   [[ "$LBP_ANSWER" == "600" ]] && exit 0

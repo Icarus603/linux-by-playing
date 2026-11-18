@@ -1,13 +1,14 @@
 id: "6-04"
 title: pkill：依名字批量結束
 kind: practice
-story: "有五架無人機（drone）程序失控了。一個一個 kill 太慢，pkill 名稱 可以依名字一次結束全部。killall 也類似。"
+story: "有五架無人機（drone）程序失控了。一個一個查 PID 再 kill 太慢。\n\npkill 名稱 可以「依名字」一次結束所有同名程序（killall 名稱 也類似）。用之前要確定名字不會誤傷別人。"
 goal: "結束所有名叫 drone 的程序。"
 teaches: [pkill, killall]
 xp: 20
 hints:
-  - "pkill drone"
-  - "killall drone 也可以。"
+  - "格式：pkill 程序名稱"
+  - "打：pkill drone"
+  - "用 pgrep drone 確認，沒有任何輸出就代表都結束了。"
 setup: |
   cp -f /usr/bin/sleep /usr/local/bin/drone
   for i in 1 2 3 4 5; do setsid setpriv --reuid=player --regid=player --init-groups -- drone 100000 >/dev/null 2>&1 </dev/null & done

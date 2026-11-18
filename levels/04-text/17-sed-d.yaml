@@ -1,13 +1,14 @@
 id: "4-17"
 title: sed 刪除行
 kind: practice
-story: "sed '/模式/d' 刪除符合模式的行。可用分號串接多條規則。清理設定檔很實用。"
+story: "sed 也能刪除整行：sed '/模式/d' 檔名，意思是「刪掉符合這個模式的每一行」（d = delete）。\n  '/^#/d'   刪掉以 # 開頭的行（^ 代表行首，也就是註解）\n  '/^$/d'   刪掉空行（^$ 代表「行首緊接著行尾」，中間什麼都沒有）\n想一次下兩條規則，用分號隔開。加 -i 才會真的改到檔案。"
 goal: "config.ini 滿是註解（# 開頭）和空行。直接修改檔案，刪掉所有註解與空行，只留下設定。"
 teaches: [sed]
 xp: 25
 hints:
-  - "sed -i '/^#/d' config.ini"
-  - "空行的模式是 ^$，兩條規則用分號隔開：'/^#/d;/^$/d'"
+  - "一次只處理一種：sed -i '/^#/d' config.ini 先刪註解。"
+  - "再處理空行，規則是 /^$/d。"
+  - "兩條合在一起：sed -i '/^#/d;/^$/d' config.ini"
 setup: |
   cd /home/player
   printf '# main settings\nport=8080\n\n# net\nhost=0.0.0.0\n\n# end\nmode=prod\n' > config.ini

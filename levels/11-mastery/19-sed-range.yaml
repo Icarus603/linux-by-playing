@@ -1,12 +1,14 @@
 id: "11-19"
 title: sed 範圍與區段擷取
 kind: practice
-story: "sed -n '/開始/,/結束/p' 會印出從符合「開始」的行到符合「結束」的行之間的所有內容。從一份長文件裡擷取一段區塊，非常好用。"
+story: "sed 的「範圍」寫法能從一份長文件裡擷取一整段區塊：\n  sed -n '/開始/,/結束/p' 檔案\n意思是：從「符合開始的那一行」，印到「符合結束的那一行」，包含這兩行（-n 配 p：只印指定範圍）。"
 goal: "station.log 裡有一段從 BEGIN 開始到 END 結束的重要區塊（含這兩行）。擷取出來存成 section.txt。"
 teaches: [sed]
 xp: 45
 hints:
-  - "sed -n '/BEGIN/,/END/p' station.log > section.txt"
+  - "格式：sed -n '/開始字樣/,/結束字樣/p' 檔案"
+  - "開始字樣是 BEGIN，結束字樣是 END。"
+  - "打：sed -n '/BEGIN/,/END/p' station.log > section.txt"
 setup: |
   cd /home/player
   { for i in $(seq 1 20); do echo "noise $i"; done; echo BEGIN; for i in $(seq 1 5); do echo "payload $i"; done; echo END; for i in $(seq 21 40); do echo "noise $i"; done; } > station.log

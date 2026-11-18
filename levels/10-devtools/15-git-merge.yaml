@@ -1,13 +1,14 @@
 id: "10-15"
 title: git merge：合併分支
 kind: practice
-story: "功能做完了，要把分支併回主線：切到主線（git switch main），再 git merge 分支名稱。沒有衝突時，git 會自己搞定。"
+story: "功能在分支上做完了，要把成果「合併」回主線：\n  ① 先切到要接收的分支（主線）：git switch main\n  ② 再把分支併進來：git merge 分支名稱\n沒有衝突的話，git 會自己搞定。"
 goal: "分支 feature-y 上已有一筆新提交。回到 main，把 feature-y 合併進來。"
 teaches: [git]
 xp: 45
 hints:
-  - "git switch main"
-  - "git merge feature-y"
+  - "先進去 cd repo，切回主線：git switch main"
+  - "合併：git merge feature-y"
+  - "用 git log --oneline 確認，feature-y 的那筆提交出現在 main 上了。"
 setup: |
   P() { runuser -u player -- env HOME=/home/player bash -c "$1"; }
   P 'git config --global user.name Player; git config --global user.email player@kernel-7; git config --global init.defaultBranch main'

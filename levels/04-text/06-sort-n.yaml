@@ -1,12 +1,14 @@
 id: "4-06"
 title: 數字排序
 kind: practice
-story: "sort 預設按字典序，所以 100 會排在 20 前面。-n 啟用數值排序，-r 反向（由大到小）。"
+story: "sort 預設是「按字典順序」排：把 100 和 20 比較時，因為字元 1 排在 2 前面，100 會排在 20 前面，這不是我們要的。\n\n  sort -n   按「數值大小」排序（n = numeric）\n  sort -r   反過來，由大到小（r = reverse）\n兩個可合寫成 -nr。再用 head -3 取前 3 行，就是「前三名」。"
 goal: "scores.txt 每行一個分數。找出最高的前三個，存成 top3.txt（由大到小）。"
 teaches: [sort, head]
 xp: 20
 hints:
-  - "sort -nr scores.txt | head -3 > top3.txt"
+  - "先用 sort -nr scores.txt，由大到小排好所有分數。"
+  - "再接 | head -3 只取前 3 行。"
+  - "打：sort -nr scores.txt | head -3 > top3.txt"
 setup: |
   cd /home/player
   printf '85\n100\n20\n93\n7\n61\n100\n88\n' > scores.txt

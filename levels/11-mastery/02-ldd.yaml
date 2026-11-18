@@ -1,12 +1,14 @@
 id: "11-02"
 title: ldd：程式依賴哪些函式庫
 kind: practice
-story: "動態連結的程式在執行時需要共享函式庫（.so 檔）。ldd 列出一個程式依賴哪些函式庫、找到的路徑。「error while loading shared libraries」這類錯誤，就靠它排查。"
+story: "很多程式不會把所有功能都包在自己身上，而是在執行時借用「共享函式庫」（副檔名 .so，像是大家共用的工具箱）。如果缺了某個函式庫，就會看到「error while loading shared libraries」。\n\nldd 程式路徑 會列出一個程式依賴哪些函式庫，以及它們在哪裡被找到。"
 goal: "用 ldd 查出 /usr/bin/ssh 依賴的加密函式庫（名稱含 libcrypto），answer 提交它的檔名（例如 libxxx.so.N）。"
 teaches: [ldd]
 xp: 35
 hints:
-  - "ldd /usr/bin/ssh | grep crypto"
+  - "打：ldd /usr/bin/ssh"
+  - "輸出很多行，過濾：ldd /usr/bin/ssh | grep crypto"
+  - "每行格式是「檔名 => 路徑」，answer 前面那個檔名（例如 libcrypto.so.3）。"
 setup: ""
 check: |
   exp=$(ldd /usr/bin/ssh | awk '/libcrypto/{print $1}' | head -1)

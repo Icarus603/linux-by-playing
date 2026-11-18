@@ -1,12 +1,14 @@
 id: "9-16"
 title: ssh-keygen：產生金鑰
 kind: practice
-story: "SSH 用金鑰代替密碼：私鑰留在你手上、公鑰放到伺服器。ssh-keygen -t ed25519 產生一對（現代推薦的演算法）。-N '' 不設通關密語、-f 指定檔案。私鑰權限必須是 600。"
+story: "SSH 是「安全地遠端登入另一台電腦」的方式。比起密碼，更安全的是「金鑰」：一對檔案，\n  私鑰（要保管好，絕不給人，像家裡鑰匙）\n  公鑰（放到伺服器上，像鎖頭，可以公開）\n用私鑰就能證明你是你。\nssh-keygen 產生一對：\n  -t ed25519   用現代推薦的演算法\n  -N ''        不設「通關密語」（對私鑰再加的一層密碼，這裡先不設）\n  -f 檔名      指定存放的檔案\n私鑰的權限必須是 600（只有自己能讀寫），否則 ssh 會拒絕使用。"
 goal: "在 ~/.ssh/ 產生一對 ed25519 金鑰（檔名 id_ed25519），不設通關密語。"
 teaches: [ssh-keygen]
 xp: 35
 hints:
-  - "ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519"
+  - "格式：ssh-keygen -t ed25519 -N '' -f 檔案路徑"
+  - "檔案路徑是 ~/.ssh/id_ed25519（若 ~/.ssh 不存在，先 mkdir -p ~/.ssh）。"
+  - "打：ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519，再 ls ~/.ssh 會看到 id_ed25519 和 id_ed25519.pub。"
 setup: |
   rm -rf /home/player/.ssh
 check: |

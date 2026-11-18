@@ -1,13 +1,14 @@
 id: "4-23"
 title: 正規表示式
 kind: practice
-story: "正規表示式是描述文字模式的語言。grep -oE 只印出符合的部分（而不是整行）。[a-z]+ 代表一個以上小寫字母，@ 就是 @。"
+story: "「正規表示式」是一種描述文字「樣子」的簡寫，讓你找出「長得像某種格式」的字串，例如 Email。基本零件：\n  [A-Za-z0-9._]   一個字元，可以是字母、數字、點或底線\n  +               前面那個零件出現「一次或更多次」\n  @               就是 @ 本身\n所以 [A-Za-z0-9._]+@[A-Za-z0-9.]+ 就是「一串字元，加 @，再加一串字元」，也就是 Email 的樣子。\n\ngrep -oE '樣子' 檔名：-E 啟用這種寫法，-o 只印出「符合的那一小段」，而不是整行。"
 goal: "contacts.txt 是一份雜亂的文字，裡面散落著 Email。找出所有「不重複」的 Email 有幾個，answer 提交。"
 teaches: [grep, sort, uniq, wc]
 xp: 30
 hints:
-  - "grep -oE '[A-Za-z0-9._]+@[A-Za-z0-9.]+' contacts.txt"
-  - "再接 sort -u 去重、wc -l 計數。"
+  - "先抓出所有 Email：grep -oE '[A-Za-z0-9._]+@[A-Za-z0-9.]+' contacts.txt"
+  - "重複的要去掉：接 | sort -u（排序並去重）。"
+  - "再接 | wc -l 數行數，完整：grep -oE '[A-Za-z0-9._]+@[A-Za-z0-9.]+' contacts.txt | sort -u | wc -l"
 setup: |
   cd /home/player
   cat > contacts.txt <<'TXT'

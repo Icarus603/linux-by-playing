@@ -1,12 +1,14 @@
 id: "5-04"
 title: 八進位權限
 kind: practice
-story: "權限也能用數字表示：r=4、w=2、x=1，三個數字依序是 擁有者、群組、其他人。例如 755 = rwxr-xr-x，600 = rw-------。"
+story: "權限除了寫成 rwx，也能用數字表示：\n  r = 4　w = 2　x = 1\n每一組把有的權限加起來：rwx = 4+2+1 = 7；rw- = 4+2 = 6；r-- = 4；--- = 0。\n三組（擁有者、群組、其他人）三個數字連在一起：\n  755 = rwxr-xr-x\n  644 = rw-r--r--\n  600 = rw-------（只有擁有者能讀寫）"
 goal: "secret.txt 是機密，要設成只有擁有者能讀寫，其他人完全沒有權限（600）。"
 teaches: [chmod]
 xp: 15
 hints:
-  - "chmod 600 secret.txt"
+  - "擁有者要 rw = 4+2 = 6，群組和其他人都要 0。"
+  - "格式：chmod 數字 檔名"
+  - "打：chmod 600 secret.txt"
 setup: |
   cd /home/player
   echo "launch codes" > secret.txt

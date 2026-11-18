@@ -625,7 +625,7 @@ export class Controller {
     }
     if (m.level !== undefined) this.applyLevel(m.level)
     const len = [...m.text].length
-    const step = len > 110 ? 2 : 1
+    const step = len > 110 ? Math.max(2, Math.ceil(len / 117)) : 1 // 長說明也控制在約 4 秒內打完
     const tickMs = 34
     this.speech = { id: ++this.speechId, text: m.text, pose: m.pose, tone: m.tone, step, tickMs, startedAt: Date.now(), danceMs: m.danceMs ?? 0 }
     this.changed()

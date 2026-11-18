@@ -1,12 +1,14 @@
 id: "8-12"
 title: 陣列
 kind: practice
-story: "bash 有陣列：arr=(a b c)，用 ${arr[0]} 取元素，${arr[@]} 是全部元素，${#arr[@]} 是長度。"
+story: "bash 有「陣列」，能把好幾個值放在同一個變數裡：\n  arr=(a b c)         建立\n  ${arr[0]}           取第 0 個（從 0 開始數！）\n  ${arr[@]}           全部元素\n  ${#arr[@]}          元素個數\n  arr=(\"$@\")           把所有參數放進陣列\n要從尾巴往前跑，可以用 C 風格的迴圈：for ((i=n-1; i>=0; i--)); do ... done。"
 goal: "寫 rev.sh：把收到的參數反過來印在同一行，用空白分隔。例如 ./rev.sh one two three 印 three two one。"
 teaches: [declare, bash]
 xp: 35
 hints:
-  - "arr=(\"$@\")，再用 for ((i=${#arr[@]}-1; i>=0; i--)) 從尾巴往前。"
+  - "先把參數放進陣列：arr=(\"$@\")，再用 ${#arr[@]} 取得個數。"
+  - "從最後一個索引往前：for ((i=${#arr[@]}-1; i>=0; i--)); do ...; done"
+  - "同一行輸出可以用 echo -n \"${arr[i]} \"，最後再 echo 換行；或把結果累積到一個字串變數再 echo。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

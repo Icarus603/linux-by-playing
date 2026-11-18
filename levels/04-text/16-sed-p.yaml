@@ -1,12 +1,14 @@
 id: "4-16"
 title: sed 取出指定行
 kind: practice
-story: "sed -n '起,迄p' 只印出指定範圍的行（-n 關掉預設輸出，p 是印出）。"
+story: "sed 也能只取出指定行：\n  sed -n '10,12p' 檔名\n其中：-n 是「安靜模式」（不要預設把每行都印出來）；'10,12p' 的意思是「第 10 行到第 12 行」，p 是 print（印出）。所以只有這三行會被印出。"
 goal: "story.txt 共 30 行。取出第 10 到第 12 行，存成 mid.txt。"
 teaches: [sed]
 xp: 20
 hints:
-  - "sed -n '10,12p' story.txt > mid.txt"
+  - "格式：sed -n '起,迄p' 檔名"
+  - "起是 10，迄是 12。"
+  - "打：sed -n '10,12p' story.txt > mid.txt"
 setup: |
   cd /home/player
   for i in $(seq 1 30); do echo "chapter line $i"; done > story.txt

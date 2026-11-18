@@ -1,12 +1,14 @@
 id: "3-06"
 title: find 配 -exec
 kind: practice
-story: "-exec 讓 find 對每個結果執行指令，{} 代表目前的檔案，以 \\; 結尾。這是批次處理的利器。"
-goal: "scripts 底下所有 .sh 檔都還沒有執行權限。用 find -exec chmod +x 一次全部加上。"
+story: "-exec 讓 find 對「每一個找到的結果」執行一個指令。寫法：\n  find 起點 條件 -exec 指令 {} \\;\n其中 {} 會被換成每個找到的檔名，\\; 表示指令到此結束（分號前的反斜線是為了不讓 shell 誤解）。\n\n例如 -exec chmod +x {} \\; 就是對每個找到的檔案執行 chmod +x（chmod +x 是「讓檔案可以被執行」，之後第 5 階段會細講）。"
+goal: "scripts 底下所有 .sh 檔都還不能執行。用 find 配 -exec chmod +x 一次全部加上。"
 teaches: [find, chmod]
 xp: 25
 hints:
-  - "find scripts -name '*.sh' -exec chmod +x {} \\;"
+  - "先用 find scripts -name '*.sh' 確認會找到哪些檔案（'*.sh' 要用單引號包起來）。"
+  - "再接上：-exec chmod +x {} \\;"
+  - "完整：find scripts -name '*.sh' -exec chmod +x {} \\;"
 setup: |
   cd /home/player
   mkdir -p scripts/sub

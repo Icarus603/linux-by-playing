@@ -1,12 +1,14 @@
 id: "9-18"
 title: scp：遠端複製
 kind: practice
-story: "scp 來源 目的 透過 SSH 複製檔案，遠端位置寫成 使用者@主機:路徑。注意 scp 的連接埠選項是大寫 -P（ssh 是小寫 -p）。"
+story: "scp 透過 SSH 在兩台電腦之間「複製檔案」，用法像 cp，只是遠端的位置要寫成「使用者@主機:路徑」（冒號後面是遠端的路徑，沒寫就是對方的家目錄）。\n  scp 本機檔案 使用者@主機:遠端檔名     上傳\n  scp 使用者@主機:遠端檔案 本機檔名     下載\n小心：連接埠選項 scp 是大寫 -P，ssh 是小寫 -p。"
 goal: "把本機的 local.txt 複製到 vaultkeeper 的家目錄，檔名叫 received.txt。（連接埠 2222）"
 teaches: [scp]
 xp: 45
 hints:
-  - "scp -P 2222 -o StrictHostKeyChecking=accept-new local.txt vaultkeeper@127.0.0.1:received.txt"
+  - "上傳格式：scp 本機檔 使用者@主機:遠端檔名"
+  - "埠號要用大寫 -P：-P 2222。"
+  - "打：scp -P 2222 -o StrictHostKeyChecking=accept-new local.txt vaultkeeper@127.0.0.1:received.txt"
 setup: |
   # --- 本機 sshd（127.0.0.1:2222）與 vaultkeeper 帳號 ---
   id vaultkeeper >/dev/null 2>&1 || useradd -m -s /bin/bash vaultkeeper

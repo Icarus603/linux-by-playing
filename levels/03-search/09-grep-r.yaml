@@ -1,12 +1,14 @@
 id: "3-09"
 title: grep -r 遞迴搜尋
 kind: practice
-story: "-r 讓 grep 遞迴搜尋整個目錄。有人把金鑰寫死在專案某個檔案裡，找出它。"
+story: "一個專案有成百上千個檔案，不可能一個個 grep。加上 -r（recursive，遞迴）就能讓 grep 搜尋「整個目錄底下的所有檔案」：grep -r 關鍵字 目錄。輸出會在每行前面標出它來自哪個檔案。\n\n有人把金鑰（API key，像是程式存取服務的密碼）直接寫在專案某個檔案裡，找出它。"
 goal: "在 project 目錄底下搜尋 api_key=，answer 提交 = 後面的值。"
 teaches: [grep]
 xp: 20
 hints:
-  - "grep -r api_key= project"
+  - "格式：grep -r 關鍵字 目錄"
+  - "打：grep -r api_key= project"
+  - "輸出的格式是「檔名:內容」，把 api_key= 後面的值 answer 出來。"
 setup: |
   cd /home/player
   mkdir -p project/{src,lib,docs,config}

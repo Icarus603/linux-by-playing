@@ -1,12 +1,14 @@
 id: "8-06"
 title: 數字比較
 kind: practice
-story: "數字比較用 -eq -ne -lt -le -gt -ge（不是 < >，那在 [ ] 裡是字串重導向的意思）。(( )) 裡可以直接用 < >。"
+story: "在 [ ] 裡比較「數字」，要用文字版的運算子，不是 < >：\n  -eq 等於　-ne 不等於\n  -lt 小於　-le 小於等於\n  -gt 大於　-ge 大於等於\n（因為 < > 在 shell 裡是重導向的符號，會被誤解。）\n例如 [ \"$1\" -ge 90 ] 是「第一個參數 ≥ 90」。"
 goal: "寫 grade.sh N：N ≥ 90 印 A，N ≥ 60 印 pass，其餘印 fail。"
 teaches: [test, bash]
 xp: 30
 hints:
-  - "if [ \"$1\" -ge 90 ]; then echo A; elif [ \"$1\" -ge 60 ]; then echo pass; else echo fail; fi"
+  - "用 if / elif / else 三段，從最高的條件先判斷。"
+  - "骨架：if [ \"$1\" -ge 90 ]; then echo A; elif [ \"$1\" -ge 60 ]; then echo pass; else echo fail; fi"
+  - "測試 ./grade.sh 95（A）、./grade.sh 70（pass）、./grade.sh 30（fail）。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

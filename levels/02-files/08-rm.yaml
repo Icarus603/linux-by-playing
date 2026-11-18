@@ -1,12 +1,14 @@
 id: "2-08"
 title: 清理垃圾
 kind: learn
-story: "rm 刪除檔案，而且沒有垃圾桶，刪了就是沒了。所以打 rm 之前務必看清楚。"
-goal: 刪除 junk.tmp，但保留 keep.txt。
+story: "rm（remove，移除）用來刪除檔案：rm 檔名。\n\n要特別小心：Linux 的 rm 沒有垃圾桶，刪了就是真的沒了，無法復原。所以打 Enter 之前，務必再看一眼檔名。"
+goal: "刪除 junk.tmp，但保留 keep.txt。"
 teaches: [rm]
 xp: 10
 hints:
-  - "rm junk.tmp"
+  - "格式：rm 檔名"
+  - "打：rm junk.tmp（只寫要刪的那一個）"
+  - "用 ls 確認 junk.tmp 沒了、keep.txt 還在。"
 setup: |
   cd /home/player
   echo trash > junk.tmp

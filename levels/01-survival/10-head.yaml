@@ -1,13 +1,13 @@
 id: "1-10"
 title: 只看開頭
 kind: learn
-story: "有些日誌長達數千行，cat 會把螢幕洗版。head 只顯示開頭幾行，-n 指定行數。"
-goal: "signal.log 的第一行有個頻率值（freq=）。只看開頭，把那個數字用 answer 提交。"
+story: "有些日誌長達幾千行，用 cat 會把整個螢幕刷滿。head 只印出檔案「開頭」的幾行（預設 10 行）。想自己指定幾行，就用選項 -n 加數字，例如 head -n 3 檔名 只看前三行。"
+goal: "signal.log 的第一行有個頻率值（freq=某數字）。只看開頭，把那個數字用 answer 提交。"
 teaches: [head]
 xp: 15
 hints:
-  - "head -n 1 signal.log"
-  - "不加 -n 預設顯示前 10 行。"
+  - "打：head -n 1 signal.log（-n 1 的意思是只要 1 行）。"
+  - "找到 freq= 後面的數字，answer 那個數字（不含 freq=）。"
 setup: |
   cd /home/player
   f="$((RANDOM % 20 + 80)).$((RANDOM % 10))"

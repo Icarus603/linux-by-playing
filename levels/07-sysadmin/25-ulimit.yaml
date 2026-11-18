@@ -1,12 +1,13 @@
 id: "7-25"
 title: ulimit：資源上限
 kind: practice
-story: "每個程序都有資源上限，避免一個失控的程式拖垮整台機器。ulimit -a 列出全部，ulimit -n 是可同時開啟的檔案數。伺服器開不了更多連線時，這常是元凶之一。"
+story: "每個程序都有「資源上限」，避免一個失控的程式拖垮整台機器。\n  ulimit -a   列出全部上限\n  ulimit -n   同時可以開啟的檔案數上限（網路連線也算開檔案）\n伺服器開不了更多連線時，這常是元凶之一。"
 goal: "用 ulimit -n 查出你這個 shell 目前「可開啟檔案數」的上限，answer 提交。"
 teaches: [ulimit]
 xp: 20
 hints:
-  - "ulimit -n"
+  - "打：ulimit -n"
+  - "它只會印一個數字，answer 那個數字。"
 setup: ""
 check: |
   # 標準答案取自玩家互動式 shell 的實際限制（sudo 執行的檢查腳本自己的限制可能不同）

@@ -1,12 +1,14 @@
 id: "4-02"
 title: 重導向 >
 kind: learn
-story: "預設指令的輸出印在螢幕。用 > 可以把輸出改寫進檔案（會覆蓋原內容）。"
+story: "平常指令的結果會印在螢幕上。「重導向」符號 > 可以把結果改送進一個檔案：\n  指令 > 檔名\n例如 echo hello > a.txt，螢幕不會顯示 hello，而是把 hello 寫進 a.txt。\n注意：> 會「覆蓋」檔案原本的內容；檔案不存在就會自動建立。"
 goal: "用 echo 配合 >，把文字 mission-start 寫進 log.txt。"
 teaches: [">"]
 xp: 15
 hints:
-  - "echo mission-start > log.txt"
+  - "格式：echo 文字 > 檔名"
+  - "打：echo mission-start > log.txt"
+  - "用 cat log.txt 檢查，應該看到 mission-start。"
 setup: ""
 check: |
   [[ "$(cat /home/player/log.txt 2>/dev/null)" == "mission-start" ]]

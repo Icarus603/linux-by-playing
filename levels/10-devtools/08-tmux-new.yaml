@@ -1,13 +1,14 @@
 id: "10-08"
 title: tmux：永不斷線的工作階段
 kind: learn
-story: "tmux 是終端機多工器：工作階段（session）在背景持續執行，即使你斷線、關掉終端機，裡面的程式都還在，之後可以重新連回。這是遠端工作的救星。-d 讓它在背景建立，-s 指定名稱。"
+story: "遠端工作時，如果網路斷線、終端機視窗被關掉，裡面正在跑的程式通常也跟著死了。tmux 是「終端機多工器」，解決這個問題：\n  「工作階段」（session）在背景持續存在，你斷線、關視窗它都還在，之後可以重新連回去，一切原封不動。\n  tmux new -d -s work   建立名叫 work 的工作階段（-d 在背景建立不進去，-s 指定名稱）\n  tmux ls               列出所有工作階段\n  tmux attach -t work   重新連回去"
 goal: "建立一個名叫 work 的 tmux 工作階段（在背景，不要進去）。用 tmux ls 確認。"
 teaches: [tmux]
 xp: 30
 hints:
-  - "tmux new -d -s work"
-  - "tmux ls 列出所有工作階段。"
+  - "格式：tmux new -d -s 名稱"
+  - "打：tmux new -d -s work"
+  - "再打 tmux ls，應該看到一行 work: ..."
 setup: |
   runuser -u player -- tmux kill-server 2>/dev/null || true
 check: |

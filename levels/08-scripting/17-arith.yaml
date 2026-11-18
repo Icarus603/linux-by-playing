@@ -1,12 +1,14 @@
 id: "8-17"
 title: 算術與 shift
 kind: practice
-story: "$(( )) 做整數運算。shift 把參數往左移一位（$2 變成 $1），搭配 while 可以逐個處理不定數量的參數。"
+story: "$(( )) 能做整數運算：total=$((total + 5))。\nshift 會把參數整個往左移一位：原本的 $2 變成 $1，$3 變成 $2……，$# 也少 1。搭配 while 迴圈，就能逐個處理「不知道有幾個」的參數：\n  while [ $# -gt 0 ]; do\n    ...處理 $1...\n    shift\n  done\n意思是：「只要還有參數（個數大於 0），就處理第一個，然後把它丟掉」。"
 goal: "寫 sum.sh 數字…：印出所有參數的總和。沒有參數就印 0。"
 teaches: [shift, bash]
 xp: 35
 hints:
-  - "total=0; while [ $# -gt 0 ]; do total=$((total + $1)); shift; done"
+  - "先設 total=0。"
+  - "骨架：total=0; while [ $# -gt 0 ]; do total=$((total + $1)); shift; done"
+  - "最後 echo $total。測試 ./sum.sh 1 2 3 應印 6；./sum.sh（無參數）應印 0。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

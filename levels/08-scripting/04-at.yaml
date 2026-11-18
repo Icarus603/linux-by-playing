@@ -1,13 +1,14 @@
 id: "8-04"
 title: $@ 與引號
 kind: practice
-story: "\"$@\" 會把每個參數原封不動地展開（含空白的參數也不會被切開），\"$*\" 則把全部合成一個字串。寫腳本時幾乎永遠要用 \"$@\"。"
+story: "腳本要處理「全部的參數」時，用 \"$@\"：它把每個參數原封不動地展開，即使某個參數裡有空格（像 \"b c\"）也不會被切開。\n（\"$*\" 則會把全部合成一整個字串。）寫腳本時，幾乎永遠該用 \"$@\"，而且要加雙引號。\n\n用 for 迴圈逐個處理：\n  for a in \"$@\"; do\n    echo \"$a\"\n  done\n意思是：「對每個參數 a，印出它」。"
 goal: "寫 args.sh：先印出參數個數，再每個參數各印一行。例如 ./args.sh a \"b c\" d 要印出 3、a、b c、d（各一行）。"
 teaches: [bash]
 xp: 30
 hints:
-  - "echo $#"
-  - "for a in \"$@\"; do echo \"$a\"; done"
+  - "第一行輸出：echo $#（參數個數）"
+  - "再用迴圈：for a in \"$@\"; do echo \"$a\"; done"
+  - "測試：./args.sh a \"b c\" d，應該印 4 行：3、a、b c、d。"
 setup: ""
 check: |
   P() { runuser -u player -- bash -c "cd /home/player && $1" 2>&1; }

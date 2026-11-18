@@ -1,12 +1,14 @@
 id: "2-02"
 title: 蓋一間艙房
 kind: learn
-story: "mkdir 建立目錄。站裡需要一個專門放貨物清單的地方。"
-goal: 建立一個叫 cargo 的目錄。
+story: "mkdir 是 make directory（建立目錄），也就是「新增資料夾」：mkdir 目錄名。站裡需要一個專門放貨物清單的地方。"
+goal: "建立一個叫 cargo 的目錄。"
 teaches: [mkdir]
 xp: 10
 hints:
-  - "mkdir cargo"
+  - "格式是 mkdir 空格 目錄名。"
+  - "打：mkdir cargo"
+  - "用 ls 確認 cargo 出現了。"
 setup: ""
 check: |
   [[ -d /home/player/cargo ]]

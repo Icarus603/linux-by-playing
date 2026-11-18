@@ -1,13 +1,14 @@
 id: "9-07"
 title: curl 送出資料（POST）
 kind: practice
-story: "網站與 API 不只能讀，也能寫。curl -d 資料 會用 POST 送出表單資料，-X 指定方法，-H 加標頭。本機 8081 有個接收站台回報的 API。"
+story: "網站和 API 不只能「讀」，也能「寫」：提交表單、回報資料。HTTP 用「方法」區分：\n  GET   讀取（curl 預設）\n  POST  送出資料\ncurl -d '資料' 網址 會用 POST 把資料送出去（只要出現 -d，curl 就自動改用 POST）。資料常寫成 名稱=值。\n本機 8081 有個接收站台回報的 API。"
 goal: "向 http://127.0.0.1:8081/report 以 POST 送出資料 status=ok。"
 teaches: [curl]
 xp: 35
 hints:
-  - "curl -d 'status=ok' http://127.0.0.1:8081/report"
-  - "-d 一出現，curl 就自動改用 POST。"
+  - "格式：curl -d '資料' 網址"
+  - "資料是 status=ok。"
+  - "打：curl -d 'status=ok' http://127.0.0.1:8081/report，回應會告訴你有沒有收到。"
 setup: |
   mkdir -p /srv/api /usr/local/lib/lbp
   chown player:player /srv/api; rm -f /srv/api/inbox.txt
