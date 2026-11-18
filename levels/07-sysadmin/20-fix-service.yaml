@@ -20,7 +20,7 @@ setup: |
   rm -f /run/lbp-systemd/radar.service.* /var/log/lbp-journal/radar.service.log
   systemctl start radar 2>/dev/null || true
 check: |
-  systemctl is-active radar >/dev/null 2>&1
+  systemctl is-active radar >/dev/null 2>&1 || { echo 'radar 服務還沒在執行。'; exit 1; }
 cleanup: |
   systemctl stop radar 2>/dev/null || true
   rm -f /etc/lbp-systemd/radar.service /usr/local/bin/radard /etc/radar.conf /run/lbp-systemd/radar.service.* /var/log/lbp-journal/radar.service.log

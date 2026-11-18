@@ -23,7 +23,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/ncbox.py >/dev/null 2>&1 </dev/null &
   sleep 0.6
 check: |
-  grep -qx 'OPEN SESAME' /tmp/nc-in.txt 2>/dev/null
+  grep -qx 'OPEN SESAME' /tmp/nc-in.txt 2>/dev/null || { echo '對方還沒收到 OPEN SESAME。'; exit 1; }
 cleanup: |
   pkill -f '[n]cbox.py' 2>/dev/null || true
   rm -f /usr/local/lib/lbp/ncbox.py /tmp/nc-in.txt

@@ -14,7 +14,7 @@ setup: |
   printf '#!/bin/bash\necho backup >> /home/player/backup.log\n' > /home/player/backup.sh
   chmod 755 /home/player/backup.sh
 check: |
-  crontab -u player -l 2>/dev/null | grep -Eq '^30 3 [*] [*] [*] +/home/player/backup.sh'
+  crontab -u player -l 2>/dev/null | grep -Eq '^30 3 [*] [*] [*] +/home/player/backup.sh' || { echo 'crontab 裡還沒有每天 3:30 執行 /home/player/backup.sh 的排程。'; exit 1; }
 cleanup: |
   crontab -r -u player 2>/dev/null || true
 reveal: "排程裡本來有一行每日備份，被人註解掉了。時間是 Vega 失蹤的那天。是誰關掉了備份？"

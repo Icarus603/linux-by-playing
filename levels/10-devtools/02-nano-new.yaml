@@ -11,6 +11,6 @@ hints:
   - "按 Ctrl-O、Enter 存檔，再按 Ctrl-X 離開。用 cat motd.txt 確認內容。"
 setup: ""
 check: |
-  [[ "$(cat /home/player/motd.txt 2>/dev/null)" == "Kernel-7 online" ]]
+  [[ "$(cat /home/player/motd.txt 2>/dev/null)" == "Kernel-7 online" ]] || { echo 'motd.txt 不存在或內容不是 Kernel-7 online。'; exit 1; }
 solution: |
   echo "Kernel-7 online" > motd.txt

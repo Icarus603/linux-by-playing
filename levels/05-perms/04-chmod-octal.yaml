@@ -14,7 +14,7 @@ setup: |
   echo "launch codes" > secret.txt
   chmod 644 secret.txt
 check: |
-  [[ "$(stat -c %a /home/player/secret.txt)" == "600" ]]
+  [[ "$(stat -c %a /home/player/secret.txt)" == "600" ]] || { echo 'secret.txt 的權限還不是 600。'; exit 1; }
 solution: |
   chmod 600 secret.txt
 golf: 20

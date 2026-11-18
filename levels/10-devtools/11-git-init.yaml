@@ -16,7 +16,8 @@ setup: |
   P 'mkdir -p /home/player/station && echo "reactor=on" > /home/player/station/core.conf'
 check: |
   GT() { git -c safe.directory='*' -C /home/player/station "$@"; }
-  [[ "$(GT log --format=%s 2>/dev/null | head -1)" == "initial commit" && "$(GT log --oneline 2>/dev/null | wc -l)" == "1" ]]
+  [[ "$(GT log --format=%s 2>/dev/null | head -1)" == "initial commit" ]] || { echo '最新一次提交的訊息不是 initial commit。'; exit 1; }
+  [[ "$(GT log --oneline 2>/dev/null | wc -l)" == "1" ]] || { echo '提交數量不是 1。'; exit 1; }
 reveal: "版本庫的第一筆提交寫著：「初始化 Kernel-7 設定。願它比我更可靠。」作者是 vega。"
 solution: |
   cd station

@@ -11,6 +11,6 @@ hints:
   - "打：dd if=/dev/zero of=blob.bin bs=1M count=5，再 ls -l blob.bin 確認大小。"
 setup: ""
 check: |
-  [[ "$(stat -c %s /home/player/blob.bin 2>/dev/null)" == "5242880" ]]
+  [[ "$(stat -c %s /home/player/blob.bin 2>/dev/null)" == "5242880" ]] || { echo 'blob.bin 不存在或大小不是 5 MB（5242880 位元組）。'; exit 1; }
 solution: |
   dd if=/dev/zero of=blob.bin bs=1M count=5

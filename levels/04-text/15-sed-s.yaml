@@ -14,7 +14,9 @@ setup: |
   printf 'db=localhost\ncache=localhost\nqueue=localhost\nname=kernel7\n' > app.conf
 check: |
   cd /home/player
-  ! grep -q localhost app.conf && [[ $(grep -c '10.0.0.5' app.conf) -eq 3 ]] && grep -q 'name=kernel7' app.conf
+  ! grep -q localhost app.conf || { echo 'app.conf 裡還有 localhost。'; exit 1; }
+  [[ $(grep -c '10.0.0.5' app.conf) -eq 3 ]] || { echo '10.0.0.5 要剛好出現 3 次。'; exit 1; }
+  grep -q 'name=kernel7' app.conf || { echo 'name=kernel7 那行被改壞了。'; exit 1; }
 solution: |
   sed -i 's/localhost/10.0.0.5/g' app.conf
 golf: 39

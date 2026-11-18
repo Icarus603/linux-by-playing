@@ -16,7 +16,9 @@ setup: |
   P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo base > work.txt && git add . && git commit -qm base && git branch hotfix && echo "half done" >> work.txt'
 check: |
   GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
-  [[ "$(GT branch --show-current)" == "hotfix" && "$(GT stash list | wc -l)" == "1" && -z "$(GT status --porcelain)" ]]
+  [[ "$(GT branch --show-current)" == "hotfix" ]] || { echo '目前不在 hotfix 分支。'; exit 1; }
+  [[ "$(GT stash list | wc -l)" == "1" ]] || { echo 'stash 裡要剛好有 1 筆暫存。'; exit 1; }
+  [[ -z "$(GT status --porcelain)" ]] || { echo '工作目錄還有未處理的變更。'; exit 1; }
 solution: |
   cd repo
   git stash -q

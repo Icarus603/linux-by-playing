@@ -14,6 +14,6 @@ setup: |
   printf 'ann,ann@kernel7.io,ops\nbob,bob@kernel7.io,dev\ncat,cat@kernel7.io,ops\n' > users.csv
 check: |
   cd /home/player
-  diff <(cut -d, -f2 users.csv) emails.txt >/dev/null
+  diff <(cut -d, -f2 users.csv) emails.txt >/dev/null || { echo 'emails.txt 不對，要是 users.csv 的第 2 欄。'; exit 1; }
 solution: |
   cut -d, -f2 users.csv > emails.txt

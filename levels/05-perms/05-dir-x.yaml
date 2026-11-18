@@ -15,6 +15,6 @@ setup: |
   echo ok > vault/note.txt
   chmod 644 vault
 check: |
-  [[ "$(stat -c %a /home/player/vault)" =~ ^[57] ]]
+  [[ "$(stat -c %a /home/player/vault)" =~ ^[57] ]] || { echo 'vault 的擁有者權限還不夠：目錄要有 r 和 x 才能進入。'; exit 1; }
 solution: |
   chmod u+x vault

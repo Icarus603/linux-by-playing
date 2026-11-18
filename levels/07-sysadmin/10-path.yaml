@@ -15,7 +15,9 @@ setup: |
   printf '#!/bin/bash\necho hello-ran > /home/player/ran.txt\necho "Hello from the station!"\n' > tools/hello
   chmod 755 tools/hello
 check: |
-  [[ "$LBP_LAST" == "hello" && "$LBP_RC" == "0" && "$(cat /home/player/ran.txt 2>/dev/null)" == "hello-ran" ]]
+  [[ "$LBP_LAST" == "hello" ]] || { echo '要直接輸入 hello 這個指令。'; exit 1; }
+  [[ "$LBP_RC" == "0" ]] || { echo 'hello 執行失敗了。'; exit 1; }
+  [[ "$(cat /home/player/ran.txt 2>/dev/null)" == "hello-ran" ]] || { echo 'hello 還沒有成功執行過（ran.txt 沒有出現）。'; exit 1; }
 solution: |
   export PATH=$PATH:$HOME/tools
   hello

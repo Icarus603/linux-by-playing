@@ -15,7 +15,7 @@ setup: |
   echo "boot ok" > /srv/engine/engine.log
   chown root:root /srv/engine/engine.log
 check: |
-  [[ "$(stat -c %U:%G /srv/engine/engine.log)" == "player:player" ]]
+  [[ "$(stat -c %U:%G /srv/engine/engine.log)" == "player:player" ]] || { echo 'engine.log 的擁有者:群組還不是 player:player。'; exit 1; }
 cleanup: |
   rm -rf /srv/engine
 solution: |

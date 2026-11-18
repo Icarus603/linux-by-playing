@@ -12,7 +12,8 @@ hints:
 setup: |
   echo "launch plan" > /home/player/draft.txt
 check: |
-  [[ ! -e /home/player/draft.txt && "$(cat /home/player/final.txt 2>/dev/null)" == "launch plan" ]]
+  [[ ! -e /home/player/draft.txt ]] || { echo 'draft.txt 還在，這關是改名，不是複製。'; exit 1; }
+  [[ "$(cat /home/player/final.txt 2>/dev/null)" == "launch plan" ]] || { echo 'final.txt 不存在或內容不對。'; exit 1; }
 solution: |
   mv draft.txt final.txt
 golf: 22

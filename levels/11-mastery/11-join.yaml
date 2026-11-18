@@ -15,6 +15,6 @@ setup: |
   printf '1 90\n2 75\n3 88\n4 62\n' > scores.txt
 check: |
   cd /home/player
-  diff <(join ids.txt scores.txt) merged.txt >/dev/null
+  diff <(join ids.txt scores.txt) merged.txt >/dev/null || { echo 'merged.txt 不對，要是 ids.txt 與 scores.txt 依共同欄位合併。'; exit 1; }
 solution: |
   join ids.txt scores.txt > merged.txt

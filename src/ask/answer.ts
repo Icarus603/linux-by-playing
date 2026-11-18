@@ -25,7 +25,8 @@ const SYSTEM = T(`你是 Pip，住在 Linux 太空站的企鵝助教，是精通
 3. 技術問題沒把握就坦白說不確定，不要編造，並建議用 /explain 指令名稱 或 man 指令名稱。
 4. 如果問題和 Linux、電腦、命令列無關，要先坦白說這不是你的專長、你是 Linux 專家，再簡短回應，並把話題帶回 Linux。
 5. 回答要讓人真的看懂：簡單的問題 2–3 句就好；技術問題要說明「是什麼、為什麼、怎麼做」，附上一兩個可直接複製的指令範例與常見陷阱，通常 4–8 句、約 150–350 字。用自然的段落，不要 Markdown 標題或表格，指令直接寫出來。
-6. 訊息可能附上【目前的遊戲情境】：那是玩家正在玩的關卡與終端機最近的操作。玩家說「這題」「這關」「剛才」「上面」「為什麼錯」就是指它，不用叫玩家再貼一次。可以解釋題目、輸出與錯誤、引導解題思路；預設不要直接貼出完整答案，玩家明確要答案時才給。`)
+6. 訊息可能附上【目前的遊戲情境】：那是玩家正在玩的關卡與終端機最近的操作。玩家說「這題」「這關」「剛才」「上面」「為什麼錯」就是指它，不用叫玩家再貼一次。可以解釋題目、輸出與錯誤、引導解題思路；預設不要直接貼出完整答案，玩家明確要答案時才給。
+7. 終端機記錄就是事實的唯一來源：只能引用記錄裡真的出現的指令、輸出與錯誤訊息，沒出現的字句（例如 Permission denied）絕對不要自己編。指令結束碼 0 而且沒有輸出，代表它成功了；玩家說你看錯時，先以最新的記錄為準，承認並更正，不要沿用先前的說法。`)
 
 const SHOTS: [string, string][] = [
   [T('【可能相關的參考資料（不相關就忽略）】\n[1] 問：怎麼離開 vim？\n答：按 Esc 回到一般模式，輸入 :wq 存檔離開，或 :q! 放棄修改離開。\n\n問題：vim 怎麼退出'), T('先按 Esc 回到一般模式，然後輸入 :wq 存檔離開；想放棄修改就輸入 :q! 喔。')],
@@ -219,7 +220,8 @@ function gameContext(q: string, recent: Activity[]): { text: string; referential
     const blocks: string[] = []
     for (const a of [...recent].reverse().slice(0, 8)) {
       const out = clipOut(a.out, 14, 600)
-      const b = t`$ ${clip(a.cmd, 200)}${a.rc !== null && a.rc !== 0 ? t`   （結束碼 ${a.rc}）` : ''}${out ? `\n${out}` : ''}`
+      const status = a.rc !== null && a.rc !== 0 ? t`   （結束碼 ${a.rc}）` : a.rc === 0 && !out ? t('   （成功，結束碼 0，沒有任何輸出）') : ''
+      const b = t`$ ${clip(a.cmd, 200)}${status}${out ? `\n${out}` : ''}`
       if (b.length > room && blocks.length) break
       room -= b.length
       blocks.unshift(b)
@@ -249,7 +251,10 @@ function storyNote(q: string): string | null {
   return t`【劇情進度：玩家目前查到的線索】\n${known}\n（只能依這些線索回答。沒提到的事，就說「這個我們還沒查到」，並鼓勵繼續破關；不要編造、不要劇透。）`
 }
 
+/** 玩家在糾正 Pip：把上一輪（可能是錯的）回答從歷史拿掉，免得小模型照著舊說法繼續講。 */
+const CORRECT_RE = /不對|不是這樣|看錯|你錯|說錯|搞錯|沒有這|根本沒|wrong|that'?s not/i
 export async function ask(q: string, sink: Sink, signal: AbortSignal, recent: Activity[] = []): Promise<void> {
+  if (CORRECT_RE.test(q) && history.length >= 2) history.splice(-2)
   sink.begin(t('讓我想想…'))
   // 先讓出事件迴圈：使用者的提問與「讓我想想…」要先畫出來，之後才做同步的檢索（載入與比對 3.5 萬個知識塊會佔用主執行緒一陣子）
   await new Promise((r) => setTimeout(r, 60))

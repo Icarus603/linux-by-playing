@@ -16,7 +16,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- /usr/local/lib/lbp/stubborn.sh >/dev/null 2>&1 </dev/null &
   sleep 0.4
 check: |
-  ! pgrep -f '[s]tubborn.sh' >/dev/null
+  ! pgrep -f '[s]tubborn.sh' >/dev/null || { echo '那個頑固的程序還在執行，一般的終止方式可能不夠。'; exit 1; }
 cleanup: |
   pkill -9 -f '[s]tubborn.sh' || true
   rm -f /usr/local/lib/lbp/stubborn.sh

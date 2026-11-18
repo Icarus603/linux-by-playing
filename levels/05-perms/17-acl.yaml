@@ -17,7 +17,7 @@ setup: |
   chmod 640 /srv/acl/report.txt
   chmod 755 /srv/acl
 check: |
-  getfacl -p /srv/acl/report.txt 2>/dev/null | grep -q '^user:cadet:rw-'
+  getfacl -p /srv/acl/report.txt 2>/dev/null | grep -q '^user:cadet:rw-' || { echo 'report.txt 的 ACL 還沒給 cadet 讀寫權限。'; exit 1; }
 cleanup: |
   rm -rf /srv/acl
   userdel -r cadet 2>/dev/null || true

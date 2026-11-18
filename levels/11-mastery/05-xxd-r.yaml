@@ -14,7 +14,7 @@ setup: |
   head -c 64 /dev/urandom > /var/lib/lbp-expected.bin 2>/dev/null || { mkdir -p /var/lib/lbp; head -c 64 /dev/urandom > /var/lib/lbp-expected.bin; }
   xxd -p /var/lib/lbp-expected.bin > hex.txt
 check: |
-  cmp -s /home/player/restored.bin /var/lib/lbp-expected.bin
+  cmp -s /home/player/restored.bin /var/lib/lbp-expected.bin || { echo 'restored.bin 還沒復原成正確的內容。'; exit 1; }
 cleanup: |
   rm -f /var/lib/lbp-expected.bin
 solution: |

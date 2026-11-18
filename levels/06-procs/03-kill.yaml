@@ -14,7 +14,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- starlink-daemon 100000 >/dev/null 2>&1 </dev/null &
   sleep 0.3
 check: |
-  ! pgrep -x starlink-daemon >/dev/null
+  ! pgrep -x starlink-daemon >/dev/null || { echo 'starlink-daemon 還在執行。'; exit 1; }
 cleanup: |
   pkill -x starlink-daemon || true
   rm -f /usr/local/bin/starlink-daemon

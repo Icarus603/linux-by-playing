@@ -15,6 +15,8 @@ setup: |
   touch work/a/one.bak work/b/two.bak work/a/keep.txt work/b/keep.cfg work/three.bak
 check: |
   cd /home/player/work
-  [[ $(find . -name '*.bak' | wc -l) -eq 0 && -f a/keep.txt && -f b/keep.cfg && "$LBP_LAST" == *xargs* ]]
+  [[ $(find . -name "*.bak" | wc -l) -eq 0 ]] || { echo '還有 .bak 檔沒刪掉。'; exit 1; }
+  [[ -f a/keep.txt && -f b/keep.cfg ]] || { echo 'a/keep.txt 或 b/keep.cfg 被誤刪了。'; exit 1; }
+  [[ "$LBP_LAST" == *xargs* ]] || { echo '這關要用 xargs 完成。'; exit 1; }
 solution: |
   find work -name '*.bak' | xargs rm

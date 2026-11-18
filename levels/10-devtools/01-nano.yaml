@@ -12,6 +12,6 @@ hints:
 setup: |
   printf 'host=kernel7\nport=80\nmode=safe\n' > /home/player/config.txt
 check: |
-  [[ "$(cat /home/player/config.txt)" == $'host=kernel7\nport=8080\nmode=safe' ]]
+  [[ "$(cat /home/player/config.txt)" == $'host=kernel7\nport=8080\nmode=safe' ]] || { echo 'config.txt 的內容還不對。'; exit 1; }
 solution: |
   sed -i 's/^port=80$/port=8080/' config.txt

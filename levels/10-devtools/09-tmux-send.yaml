@@ -13,7 +13,7 @@ setup: |
   runuser -u player -- tmux kill-server 2>/dev/null || true
   rm -f /home/player/sent.txt
 check: |
-  [[ -f /home/player/sent.txt ]]
+  [[ -f /home/player/sent.txt ]] || { echo 'sent.txt 還不存在。'; exit 1; }
 cleanup: |
   runuser -u player -- tmux kill-server 2>/dev/null || true
 solution: |

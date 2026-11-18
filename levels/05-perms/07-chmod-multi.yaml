@@ -14,7 +14,7 @@ setup: |
   echo data > shared.txt
   chmod 666 shared.txt
 check: |
-  [[ "$(stat -c %a /home/player/shared.txt)" == "660" ]]
+  [[ "$(stat -c %a /home/player/shared.txt)" == "660" ]] || { echo 'shared.txt 的權限還不是 660。'; exit 1; }
 solution: |
   chmod o-rw shared.txt
 golf: 20

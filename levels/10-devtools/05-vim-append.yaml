@@ -12,6 +12,6 @@ hints:
 setup: |
   printf 'boot ok\nsystems nominal\n' > /home/player/log.txt
 check: |
-  [[ "$(cat /home/player/log.txt)" == $'boot ok\nsystems nominal\nmission complete' ]]
+  [[ "$(cat /home/player/log.txt)" == $'boot ok\nsystems nominal\nmission complete' ]] || { echo 'log.txt 的內容還不對。'; exit 1; }
 solution: |
   echo "mission complete" >> log.txt

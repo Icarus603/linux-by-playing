@@ -13,7 +13,7 @@ hints:
 setup: |
   mkdir -p /home/player/station/deck-2/engine/core
 check: |
-  [[ "$LBP_CWD" == /home/player/station/deck-2 ]]
+  [[ "$LBP_CWD" == /home/player/station/deck-2 ]] || { echo '你還沒到 station/deck-2。'; exit 1; }
 solution: |
   cd ../..
 golf: 8

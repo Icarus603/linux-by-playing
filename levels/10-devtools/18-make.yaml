@@ -14,6 +14,6 @@ setup: |
   rm -f app.out Makefile
   printf 'build:\n\techo BUILT > app.out\n\nclean:\n\trm -f app.out\n' > Makefile
 check: |
-  [[ "$(cat /home/player/app.out 2>/dev/null)" == "BUILT" ]]
+  [[ "$(cat /home/player/app.out 2>/dev/null)" == "BUILT" ]] || { echo 'app.out 不存在或內容不是 BUILT，還沒建置成功。'; exit 1; }
 solution: |
   make build

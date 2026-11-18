@@ -17,7 +17,7 @@ setup: |
   tar -czf package.tar.gz -C pkg app
   rm -rf pkg
 check: |
-  [[ -f /home/player/restore/app/VERSION && -f /home/player/restore/app/run.sh ]]
+  [[ -f /home/player/restore/app/VERSION && -f /home/player/restore/app/run.sh ]] || { echo 'restore/app 裡還沒解出 VERSION 和 run.sh，記得用 -C 指定解到 restore。'; exit 1; }
 solution: |
   mkdir restore
   tar -xzf package.tar.gz -C restore

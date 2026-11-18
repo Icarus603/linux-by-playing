@@ -14,7 +14,7 @@ setup: |
   mkdir -p /srv/drop
   chmod 777 /srv/drop
 check: |
-  [[ "$(stat -c %a /srv/drop)" == "1777" ]]
+  [[ "$(stat -c %a /srv/drop)" == "1777" ]] || { echo '/srv/drop 的權限還不是 1777（含 sticky bit）。'; exit 1; }
 cleanup: |
   rm -rf /srv/drop
 solution: |

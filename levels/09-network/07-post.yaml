@@ -36,7 +36,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- python3 /usr/local/lib/lbp/api.py >/dev/null 2>&1 </dev/null &
   sleep 0.7
 check: |
-  grep -qx 'status=ok' /srv/api/inbox.txt 2>/dev/null
+  grep -qx 'status=ok' /srv/api/inbox.txt 2>/dev/null || { echo 'API 的收件匣裡還沒有 status=ok。'; exit 1; }
 cleanup: |
   pkill -f '[a]pi.py' 2>/dev/null || true
   rm -rf /srv/api /usr/local/lib/lbp/api.py

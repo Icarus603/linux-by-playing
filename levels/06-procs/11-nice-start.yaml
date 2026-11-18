@@ -12,7 +12,8 @@ hints:
 setup: ""
 check: |
   pid=$(pgrep -u player -f '^sleep 200$' | head -1)
-  [[ -n "$pid" && "$(ps -o ni= -p "$pid" | tr -d ' ')" == "15" ]]
+  [[ -n "$pid" ]] || { echo '找不到 sleep 200 程序。'; exit 1; }
+  [[ "$(ps -o ni= -p "$pid" | tr -d " ")" == "15" ]] || { echo 'sleep 200 的 nice 值還不是 15。'; exit 1; }
 cleanup: |
   pkill -u player -f '^sleep 200$' || true
 solution: |

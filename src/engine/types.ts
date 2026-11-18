@@ -70,6 +70,8 @@ export type State = {
   hintsShown: number
   answer: string
   feedback: string
+  /** 最近一次檢查失敗的時間；同樣的回饋再次出現時也要再顯示 */
+  fbAt: number
   event: GameEvent | null
   /** 每次寫入遞增，HUD 以此偵測變更 */
   seq: number
@@ -95,6 +97,7 @@ export const emptyState = (): State => ({
   hintsShown: 0,
   answer: '',
   feedback: '',
+  fbAt: 0,
   event: null,
   seq: 0,
   streak: 0,

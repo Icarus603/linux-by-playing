@@ -22,7 +22,7 @@ setup: |
   sleep 0.6
   echo "report-$((RANDOM % 9000 + 1000))" > /home/player/local.txt; chown player:player /home/player/local.txt
 check: |
-  cmp -s /home/player/local.txt /home/vaultkeeper/received.txt
+  cmp -s /home/player/local.txt /home/vaultkeeper/received.txt || { echo 'vaultkeeper 還沒收到和 local.txt 相同的檔案。'; exit 1; }
 cleanup: |
   pkill -f "[s]shd -p 2222" 2>/dev/null || true
   pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true

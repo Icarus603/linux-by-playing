@@ -14,6 +14,8 @@ setup: |
   for i in $(seq 1 2000); do echo "log line $i: all systems nominal"; done > biglog.txt
 check: |
   cd /home/player
-  [[ -f biglog.txt.xz && ! -e biglog.txt ]] && xz -t biglog.txt.xz
+  [[ -f biglog.txt.xz ]] || { echo '還沒有 biglog.txt.xz。'; exit 1; }
+  [[ ! -e biglog.txt ]] || { echo 'biglog.txt 還在，壓縮後原檔應該被取代。'; exit 1; }
+  xz -t biglog.txt.xz || { echo 'biglog.txt.xz 不是完整的 xz 檔。'; exit 1; }
 solution: |
   xz biglog.txt

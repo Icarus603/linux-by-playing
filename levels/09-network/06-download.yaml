@@ -16,7 +16,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 8080 --bind 127.0.0.1 --directory /srv/site >/dev/null 2>&1 </dev/null &
   sleep 0.7
 check: |
-  cmp -s /home/player/firmware.bin /srv/site/firmware.bin
+  cmp -s /home/player/firmware.bin /srv/site/firmware.bin || { echo '下載的 firmware.bin 和伺服器上的檔案不一致。'; exit 1; }
 cleanup: |
   pkill -f '[h]ttp.server 8080' 2>/dev/null || true
   rm -rf /srv/site

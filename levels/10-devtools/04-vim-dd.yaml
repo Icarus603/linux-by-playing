@@ -12,6 +12,6 @@ hints:
 setup: |
   printf 'task one\ntask two\nCANCELLED task\ntask four\n' > /home/player/tasks.txt
 check: |
-  [[ "$(cat /home/player/tasks.txt)" == $'task one\ntask two\ntask four' ]]
+  [[ "$(cat /home/player/tasks.txt)" == $'task one\ntask two\ntask four' ]] || { echo 'tasks.txt 的內容還不對。'; exit 1; }
 solution: |
   sed -i '3d' tasks.txt

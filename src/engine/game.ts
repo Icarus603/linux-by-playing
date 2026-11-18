@@ -10,6 +10,8 @@ const now = (): number => Date.now()
 // 回傳給 HUD 的訊息會依語言翻譯，所以 HUD 不能再用文字內容判斷「是不是錯誤」。
 // 改在訊息開頭放不可見的標記：ERR = 需要 Pip 說明的錯誤；HINT_OK = 提示已顯示在面板（不必再說一次）。
 export const ERR = '\u200b'
+/** 檢查失敗、關卡又沒提供具體回饋時的通用訊息（也在 feedback.en.json 有翻譯）。 */
+export const GENERIC_FB = '指令執行完了，但還沒達成任務目標。重讀一次任務，或輸入 /hint；環境弄亂了可用 /restart 重來。'
 export const HINT_OK = '\u200c'
 export const HINT_NO = ''
 export const stripMark = (s: string): string => s.replace(/^[\u200b\u200c]/, '')
@@ -126,8 +128,10 @@ export function tick(last: string, cwd: string, rc = '0'): string {
     }
     cd = nxt ? `cd:${nxt.cwd}` : ''
   } else {
-    const fb = r.out.trim().split('\n')[0] ?? ''
-    if (fb !== s.feedback) s.feedback = fb
+    // 關卡沒寫回饋時：指令成功跑完卻沒過關，至少告訴玩家「有收到、但還沒達成」，不要讓人以為壞了
+    const fb = r.out.trim().split('\n')[0] || (rc === '0' && last.trim() ? GENERIC_FB : '')
+    s.feedback = fb
+    s.fbAt = fb ? now() : s.fbAt
   }
   saveState(s)
   return cd

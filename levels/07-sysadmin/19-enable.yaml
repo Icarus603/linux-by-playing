@@ -14,7 +14,7 @@ setup: |
   printf '[Unit]\nDescription=Station Nav\n[Service]\nExecStart=/usr/bin/sleep infinity\n' > /etc/lbp-systemd/nav.service
   rm -f /etc/lbp-systemd/enabled/nav.service
 check: |
-  systemctl is-enabled nav >/dev/null 2>&1
+  systemctl is-enabled nav >/dev/null 2>&1 || { echo 'nav 服務還沒設成開機自動啟動。'; exit 1; }
 cleanup: |
   rm -f /etc/lbp-systemd/nav.service /etc/lbp-systemd/enabled/nav.service
 solution: |

@@ -13,7 +13,8 @@ setup: |
   id intruder >/dev/null 2>&1 || useradd -m -s /bin/bash intruder
   echo "planted" > /home/intruder/.hidden
 check: |
-  ! id intruder >/dev/null 2>&1 && [[ ! -d /home/intruder ]]
+  ! id intruder >/dev/null 2>&1 || { echo 'intruder 這個帳號還在。'; exit 1; }
+  [[ ! -d /home/intruder ]] || { echo '/home/intruder 家目錄還在。'; exit 1; }
 cleanup: |
   userdel -r intruder 2>/dev/null || true
 solution: |

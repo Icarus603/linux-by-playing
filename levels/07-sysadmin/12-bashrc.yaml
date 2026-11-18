@@ -11,7 +11,8 @@ hints:
   - "再打：source ~/.bashrc，讓它立刻生效。"
 setup: ""
 check: |
-  grep -q "^alias gs=" /home/player/.bashrc && [[ "$LBP_LAST" == source* || "$LBP_LAST" == ". "* ]]
+  grep -q "^alias gs=" /home/player/.bashrc || { echo '.bashrc 裡還沒有 alias gs=。'; exit 1; }
+  [[ "$LBP_LAST" == source* || "$LBP_LAST" == ". "* ]] || { echo '寫好之後要用 source 讓它生效。'; exit 1; }
 solution: |
   echo "alias gs='git status'" >> ~/.bashrc
   source ~/.bashrc

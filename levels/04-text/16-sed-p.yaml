@@ -14,6 +14,6 @@ setup: |
   for i in $(seq 1 30); do echo "chapter line $i"; done > story.txt
 check: |
   cd /home/player
-  diff <(sed -n '10,12p' story.txt) mid.txt >/dev/null
+  diff <(sed -n '10,12p' story.txt) mid.txt >/dev/null || { echo 'mid.txt 不對，要是 story.txt 的第 10 到 12 行。'; exit 1; }
 solution: |
   sed -n '10,12p' story.txt > mid.txt

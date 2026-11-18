@@ -16,7 +16,8 @@ setup: |
   P 'mkdir /home/player/repo && cd /home/player/repo && git init -q && echo base > base.txt && git add . && git commit -qm base && git switch -q -c feature-y && echo feat > feat.txt && git add . && git commit -qm "add feat" && git switch -q main'
 check: |
   GT() { git -c safe.directory='*' -C /home/player/repo "$@"; }
-  [[ "$(GT branch --show-current)" == "main" && -f /home/player/repo/feat.txt ]]
+  [[ "$(GT branch --show-current)" == "main" ]] || { echo '目前不在 main 分支。'; exit 1; }
+  [[ -f /home/player/repo/feat.txt ]] || { echo 'main 上還沒有 feat.txt，分支還沒合併進來。'; exit 1; }
 solution: |
   cd repo
   git merge -q feature-y

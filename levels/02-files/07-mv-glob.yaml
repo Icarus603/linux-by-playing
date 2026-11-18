@@ -16,7 +16,9 @@ setup: |
   echo keep > readme.txt
 check: |
   cd /home/player
-  [[ $(ls archive/*.log 2>/dev/null | wc -l) -eq 3 && $(ls *.log 2>/dev/null | wc -l) -eq 0 && -f readme.txt ]]
+  [[ $(ls archive/*.log 2>/dev/null | wc -l) -eq 3 ]] || { echo 'archive/ 裡要剛好有 3 個 .log 檔。'; exit 1; }
+  [[ $(ls *.log 2>/dev/null | wc -l) -eq 0 ]] || { echo '家目錄裡還有 .log 檔沒搬走。'; exit 1; }
+  [[ -f readme.txt ]] || { echo 'readme.txt 不見了，不該動到它。'; exit 1; }
 solution: |
   mv *.log archive/
 reveal: "歸檔的日誌裡，每晚 03:00 都有一筆不屬於任何人的寫入。寫入者的名字是 warden。"

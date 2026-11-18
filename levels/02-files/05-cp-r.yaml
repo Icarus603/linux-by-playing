@@ -15,6 +15,7 @@ setup: |
   echo "mode=safe" > config/main.conf
   echo "dns=10.0.0.1" > config/net/dns.conf
 check: |
-  [[ -d /home/player/config-backup ]] && diff -r /home/player/config /home/player/config-backup >/dev/null
+  [[ -d /home/player/config-backup ]] || { echo '還沒有 config-backup 目錄。'; exit 1; }
+  diff -r /home/player/config /home/player/config-backup >/dev/null || { echo 'config-backup 和 config 的內容不一樣，是不是漏了子目錄？'; exit 1; }
 solution: |
   cp -r config config-backup

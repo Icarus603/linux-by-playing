@@ -14,7 +14,8 @@ setup: |
   echo trash > junk.tmp
   echo important > keep.txt
 check: |
-  [[ ! -e /home/player/junk.tmp && -f /home/player/keep.txt ]]
+  [[ ! -e /home/player/junk.tmp ]] || { echo 'junk.tmp 還在。'; exit 1; }
+  [[ -f /home/player/keep.txt ]] || { echo 'keep.txt 被誤刪了。'; exit 1; }
 solution: |
   rm junk.tmp
 golf: 11

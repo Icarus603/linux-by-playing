@@ -16,7 +16,9 @@ setup: |
   echo "apr" > logs/2024-04.log
 check: |
   cd /home/player
-  [[ -L latest.log && "$(readlink latest.log)" == "logs/2024-05.log" && "$(cat latest.log)" == may ]]
+  [[ -L latest.log ]] || { echo 'latest.log 還不是符號連結。'; exit 1; }
+  [[ "$(readlink latest.log)" == "logs/2024-05.log" ]] || { echo '連結指向的目標不對，應該是 logs/2024-05.log。'; exit 1; }
+  [[ "$(cat latest.log)" == may ]] || { echo '透過 latest.log 讀不到內容，連結可能壞了。'; exit 1; }
 solution: |
   ln -s logs/2024-05.log latest.log
 reveal: "latest.log 這個捷徑，被人改過指向。有人（或什麼東西）在偷偷改你的路徑。"

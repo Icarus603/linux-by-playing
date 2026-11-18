@@ -15,7 +15,8 @@ setup: |
   echo f > report-final.txt
 check: |
   cd /home/player
-  [[ -f report-10.txt && -f report-final.txt && $(ls report-?.txt 2>/dev/null | wc -l) -eq 0 ]]
+  [[ -f report-10.txt && -f report-final.txt ]] || { echo 'report-10.txt 或 report-final.txt 不見了，不該動到它們。'; exit 1; }
+  [[ $(ls report-?.txt 2>/dev/null | wc -l) -eq 0 ]] || { echo '還有單一字元編號的 report-?.txt 沒處理。'; exit 1; }
 solution: |
   rm report-?.txt
 golf: 15

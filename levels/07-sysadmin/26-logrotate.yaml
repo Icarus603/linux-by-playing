@@ -16,6 +16,8 @@ setup: |
   printf '/home/player/app.log {\n    rotate 3\n    size 1\n    missingok\n    notifempty\n    nocompress\n}\n' > rotate.conf
 check: |
   cd /home/player
-  [[ -f app.log.1 && $(wc -l < app.log.1) -eq 100 && ( ! -s app.log ) ]]
+  [[ -f app.log.1 ]] || { echo '還沒有 app.log.1。'; exit 1; }
+  [[ $(wc -l < app.log.1) -eq 100 ]] || { echo 'app.log.1 的行數不是 100，內容要是原本的 app.log。'; exit 1; }
+  [[ ! -s app.log ]] || { echo 'app.log 應該被清空。'; exit 1; }
 solution: |
   logrotate -s ~/logrotate.state -f rotate.conf

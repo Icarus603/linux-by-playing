@@ -17,6 +17,6 @@ setup: |
   echo old > mirror/a.txt; echo stale > mirror/stale.txt
 check: |
   cd /home/player
-  diff -r live mirror >/dev/null
+  diff -r live mirror >/dev/null || { echo 'mirror 和 live 的內容還不一致。'; exit 1; }
 solution: |
   rsync -a --delete live/ mirror/

@@ -16,6 +16,7 @@ setup: |
   for n in x y; do echo new > tmp/new-$n.log; done
 check: |
   cd /home/player/tmp
-  [[ $(ls old-* 2>/dev/null | wc -l) -eq 0 && $(ls new-* 2>/dev/null | wc -l) -eq 2 ]]
+  [[ $(ls old-* 2>/dev/null | wc -l) -eq 0 ]] || { echo '還有 old- 開頭的檔案沒改名。'; exit 1; }
+  [[ $(ls new-* 2>/dev/null | wc -l) -eq 2 ]] || { echo 'new- 開頭的檔案要剛好有 2 個。'; exit 1; }
 solution: |
   find tmp -type f -mtime +30 -delete

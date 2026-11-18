@@ -14,7 +14,7 @@ setup: |
   printf '#!/bin/bash\necho "mission=$MISSION" > /home/player/report.out\n' > report.sh
   chmod 755 report.sh
 check: |
-  [[ "$(cat /home/player/report.out 2>/dev/null)" == "mission=apollo" ]]
+  [[ "$(cat /home/player/report.out 2>/dev/null)" == "mission=apollo" ]] || { echo 'report.out 不存在或內容不是 mission=apollo。'; exit 1; }
 solution: |
   export MISSION=apollo
   ./report.sh

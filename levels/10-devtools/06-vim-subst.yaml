@@ -12,6 +12,6 @@ hints:
 setup: |
   printf 'alpha one\nbeta alpha\nalpha alpha gamma\n' > /home/player/notes.txt
 check: |
-  [[ "$(cat /home/player/notes.txt)" == $'omega one\nbeta omega\nomega omega gamma' ]]
+  [[ "$(cat /home/player/notes.txt)" == $'omega one\nbeta omega\nomega omega gamma' ]] || { echo 'notes.txt 的內容還不對。'; exit 1; }
 solution: |
   sed -i 's/alpha/omega/g' notes.txt

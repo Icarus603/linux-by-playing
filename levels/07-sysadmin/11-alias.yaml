@@ -11,7 +11,8 @@ hints:
   - "建好後輸入 ll，應該會看到跟 ls -la 一樣的結果。"
 setup: ""
 check: |
-  [[ "$LBP_LAST" == "ll" && "$LBP_RC" == "0" ]]
+  [[ "$LBP_LAST" == "ll" ]] || { echo '要直接輸入 ll。'; exit 1; }
+  [[ "$LBP_RC" == "0" ]] || { echo 'll 執行失敗了，別名可能還沒設好。'; exit 1; }
 solution: |
   alias ll='ls -la'
   ll

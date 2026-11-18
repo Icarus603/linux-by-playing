@@ -18,6 +18,8 @@ setup: |
   chmod -R go-rwx public
 check: |
   cd /home/player/public
-  [[ -z "$(find . -type f ! -perm -o=r)" && -z "$(find . -type d ! -perm -o=rx)" && -z "$(find . -type f -perm /111)" ]]
+  [[ -z "$(find . -type f ! -perm -o=r)" ]] || { echo 'public 裡有檔案其他人讀不到。'; exit 1; }
+  [[ -z "$(find . -type d ! -perm -o=rx)" ]] || { echo 'public 裡有目錄其他人不能進入。'; exit 1; }
+  [[ -z "$(find . -type f -perm /111)" ]] || { echo 'public 裡有一般檔案被加上了執行權限。'; exit 1; }
 solution: |
   chmod -R a+rX public

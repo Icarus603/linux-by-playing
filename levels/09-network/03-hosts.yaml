@@ -12,7 +12,7 @@ hints:
 setup: |
   grep -v ' hub$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
 check: |
-  [[ "$(getent hosts hub | awk '{print $1}' | head -1)" == "127.0.0.1" ]]
+  [[ "$(getent hosts hub | awk '{print $1}' | head -1)" == "127.0.0.1" ]] || { echo 'hub 還沒解析到 127.0.0.1。'; exit 1; }
 cleanup: |
   grep -v ' hub$' /etc/hosts > /tmp/hosts.new; cat /tmp/hosts.new > /etc/hosts
 solution: |

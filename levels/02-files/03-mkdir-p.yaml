@@ -11,6 +11,6 @@ hints:
   - "打：mkdir -p ship/deck/engine/core"
 setup: ""
 check: |
-  [[ -d /home/player/ship/deck/engine/core ]]
+  [[ -d /home/player/ship/deck/engine/core ]] || { echo 'ship/deck/engine/core 這整串目錄還沒建好。'; exit 1; }
 solution: |
   mkdir -p ship/deck/engine/core

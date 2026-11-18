@@ -14,7 +14,7 @@ setup: |
   printf '85\n100\n20\n93\n7\n61\n100\n88\n' > scores.txt
 check: |
   cd /home/player
-  diff <(sort -nr scores.txt | head -3) top3.txt >/dev/null
+  diff <(sort -nr scores.txt | head -3) top3.txt >/dev/null || { echo 'top3.txt 不對，要是 scores.txt 由大到小的前三名。'; exit 1; }
 solution: |
   sort -nr scores.txt | head -3 > top3.txt
 golf: 36

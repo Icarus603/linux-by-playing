@@ -15,6 +15,6 @@ setup: |
   printf '31\n27\n45\n' > ages.txt
 check: |
   cd /home/player
-  diff <(paste names.txt ages.txt) people.tsv >/dev/null
+  diff <(paste names.txt ages.txt) people.tsv >/dev/null || { echo 'people.tsv 不對，要是 names.txt 與 ages.txt 並排合併。'; exit 1; }
 solution: |
   paste names.txt ages.txt > people.tsv

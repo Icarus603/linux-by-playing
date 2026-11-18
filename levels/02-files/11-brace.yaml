@@ -12,6 +12,7 @@ hints:
 setup: ""
 check: |
   cd /home/player
-  [[ -f log-jan.txt && -f log-feb.txt && -f log-mar.txt && "$LBP_LAST" == *"{"* ]]
+  [[ -f log-jan.txt && -f log-feb.txt && -f log-mar.txt ]] || { echo 'log-jan.txt、log-feb.txt、log-mar.txt 還沒全部建好。'; exit 1; }
+  [[ "$LBP_LAST" == *"{"* ]] || { echo '這關要用大括號展開一次建立它們。'; exit 1; }
 solution: |
   touch log-{jan,feb,mar}.txt

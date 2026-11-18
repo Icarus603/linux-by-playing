@@ -13,6 +13,6 @@ setup: |
   cd /home/player
   printf 'Ada\nLinus\n' > roster.txt
 check: |
-  [[ "$(cat /home/player/roster.txt)" == $'Ada\nLinus\nPip' ]]
+  [[ "$(cat /home/player/roster.txt)" == $'Ada\nLinus\nPip' ]] || { echo 'roster.txt 的內容不對，應該是 Ada、Linus、Pip 各一行。'; exit 1; }
 solution: |
   echo Pip >> roster.txt

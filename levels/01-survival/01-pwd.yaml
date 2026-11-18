@@ -11,6 +11,6 @@ hints:
   - "輸入列看起來像 player@kernel-7:~$ 的地方，就是你打字的位置。"
 setup: ""
 check: |
-  [[ "$LBP_LAST" == "pwd" ]]
+  [[ "$LBP_LAST" == "pwd" ]] || { echo '這關要輸入的指令是 pwd。'; exit 1; }
 solution: |
   pwd

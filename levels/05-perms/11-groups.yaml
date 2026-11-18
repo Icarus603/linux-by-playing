@@ -13,7 +13,7 @@ setup: |
   getent group engineers >/dev/null && groupdel engineers || true
   id cadet >/dev/null 2>&1 || useradd -m -s /bin/bash cadet
 check: |
-  id -nG cadet 2>/dev/null | tr ' ' '\n' | grep -qx engineers
+  id -nG cadet 2>/dev/null | tr ' ' '\n' | grep -qx engineers || { echo 'cadet 還不在 engineers 群組裡。'; exit 1; }
 cleanup: |
   userdel -r cadet 2>/dev/null || true
   groupdel engineers 2>/dev/null || true

@@ -11,7 +11,7 @@ hints:
   - "建好後用 ls 看看，應該會出現 notes.txt。"
 setup: ""
 check: |
-  [[ -f /home/player/notes.txt ]]
+  [[ -f /home/player/notes.txt ]] || { echo '家目錄裡還沒有 notes.txt。'; exit 1; }
 solution: |
   touch notes.txt
 golf: 15

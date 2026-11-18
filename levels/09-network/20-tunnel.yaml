@@ -25,7 +25,7 @@ setup: |
   setsid setpriv --reuid=player --regid=player --init-groups -- python3 -m http.server 9500 --bind 127.0.0.1 --directory /srv/inner >/dev/null 2>&1 </dev/null &
   sleep 0.7
 check: |
-  [[ "$(curl -s --max-time 2 http://127.0.0.1:9600/secret.txt)" == "$(cat /srv/inner/secret.txt)" ]]
+  [[ "$(curl -s --max-time 2 http://127.0.0.1:9600/secret.txt)" == "$(cat /srv/inner/secret.txt)" ]] || { echo '還取不到 127.0.0.1:9600 上的 secret.txt。'; exit 1; }
 cleanup: |
   pkill -f "[s]shd -p 2222" 2>/dev/null || true
   pkill -f "[s]sh -fN -L 9600" 2>/dev/null || true

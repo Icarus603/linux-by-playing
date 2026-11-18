@@ -12,7 +12,7 @@ hints:
 setup: |
   for j in $(atq 2>/dev/null | awk '{print $1}'); do atrm "$j"; done
 check: |
-  [[ $(atq 2>/dev/null | wc -l) -ge 1 ]]
+  [[ $(atq 2>/dev/null | wc -l) -ge 1 ]] || { echo '還沒有排入任何 at 工作。'; exit 1; }
 cleanup: |
   for j in $(atq 2>/dev/null | awk '{print $1}'); do atrm "$j"; done
 solution: |

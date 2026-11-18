@@ -12,7 +12,7 @@ setup: |
   mkdir -p /home/player/logbook
   if [ "${LBP_LANG:-}" = en ]; then echo "No anomalies today." > /home/player/logbook/entry-000.txt; else echo "今日無異常。" > /home/player/logbook/entry-000.txt; fi
 check: |
-  [[ "$LBP_CWD" == /home/player/logbook ]]
+  [[ "$LBP_CWD" == /home/player/logbook ]] || { echo '你還沒進到 logbook 目錄。'; exit 1; }
 solution: |
   cd logbook
 golf: 10

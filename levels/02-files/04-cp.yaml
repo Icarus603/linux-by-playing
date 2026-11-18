@@ -12,7 +12,9 @@ hints:
 setup: |
   echo "reactor blueprint v3" > /home/player/blueprint.txt
 check: |
-  [[ -f /home/player/blueprint.txt && -f /home/player/blueprint.bak ]] && cmp -s /home/player/blueprint.txt /home/player/blueprint.bak
+  [[ -f /home/player/blueprint.txt ]] || { echo 'blueprint.txt 不見了，這關是複製，不是搬移。'; exit 1; }
+  [[ -f /home/player/blueprint.bak ]] || { echo '還沒有 blueprint.bak。'; exit 1; }
+  cmp -s /home/player/blueprint.txt /home/player/blueprint.bak || { echo 'blueprint.bak 的內容和原檔不同。'; exit 1; }
 solution: |
   cp blueprint.txt blueprint.bak
 golf: 23

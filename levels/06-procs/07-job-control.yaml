@@ -12,7 +12,9 @@ hints:
 setup: ""
 check: |
   pid=$(pgrep -u player -f '^sleep 300$' | head -1)
-  [[ -n "$pid" ]] && [[ "$(ps -o stat= -p "$pid")" != T* ]] && [[ "$LBP_LAST" =~ ^bg([[:space:]]|$) ]]
+  [[ -n "$pid" ]] || { echo '找不到 sleep 300 程序。'; exit 1; }
+  [[ "$(ps -o stat= -p "$pid")" != T* ]] || { echo '程序還處於停止（T）狀態。'; exit 1; }
+  [[ "$LBP_LAST" =~ ^bg([[:space:]]|$) ]] || { echo '這關要用 bg 指令。'; exit 1; }
 cleanup: |
   pkill -u player -f '^sleep 300$' || true
 solution: |

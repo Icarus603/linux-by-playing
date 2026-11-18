@@ -15,6 +15,9 @@ setup: |
   mkdir -p photos; echo img > photos/p1.jpg
 check: |
   cd /home/player
-  [[ -f bundle.zip ]] && unzip -l bundle.zip | grep -q 'a.txt' && unzip -l bundle.zip | grep -q 'b.txt' && unzip -l bundle.zip | grep -q 'photos/p1.jpg'
+  [[ -f bundle.zip ]] || { echo '還沒有 bundle.zip。'; exit 1; }
+  unzip -l bundle.zip | grep -q 'a.txt' || { echo 'bundle.zip 裡沒有 a.txt。'; exit 1; }
+  unzip -l bundle.zip | grep -q 'b.txt' || { echo 'bundle.zip 裡沒有 b.txt。'; exit 1; }
+  unzip -l bundle.zip | grep -q 'photos/p1.jpg' || { echo 'bundle.zip 裡沒有 photos/p1.jpg，目錄要加 -r。'; exit 1; }
 solution: |
   zip -r bundle.zip a.txt b.txt photos

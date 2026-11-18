@@ -16,6 +16,7 @@ setup: |
   rm -rf z
 check: |
   cd /home/player
-  [[ "$(cat extracted/greeting.txt 2>/dev/null)" == "hello" && -f extracted/farewell.txt ]]
+  [[ "$(cat extracted/greeting.txt 2>/dev/null)" == "hello" ]] || { echo 'extracted/greeting.txt 不存在或內容不對。'; exit 1; }
+  [[ -f extracted/farewell.txt ]] || { echo 'extracted/farewell.txt 不存在。'; exit 1; }
 solution: |
   unzip inbox.zip -d extracted

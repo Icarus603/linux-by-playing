@@ -12,6 +12,8 @@ hints:
 setup: ""
 check: |
   cd /home/player
-  [[ -s found.txt ]] && grep -q 'Permission denied' errors.txt && ! grep -q 'Permission denied' found.txt
+  [[ -s found.txt ]] || { echo 'found.txt 是空的或不存在。'; exit 1; }
+  grep -q 'Permission denied' errors.txt || { echo 'errors.txt 裡沒有 Permission denied，錯誤訊息要用 2> 導向過去。'; exit 1; }
+  ! grep -q 'Permission denied' found.txt || { echo 'found.txt 裡混進了 Permission denied，錯誤訊息要分開存。'; exit 1; }
 solution: |
   find /root /etc -name '*.conf' > found.txt 2> errors.txt

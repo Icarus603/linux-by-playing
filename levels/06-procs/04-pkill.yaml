@@ -14,7 +14,7 @@ setup: |
   for i in 1 2 3 4 5; do setsid setpriv --reuid=player --regid=player --init-groups -- drone 100000 >/dev/null 2>&1 </dev/null & done
   sleep 0.4
 check: |
-  ! pgrep -x drone >/dev/null
+  ! pgrep -x drone >/dev/null || { echo 'drone 還在執行。'; exit 1; }
 cleanup: |
   pkill -x drone || true
   rm -f /usr/local/bin/drone

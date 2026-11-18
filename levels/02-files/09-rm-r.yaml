@@ -16,7 +16,9 @@ setup: |
   echo y > keep/b.txt
 check: |
   cd /home/player
-  [[ ! -e old-station && ! -e empty && -f keep/b.txt ]]
+  [[ ! -e old-station ]] || { echo 'old-station 還在。'; exit 1; }
+  [[ ! -e empty ]] || { echo 'empty 還在。'; exit 1; }
+  [[ -f keep/b.txt ]] || { echo 'keep/b.txt 被誤刪了。'; exit 1; }
 solution: |
   rm -r old-station
   rmdir empty

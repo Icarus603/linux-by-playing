@@ -10,7 +10,7 @@ hints:
   - "直接打：cd /var/log"
 setup: ""
 check: |
-  [[ "$LBP_CWD" == /var/log ]]
+  [[ "$LBP_CWD" == /var/log ]] || { echo '你還沒到 /var/log，cd 後面要接完整路徑。'; exit 1; }
 solution: |
   cd /var/log
 golf: 11

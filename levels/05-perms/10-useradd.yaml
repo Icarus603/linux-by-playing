@@ -12,7 +12,8 @@ hints:
 setup: |
   id cadet >/dev/null 2>&1 && userdel -r cadet 2>/dev/null || true
 check: |
-  id cadet >/dev/null 2>&1 && [[ -d /home/cadet ]]
+  id cadet >/dev/null 2>&1 || { echo '還沒有 cadet 這個使用者。'; exit 1; }
+  [[ -d /home/cadet ]] || { echo 'cadet 的家目錄還沒建立。'; exit 1; }
 cleanup: |
   userdel -r cadet 2>/dev/null || true
 solution: |

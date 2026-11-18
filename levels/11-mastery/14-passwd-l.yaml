@@ -13,7 +13,8 @@ setup: |
   id mallory >/dev/null 2>&1 || useradd -m -s /bin/bash mallory
   echo 'mallory:Secret123' | chpasswd
 check: |
-  [[ "$(passwd -S mallory 2>/dev/null | awk '{print $2}')" == "L" ]] && id mallory >/dev/null 2>&1
+  id mallory >/dev/null 2>&1 || { echo 'mallory 這個帳號不見了，這關是鎖定，不是刪除。'; exit 1; }
+  [[ "$(passwd -S mallory 2>/dev/null | awk '{print $2}')" == "L" ]] || { echo 'mallory 還沒有被鎖定。'; exit 1; }
 cleanup: |
   userdel -r mallory 2>/dev/null || true
 solution: |

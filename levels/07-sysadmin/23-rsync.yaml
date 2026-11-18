@@ -16,6 +16,7 @@ setup: |
   echo 1 > src/a/one.txt; echo 2 > src/b/two.txt; echo 3 > src/root.txt
 check: |
   cd /home/player
-  [[ -d dst ]] && diff -r src dst >/dev/null
+  [[ -d dst ]] || { echo '還沒有 dst 目錄。'; exit 1; }
+  diff -r src dst >/dev/null || { echo 'dst 和 src 的內容還不一致。'; exit 1; }
 solution: |
   rsync -av src/ dst/

@@ -13,7 +13,7 @@ setup: |
   cd /home/player
   printf '# main settings\nport=8080\n\n# net\nhost=0.0.0.0\n\n# end\nmode=prod\n' > config.ini
 check: |
-  [[ "$(cat /home/player/config.ini)" == $'port=8080\nhost=0.0.0.0\nmode=prod' ]]
+  [[ "$(cat /home/player/config.ini)" == $'port=8080\nhost=0.0.0.0\nmode=prod' ]] || { echo 'config.ini 的內容還不對，檢查三行的值。'; exit 1; }
 solution: |
   sed -i '/^#/d;/^$/d' config.ini
 golf: 30

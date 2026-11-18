@@ -11,7 +11,7 @@ hints:
   - "打：cd ~　或者只打 cd，兩種都會回家。"
 setup: ""
 check: |
-  [[ "$LBP_CWD" == /home/player ]]
+  [[ "$LBP_CWD" == /home/player ]] || { echo '你還沒回到家目錄。'; exit 1; }
 solution: |
   cd ~
 golf: 2

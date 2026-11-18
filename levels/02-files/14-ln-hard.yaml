@@ -13,6 +13,8 @@ setup: |
   echo "telemetry" > /home/player/data.txt
 check: |
   cd /home/player
-  [[ -f data.txt && -f data-link.txt && ! -L data-link.txt && "$(stat -c %i data.txt)" == "$(stat -c %i data-link.txt)" ]]
+  [[ -f data.txt && -f data-link.txt ]] || { echo 'data.txt 或 data-link.txt 不存在。'; exit 1; }
+  [[ ! -L data-link.txt ]] || { echo 'data-link.txt 是符號連結，這關要的是硬連結。'; exit 1; }
+  [[ "$(stat -c %i data.txt)" == "$(stat -c %i data-link.txt)" ]] || { echo 'data-link.txt 和 data.txt 不是同一個 inode。'; exit 1; }
 solution: |
   ln data.txt data-link.txt

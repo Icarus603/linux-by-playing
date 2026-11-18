@@ -11,7 +11,8 @@ hints:
   - "輸出會寫進 nohup.out；想丟掉輸出可以用：nohup sleep 500 > /dev/null 2>&1 &"
 setup: ""
 check: |
-  pgrep -u player -f '^sleep 500$' >/dev/null && [[ "$LBP_LAST" == *nohup* ]]
+  pgrep -u player -f '^sleep 500$' >/dev/null || { echo 'sleep 500 還沒在執行。'; exit 1; }
+  [[ "$LBP_LAST" == *nohup* ]] || { echo '這關要用 nohup。'; exit 1; }
 cleanup: |
   pkill -u player -f '^sleep 500$' || true
 solution: |

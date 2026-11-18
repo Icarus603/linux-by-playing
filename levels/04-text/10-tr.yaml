@@ -13,6 +13,6 @@ setup: |
   cd /home/player
   echo "all systems nominal" > msg.txt
 check: |
-  [[ "$(cat /home/player/loud.txt 2>/dev/null)" == "ALL SYSTEMS NOMINAL" ]]
+  [[ "$(cat /home/player/loud.txt 2>/dev/null)" == "ALL SYSTEMS NOMINAL" ]] || { echo 'loud.txt 不存在，或內容不是大寫的 ALL SYSTEMS NOMINAL。'; exit 1; }
 solution: |
   tr 'a-z' 'A-Z' < msg.txt > loud.txt

@@ -16,7 +16,7 @@ setup: |
   chgrp crew /srv/team
   chmod 770 /srv/team
 check: |
-  [[ "$(stat -c %a /srv/team)" == "2770" ]]
+  [[ "$(stat -c %a /srv/team)" == "2770" ]] || { echo '/srv/team 的權限還不是 2770（含 setgid）。'; exit 1; }
 cleanup: |
   rm -rf /srv/team
   groupdel crew 2>/dev/null || true

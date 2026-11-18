@@ -14,7 +14,7 @@ setup: |
   printf '#!/bin/bash\necho ready\n' > script.sh
   chmod 644 script.sh
 check: |
-  [[ "$(stat -c %A /home/player/script.sh)" =~ ^.{3}x ]]
+  [[ "$(stat -c %A /home/player/script.sh)" =~ ^.{3}x ]] || { echo 'script.sh 還沒有擁有者的執行權限。'; exit 1; }
 solution: |
   chmod u+x script.sh
 golf: 18

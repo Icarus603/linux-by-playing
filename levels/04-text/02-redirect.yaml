@@ -11,6 +11,6 @@ hints:
   - "用 cat log.txt 檢查，應該看到 mission-start。"
 setup: ""
 check: |
-  [[ "$(cat /home/player/log.txt 2>/dev/null)" == "mission-start" ]]
+  [[ "$(cat /home/player/log.txt 2>/dev/null)" == "mission-start" ]] || { echo 'log.txt 不存在，或內容不是 mission-start。'; exit 1; }
 solution: |
   echo mission-start > log.txt

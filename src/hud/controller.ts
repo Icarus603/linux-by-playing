@@ -579,7 +579,7 @@ export class Controller {
     if (ev && ev.at !== this.lastEventAt) {
       this.lastEventAt = ev.at
       this.onEvent(ev, prev, next)
-    } else if (next.feedback && next.feedback !== this.lastFeedback) {
+    } else if (next.feedback && next.fbAt !== prev.fbAt) {
       this.failCount++
       this.store.push({ kind: 'note', text: `↳ ${trFeedback(next.feedback)}`, tone: 'warn' })
     }

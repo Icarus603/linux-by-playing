@@ -14,7 +14,7 @@ setup: |
   printf 'zoe\nbob\nann\nbob\nzoe\ncat\nann\nann\n' > names.txt
 check: |
   cd /home/player
-  diff <(sort -u names.txt) unique.txt >/dev/null
+  diff <(sort -u names.txt) unique.txt >/dev/null || { echo 'unique.txt 不對，要是 names.txt 去重並排序後的結果。'; exit 1; }
 solution: |
   sort names.txt | uniq > unique.txt
 golf: 28

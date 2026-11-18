@@ -11,7 +11,8 @@ hints:
   - "也可以在空格前加反斜線：touch my\\ notes.txt"
 setup: ""
 check: |
-  [[ -f "/home/player/my notes.txt" && ! -e /home/player/my && ! -e /home/player/notes.txt ]]
+  [[ -f "/home/player/my notes.txt" ]] || { echo '還沒有「my notes.txt」，檔名有空格，要用引號包起來。'; exit 1; }
+  [[ ! -e /home/player/my && ! -e /home/player/notes.txt ]] || { echo '多出了 my 或 notes.txt：空格把檔名拆成兩個了。'; exit 1; }
 solution: |
   touch "my notes.txt"
 golf: 20

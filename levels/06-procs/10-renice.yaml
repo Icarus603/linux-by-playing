@@ -15,7 +15,8 @@ setup: |
   sleep 0.5
 check: |
   pid=$(pgrep -x cpu-hog | head -1)
-  [[ -n "$pid" ]] && (( $(ps -o ni= -p "$pid" | tr -d ' ') >= 10 ))
+  [[ -n "$pid" ]] || { echo '找不到 cpu-hog 程序。'; exit 1; }
+  (( $(ps -o ni= -p "$pid" | tr -d " ") >= 10 )) || { echo 'cpu-hog 的 nice 值還不夠高（至少要 10）。'; exit 1; }
 cleanup: |
   pkill -x cpu-hog || true
   rm -f /usr/local/bin/cpu-hog

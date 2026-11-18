@@ -11,7 +11,7 @@ hints:
   - "用 ls 確認 cargo 出現了。"
 setup: ""
 check: |
-  [[ -d /home/player/cargo ]]
+  [[ -d /home/player/cargo ]] || { echo '家目錄裡還沒有 cargo 目錄。'; exit 1; }
 solution: |
   mkdir cargo
 golf: 11

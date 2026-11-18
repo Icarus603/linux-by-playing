@@ -15,6 +15,6 @@ setup: |
   printf 'host=a\nport=9090\nmode=safe\nlog=on\n' > /tmp/app.expected
   diff -u app.conf /tmp/app.expected > fix.patch || true
 check: |
-  cmp -s /home/player/app.conf /tmp/app.expected
+  cmp -s /home/player/app.conf /tmp/app.expected || { echo 'app.conf 的內容還不是預期的結果。'; exit 1; }
 solution: |
   patch -s app.conf < fix.patch
