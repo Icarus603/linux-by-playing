@@ -178,6 +178,7 @@
  "指令執行完了，但還沒達成任務目標。重讀一次任務，或輸入 /hint；環境弄亂了可用 /restart 重來。": "The command ran, but the task isn't done yet. Re-read the task or type /hint; if the environment got messed up, /restart resets it.",
  "readme.txt 不該有執行權限，只該處理 .sh 檔。用 /restart 重來。": "readme.txt shouldn't be executable; only the .sh files should be. Use /restart to start over.",
  "a.sh 或 b.sh 還不能執行。": "a.sh or b.sh still isn't executable.",
+ "find 的檔名條件前面要加 -name，例如 -name '*.sh'；沒有 -name，'*.sh' 會被當成要搜尋的起點路徑。": "find needs -name before the filename pattern, e.g. -name '*.sh'. Without -name, '*.sh' is treated as a starting path to search.",
  "sub/ 裡的 c.sh 還沒處理。find 要自己往下找，不要讓 shell 的 *.sh 先展開。": "sub/c.sh isn't handled yet. Let find search downward itself; don't let the shell expand *.sh first.",
  "這關要輸入的指令是 pwd。": "This level wants the command pwd.",
  "這關要輸入的指令是 ls。": "This level wants the command ls.",

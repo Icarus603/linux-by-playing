@@ -16,6 +16,7 @@ setup: |
   echo note > scripts/readme.txt
 check: |
   cd /home/player/scripts
+  [[ "$LBP_LAST" == *find* && "$LBP_LAST" != *-name* ]] && { echo "find 的檔名條件前面要加 -name，例如 -name '*.sh'；沒有 -name，'*.sh' 會被當成要搜尋的起點路徑。"; exit 1; }
   [[ -x readme.txt ]] && { echo "readme.txt 不該有執行權限，只該處理 .sh 檔。用 /restart 重來。"; exit 1; }
   [[ -x a.sh && -x b.sh ]] || { echo "a.sh 或 b.sh 還不能執行。"; exit 1; }
   [[ -x sub/c.sh ]] || { echo "sub/ 裡的 c.sh 還沒處理。find 要自己往下找，不要讓 shell 的 *.sh 先展開。"; exit 1; }
